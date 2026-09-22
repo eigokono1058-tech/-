@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Kit — LAST METERS</title>
+<meta name="description" content="イベント用QRコードのプレビュー・印刷・ダウンロード。名刺サイズと卓上ポスター(A6)、日本語版と英語版に対応。">
+<meta name="theme-color" content="#0a0c12">
+<link rel="icon" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/i18n.js"></script>
+<style>
+  .qr-hero { text-align: center; padding: 36px 0 8px; }
+  .qr-big { background:#fff; border-radius:18px; padding:16px; display:inline-block; box-shadow: var(--shadow); }
+  .qr-big img { width: 216px; height: 216px; display:block; }
+  .url-box {
+    font-family: var(--mono); font-size: 12.5px; word-break: break-all;
+    background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; margin: 16px 0 6px;
+  }
+  .kit { display:grid; gap:12px; grid-template-columns: 1fr; margin-top: 8px; }
+  @media (min-width:640px){ .kit { grid-template-columns: 1fr 1fr; } }
+  .kit .card { display:flex; flex-direction:column; gap:10px; }
+  .preview {
+    background:#fff; border-radius:10px; padding:8px; display:grid; place-items:center;
+    border:1px solid var(--border-soft); overflow:hidden;
+  }
+  .preview img { max-width:100%; height:auto; display:block; }
+  ol.steps { padding-left: 1.3em; color: var(--text-dim); font-size: 14px; }
+  ol.steps li { margin-bottom: 6px; }
+  pre.cmd {
+    background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px; overflow-x:auto; font-size: 12.5px; margin: 8px 0 0;
+  }
+  .print-area { display:none; }
+
+  @media print {
+    @page { margin: 8mm; }
+    .aurora, .grid-lines, .top-controls, .no-print { display:none !important; }
+    body { background:#fff; color:#000; }
+    .print-area { display:block; }
+    body[data-print^="card"] .pa-card { display:block; }
+    body[data-print^="card"] .pa-poster { display:none; }
+    body[data-print^="poster"] .pa-poster { display:block; }
+    body[data-print^="poster"] .pa-card { display:none; }
+    .pa-card img, .pa-poster img { display:none; }
+    body[data-print="card-ja"] .pa-card .ja,
+    body[data-print="card-en"] .pa-card .en,
+    body[data-print="poster-ja"] .pa-poster .ja,
+    body[data-print="poster-en"] .pa-poster .en { display:block; }
+    .pa-card img { width: 91mm; height: 55mm; }
+    .pa-poster img { width: 105mm; height: 148mm; }
+    .cut { outline: 0.2mm dashed #999; outline-offset: 2mm; }
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
+
+<main class="wrap no-print">
+  <p style="padding-top:20px"><a href="../" class="small">
+    <span data-l="ja">← プロフィールに戻る</span><span data-l="en">← Back to profile</span>
+  </a></p>
+
+  <header class="qr-hero">
+    <div class="eyebrow">QR KIT</div>
+    <h1 style="font-size:26px;margin-top:8px">
+      <span data-l="ja">イベント用QRコード</span><span data-l="en">QR codes for the event</span>
+    </h1>
+    <p class="muted small" style="max-width:440px;margin:0 auto 20px">
+      <span data-l="ja">名刺・スライド・卓上ポスターの3用途、日本語版と英語版を用意しています。
+        誤り訂正レベルはH(30%)、余白は規格どおり4モジュール確保しているので、多少汚れても暗い会場でも読み取れます。</span>
+      <span data-l="en">Business card, slide and table poster — in both Japanese and English.
+        Error correction is level H (30%) with a full 4-module quiet zone, so it still scans when smudged or in a dim room.</span>
+    </p>
+    <span class="qr-big"><img src="../assets/qr/profile-qr.svg" alt="QR code for the profile site"></span>
+    <div class="url-box" id="qrUrl">https://eigokono1058-tech.github.io/-/</div>
+    <p class="tiny faint">
+      <span data-l="ja">↑ このURLが埋め込まれています。公開URLを変えたら下の手順で必ず作り直してください。</span>
+      <span data-l="en">↑ This is the URL encoded in the QR. If the site URL changes, regenerate it using the steps below.</span>
+    </p>
+    <div class="row row-wrap" style="justify-content:center;margin-top:10px">
+      <a class="btn btn-sm btn-primary" href="../assets/qr/profile-qr.png" download>PNG (1080px)</a>
+      <a class="btn btn-sm" href="../assets/qr/profile-qr.svg" download>SVG</a>
+    </div>
+  </header>
+
+  <section class="kit">
+    <div class="card">
+      <div class="row spread">
+        <b><span data-l="ja">名刺カード</span><span data-l="en">Business card</span></b>
+        <span class="pill">91 × 55 mm</span>
+      </div>
+      <div class="preview"><img src="../assets/qr/profile-qr-card.svg" alt="Business card sized QR card (Japanese)" id="cardPreview"></div>
+      <p class="tiny faint" style="margin:0">
+        <span data-l="ja">名刺の裏面や当日の名札に貼る想定。厚紙に等倍で印刷してください。</span>
+        <span data-l="en">Meant for the back of a name card or your badge. Print at 100% scale on card stock.</span>
+      </p>
+      <div class="row row-wrap">
+        <button class="btn btn-sm" data-print="card-ja" type="button">
+          <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
+        </button>
+        <button class="btn btn-sm" data-print="card-en" type="button">
+          <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
+        </button>
+      </div>
+      <div class="row row-wrap">
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-card.svg" download>SVG (JA)</a>
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-card-en.svg" download>SVG (EN)</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row spread">
+        <b><span data-l="ja">卓上ポスター</span><span data-l="en">Table poster</span></b>
+        <span class="pill">A6 / 105 × 148 mm</span>
+      </div>
+      <div class="preview"><img src="../assets/qr/profile-qr-poster.svg" alt="A6 QR poster (Japanese)" style="max-height:300px" id="posterPreview"></div>
+      <p class="tiny faint" style="margin:0">
+        <span data-l="ja">懇親会のテーブルやブースに立てる用。カードスタンドに入るサイズです。</span>
+        <span data-l="en">Stand it on a table at the mixer or on your booth. Fits a standard card stand.</span>
+      </p>
+      <div class="row row-wrap">
+        <button class="btn btn-sm" data-print="poster-ja" type="button">
+          <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
+        </button>
+        <button class="btn btn-sm" data-print="poster-en" type="button">
+          <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
+        </button>
+      </div>
+      <div class="row row-wrap">
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-poster.svg" download>SVG (JA)</a>
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-poster-en.svg" download>SVG (EN)</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:20px">
+    <b><span data-l="ja">URLを変えたときの作り直し手順</span><span data-l="en">Regenerating after a URL change</span></b>
+    <ol class="steps" style="margin-top:10px">
+      <li>
+        <span data-l="ja"><code>assets/js/profile-config.js</code> の <code>siteUrl</code> を新しい公開URLに書き換える</span>
+        <span data-l="en">Update <code>siteUrl</code> in <code>assets/js/profile-config.js</code></span>
+      </li>
+      <li>
+        <span data-l="ja">下のコマンドを実行する（6ファイルが同時に更新されます）</span>
+        <span data-l="en">Run the command below (it rewrites all six files)</span>
+      </li>
+      <li>
+        <span data-l="ja">変更をコミットして push する</span>
+        <span data-l="en">Commit and push the result</span>
+      </li>
+    </ol>
+    <pre class="cmd">pip install segno
+python3 tools/gen_qr.py
+python3 tools/gen_qr.py --url https://your-domain.example/</pre>
+    <p class="tiny faint" style="margin-top:10px;margin-bottom:0">
+      <span data-l="ja">QRは<b>URLだけ</b>を埋め込んでいます。サイトの中身をいくら更新してもQRは刷り直し不要です。
+        逆にURLが変わるとQRは無効になるので、独自ドメインを使う予定があるならドメインを決めてから印刷してください。</span>
+      <span data-l="en">The QR encodes <b>only the URL</b>, so you can keep editing the site without reprinting.
+        Changing the URL does invalidate it — decide on a custom domain before you print.</span>
+    </p>
+  </section>
+
+  <p class="footer">LAST METERS · QR Kit</p>
+</main>
+
+<div class="print-area pa-card">
+  <img class="ja cut" src="../assets/qr/profile-qr-card.svg" alt="">
+  <img class="en cut" src="../assets/qr/profile-qr-card-en.svg" alt="">
+</div>
+<div class="print-area pa-poster">
+  <img class="ja cut" src="../assets/qr/profile-qr-poster.svg" alt="">
+  <img class="en cut" src="../assets/qr/profile-qr-poster-en.svg" alt="">
+</div>
+
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/profile-config.js"></script>
+<script>
+  (function () {
+    if (window.LMTheme) window.LMTheme.bind("#themeBtn");
+    if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
+
+    var cfgUrl = (window.PROFILE && window.PROFILE.siteUrl) || "";
+    if (cfgUrl) document.getElementById("qrUrl").textContent = cfgUrl;
+
+    // プレビューは表示言語に合わせて差し替える
+    function syncPreview(lang) {
+      var suffix = lang === "en" ? "-en" : "";
+      document.getElementById("cardPreview").src = "../assets/qr/profile-qr-card" + suffix + ".svg";
+      document.getElementById("posterPreview").src = "../assets/qr/profile-qr-poster" + suffix + ".svg";
+    }
+    if (window.LM_I18N) {
+      syncPreview(window.LM_I18N.lang);
+      window.LM_I18N.onChange(syncPreview);
+    }
+
+    document.querySelectorAll("[data-print]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.body.setAttribute("data-print", btn.getAttribute("data-print"));
+        window.print();
+      });
+    });
+    window.addEventListener("afterprint", function () {
+      document.body.removeAttribute("data-print");
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,487 +1,340 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LYS & RO | Nordic Interior Design</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
-            background-color: #f0f2f5; /* フォールバック色 */
-        }
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            outline: none;
-        }
-        .content-section {
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            transform: translateY(-50%);
-            max-width: 500px;
-            color: #2c3e50;
-            pointer-events: none; /* 3D操作を邪魔しないように */
-            opacity: 0;
-            transition: opacity 1s ease, transform 1s ease;
-            z-index: 10;
-        }
-        .content-section.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(-50%) translateX(0);
-        }
-        .content-section.hidden-left {
-            transform: translateY(-50%) translateX(-50px);
-        }
-        .content-section.hidden-right {
-            transform: translateY(-50%) translateX(50px);
-        }
-        
-        /* グラスモーフィズム風のカード */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eigo Kono (Ayden)</title>
+<meta name="description" content="Exploring a new delivery experience in Japan: receiving parcels based on when and where you can actually be, instead of one fixed address. / 日本の不在配送・再配達を減らす、物流の受取体験を検討しています。">
+<meta name="theme-color" content="#0a0c12">
+<meta property="og:title" content="Eigo (Ayden) Kono — LAST METERS">
+<meta property="og:description" content="Reducing failed deliveries in Japan by letting people receive packages based on when and where they can actually be available.">
+<meta property="og:type" content="profile">
+<link rel="icon" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/i18n.js"></script>
+<style>
+  /* ---------- hero ---------- */
+  .hero { padding: 34px 0 6px; text-align: center; }
+  .avatar {
+    width: 74px; height: 74px; margin: 0 auto 12px;
+    border-radius: 50%; display: grid; place-items: center;
+    font-size: 26px; font-weight: 700; letter-spacing: 0.02em;
+    color: #06121f;
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-1) 12%, transparent), var(--shadow);
+    object-fit: cover; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .hero h1 { font-size: 27px; margin-bottom: 2px; }
+  .hero .roman { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
+  .nick-chip {
+    display: inline-block; margin: 0 0 10px;
+    padding: 3px 12px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700;
+    color: var(--brand-2);
+    background: color-mix(in srgb, var(--brand-2) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, transparent);
+  }
+  .hero .role { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; text-wrap: balance; }
+  .hero .loc { font-size: 13px; color: var(--text-faint); margin-bottom: 12px; }
+  .hero .headline {
+    font-size: 14.5px; color: var(--text-dim); max-width: 430px; margin: 0 auto 16px;
+    text-align: left; text-wrap: pretty;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin: 0 0 22px; }
 
-        .nav-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #cbd5e0;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .nav-dot.active {
-            background-color: #4a5568;
-            transform: scale(1.3);
-        }
-        
-        /* カスタムスクロールバー非表示 */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
+  /* ---------- hero film ---------- */
+  .film { margin: 2px 0 22px; }
+  .film-frame {
+    position: relative;
+    width: min(72vw, 272px);
+    aspect-ratio: 9 / 16;
+    margin: 0 auto;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #05070c;
+    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, var(--border));
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-2) 8%, transparent), var(--shadow);
+  }
+  .film-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #05070c; }
+
+  /* 動画の表紙。コーデックの都合でフレームを抜き出せないので自前で描く */
+  .film-cover {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 18px 16px;
+    border: 0; cursor: pointer; text-align: left; font: inherit; color: var(--text);
+    background:
+      radial-gradient(85% 55% at 22% 8%, color-mix(in srgb, var(--brand-1) 52%, transparent), transparent 70%),
+      radial-gradient(75% 50% at 88% 96%, color-mix(in srgb, var(--brand-2) 46%, transparent), transparent 72%),
+      linear-gradient(160deg, #10162a 0%, #070a12 60%, #05070c 100%);
+    transition: opacity 0.25s ease;
+  }
+  .film-cover.is-hidden { opacity: 0; pointer-events: none; }
+  .fc-eyebrow {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
+    color: var(--brand-2); display: block;
+  }
+  .fc-title {
+    display: block; margin-top: 7px;
+    font-size: 21px; font-weight: 700; line-height: 1.18; letter-spacing: -0.015em;
+    color: #fff; text-wrap: balance;
+  }
+  .fc-mid { display: grid; place-items: center; }
+  .fc-play {
+    width: 62px; height: 62px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7);
+  }
+  .fc-play svg { margin-left: 3px; }
+  .film-cover:hover .fc-play { transform: scale(1.06); }
+  .fc-play { transition: transform 0.18s ease; }
+  .fc-bottom { font-size: 11.5px; color: rgba(255, 255, 255, 0.72); font-weight: 600; }
+  .film-cap { font-size: 12.5px; color: var(--text-faint); text-align: center; margin: 12px auto 0; max-width: 340px; }
+
+  /* ---------- link list ---------- */
+  .links { display: grid; gap: 10px; }
+  .link-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 16px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text); text-decoration: none;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+    min-height: 66px;
+  }
+  .link-row:hover { text-decoration: none; transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border)); }
+  .link-row:active { transform: scale(0.99); }
+  .link-ico {
+    width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: color-mix(in srgb, var(--accent, var(--brand-1)) 15%, transparent);
+    color: var(--accent, var(--brand-1));
+    border: 1px solid color-mix(in srgb, var(--accent, var(--brand-1)) 28%, transparent);
+  }
+  .link-txt { flex: 1 1 auto; min-width: 0; }
+  .link-txt b { display: block; font-size: 15.5px; font-weight: 650; }
+  .link-txt span { display: block; font-size: 12.5px; color: var(--text-faint); }
+  .link-row .chev { color: var(--text-faint); flex: 0 0 auto; }
+  .link-row.featured {
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+      color-mix(in srgb, var(--surface) 92%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  }
+
+  /* ---------- projects ---------- */
+  .project {
+    margin-top: 16px; padding: 20px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    box-shadow: var(--shadow-soft);
+  }
+  /* 主役のプロジェクト（DevDayの応募軸）だけ強調する */
+  .project.is-lead {
+    margin-top: 28px;
+    border-color: color-mix(in srgb, var(--brand-2) 34%, var(--border));
+    background:
+      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 13%, transparent), transparent 62%),
+      color-mix(in srgb, var(--surface) 90%, transparent);
+    box-shadow: var(--shadow);
+  }
+  .codename {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.2em; color: var(--brand-2);
+  }
+  .codename::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 10px var(--brand-2); }
+  .project h2 { font-size: 20px; margin: 10px 0 8px; }
+  .project p { font-size: 14px; color: var(--text-dim); margin-bottom: 16px; }
+  .project-links { display: grid; gap: 8px; }
+  .plink {
+    display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: 4px 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 600;
+    min-height: 48px;
+  }
+  .plink svg { grid-row: 1; }
+  .plink:hover { text-decoration: none; border-color: var(--brand-2); }
+  .plink.cta { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); color: #06121f; border-color: transparent; }
+  .plink .pnote { grid-column: 2; font-weight: 400; font-size: 11.5px; opacity: 0.8; }
+  @media (min-width: 480px) {
+    .plink { grid-template-columns: 18px auto 1fr; }
+    .plink .pnote { grid-column: 3; grid-row: 1; text-align: right; }
+  }
+
+  /* ---------- actions ---------- */
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 26px; }
+
+  /* ---------- QR sheet ---------- */
+  .sheet {
+    position: fixed; inset: 0; z-index: 100; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(4, 6, 12, 0.72); backdrop-filter: blur(6px);
+  }
+  .sheet[data-open="true"] { display: flex; }
+  .sheet-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 22px; max-width: 360px; width: 100%; text-align: center; box-shadow: var(--shadow);
+  }
+  .qr-frame { background: #fff; border-radius: 14px; padding: 14px; display: block; margin: 0 auto 14px; width: 232px; height: 232px; }
+  .qr-frame img { width: 100%; height: 100%; display: block; }
+
+  /* ---------- setup banner ---------- */
+  .setup {
+    margin: 0 auto 18px; max-width: var(--maxw);
+    border: 1px dashed color-mix(in srgb, var(--warn) 55%, transparent);
+    background: color-mix(in srgb, var(--warn) 10%, transparent);
+    color: var(--text); border-radius: var(--radius-sm);
+    padding: 12px 14px; font-size: 13px; margin-top: 56px;
+  }
+  .setup code { background: color-mix(in srgb, var(--warn) 16%, transparent); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
+    background: var(--surface-3); color: var(--text); border: 1px solid var(--border);
+    padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: all 0.22s ease; z-index: 200;
+  }
+  .toast[data-show="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (min-width: 560px) {
+    .hero { padding-top: 48px; }
+    .hero h1 { font-size: 31px; }
+  }
+</style>
 </head>
 <body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
 
-    <!-- WebGL Canvas Container -->
-    <div id="canvas-container"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
 
-    <!-- Navigation Dots (Right side) -->
-    <div class="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 flex flex-col items-center">
-        <div class="nav-dot active" onclick="navigateTo(0)" title="Home"></div>
-        <div class="nav-dot" onclick="navigateTo(1)" title="Philosophy"></div>
-        <div class="nav-dot" onclick="navigateTo(2)" title="Works"></div>
-        <div class="nav-dot" onclick="navigateTo(3)" title="Contact"></div>
+<main class="wrap">
+  <div id="setupBanner"></div>
+
+  <header class="hero">
+    <div class="avatar" id="avatar" aria-hidden="true"></div>
+    <h1 id="nameJa"></h1>
+    <div class="roman" id="nameRoman"></div>
+    <div id="nick"></div>
+    <div class="role" id="role"></div>
+    <div class="loc" id="loc"></div>
+    <p class="headline" id="headline"></p>
+  </header>
+
+  <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い -->
+  <section class="film" aria-label="Concept film">
+    <div class="film-frame">
+      <video id="film" playsinline preload="metadata" controlslist="nodownload">
+        <source src="assets/video/last-meters-en.mp4" type="video/mp4">
+      </video>
+      <button class="film-cover" id="filmPlay" type="button"
+              aria-label="Play the concept film, 2 minutes 24 seconds, English narration">
+        <span>
+          <span class="fc-eyebrow">LAST METERS</span>
+          <span class="fc-title">AI-first<br>Last Meters</span>
+        </span>
+        <span class="fc-mid">
+          <span class="fc-play">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#06121f" aria-hidden="true">
+              <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2z"/>
+            </svg>
+          </span>
+        </span>
+        <span class="fc-bottom">
+          <span data-l="en">2:24 · English narration · tap to play</span>
+          <span data-l="ja">2分24秒 · 英語ナレーション · タップで再生</span>
+        </span>
+      </button>
     </div>
+    <p class="film-cap">
+      <span data-l="en">The idea in two minutes — what breaks in delivery today, and what it looks like when
+        a parcel meets you instead of your address.</span>
+      <span data-l="ja">2分でわかる構想。いまの配送で何が壊れているのか、そして荷物が住所ではなく「人」に届くとどうなるのか。</span>
+    </p>
+  </section>
 
-    <!-- Logo -->
-    <div class="fixed top-8 left-8 z-50">
-        <h1 class="text-2xl font-light tracking-widest text-slate-700">LYS & RO</h1>
-    </div>
+  <div class="wrap" style="padding:0"><div class="tags" id="tags"></div></div>
 
-    <!-- Progress / Scroll Hint -->
-    <div class="fixed bottom-8 right-8 z-50 text-slate-500 text-sm tracking-widest animate-bounce cursor-pointer" onclick="nextSection()">
-        SCROLL OR DRAG ↓
-    </div>
 
-    <!-- CONTENT SECTIONS (HTML Overlays) -->
-    
-    <!-- Section 1: Hero -->
-    <div id="section-0" class="content-section active">
-        <div class="glass-panel">
-            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">NORDIC INTERIOR DESIGN</p>
-            <h2 class="text-5xl font-light mb-6 text-slate-800 leading-tight">静寂と光を、<br>日常に。</h2>
-            <p class="text-slate-600 mb-8 leading-relaxed">
-                北欧の美学と日本の感性を融合させた、<br>
-                心安らぐミニマルな空間デザインをご提案します。
-            </p>
-            <button onclick="nextSection()" class="px-8 py-3 bg-slate-700 text-white text-sm tracking-widest hover:bg-slate-600 transition rounded-sm">
-                VIEW CONCEPT
-            </button>
-        </div>
-    </div>
+  <nav class="links" id="links" aria-label="リンク一覧"></nav>
 
-    <!-- Section 2: Philosophy -->
-    <div id="section-1" class="content-section hidden-right" style="left: auto; right: 10%;">
-        <div class="glass-panel">
-            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">OUR PHILOSOPHY</p>
-            <h2 class="text-4xl font-light mb-6 text-slate-800">「余白」をデザインする</h2>
-            <p class="text-slate-600 mb-6 leading-relaxed">
-                物は少なく、豊かさは多く。<br>
-                自然素材の温もりと、計算された採光。<br>
-                私たちは「住む人の心が整う」空間作りを目指しています。
-            </p>
-            <ul class="text-slate-600 space-y-2 mb-6">
-                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>サステナブルな素材選定</li>
-                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>機能美の追求</li>
-                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>自然との調和</li>
-            </ul>
-        </div>
-    </div>
+  <div id="projects"></div>
 
-    <!-- Section 3: Works -->
-    <div id="section-2" class="content-section hidden-right">
-        <div class="glass-panel">
-            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">RECENT WORKS</p>
-            <h2 class="text-4xl font-light mb-6 text-slate-800">空間の事例</h2>
-            <p class="text-slate-600 mb-6">
-                個人邸宅からオフィス、カフェまで。<br>
-                それぞれの物語に寄り添うデザイン。
-            </p>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-gray-100 p-4 text-center rounded">
-                    <div class="text-2xl mb-1 text-slate-700">01</div>
-                    <div class="text-xs text-slate-500">PRIVATE HOME</div>
-                </div>
-                <div class="bg-gray-100 p-4 text-center rounded">
-                    <div class="text-2xl mb-1 text-slate-700">02</div>
-                    <div class="text-xs text-slate-500">CO-WORKING</div>
-                </div>
-            </div>
-            <button class="text-slate-700 border-b border-slate-700 pb-1 hover:text-blue-500 hover:border-blue-500 transition">
-                すべての実績を見る ->
-            </button>
-        </div>
-    </div>
+  <div class="actions">
+    <button class="btn btn-sm" id="qrBtn" type="button">
+      <span data-l="ja">QRを表示</span><span data-l="en">Show QR</span>
+    </button>
+    <button class="btn btn-sm" id="copyBtn" type="button">
+      <span data-l="ja">URLをコピー</span><span data-l="en">Copy link</span>
+    </button>
+    <button class="btn btn-sm hidden" id="shareBtn" type="button">
+      <span data-l="ja">共有</span><span data-l="en">Share</span>
+    </button>
+    <button class="btn btn-sm hidden" id="vcardBtn" type="button">
+      <span data-l="ja">連絡先を保存</span><span data-l="en">Save contact</span>
+    </button>
+  </div>
 
-    <!-- Section 4: Contact -->
-    <div id="section-3" class="content-section hidden-right" style="left: 50%; transform: translate(-50%, -50%); text-align: center;">
-        <div class="glass-panel">
-            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">CONTACT US</p>
-            <h2 class="text-4xl font-light mb-6 text-slate-800">お問い合わせ</h2>
-            <p class="text-slate-600 mb-8">
-                理想の空間づくりについて、<br>まずはお話をお聞かせください。
-            </p>
-            <form class="space-y-4 text-left max-w-xs mx-auto" onsubmit="event.preventDefault(); alert('デモ送信完了しました');">
-                <input type="email" placeholder="Email Address" class="w-full px-4 py-2 bg-white border border-slate-200 focus:outline-none focus:border-blue-300 rounded-sm">
-                <button type="submit" class="w-full py-3 bg-slate-700 text-white tracking-widest hover:bg-slate-600 transition rounded-sm">
-                    SEND MESSAGE
-                </button>
-            </form>
-            <div class="mt-8 flex justify-center space-x-6 text-slate-400">
-                <span>Instagram</span>
-                <span>Pinterest</span>
-                <span>Twitter</span>
-            </div>
-        </div>
-    </div>
+  <p class="footer">
+    <span id="footName"></span>
+    · <a href="./qr/"><span data-l="ja">QRを作り直す</span><span data-l="en">QR kit</span></a>
+    · <a href="./plan/"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></a>
+  </p>
+</main>
 
-    <script>
-        // --- THREE.JS SETUP ---
-        
-        // Config
-        const config = {
-            colors: {
-                background: 0xf0f2f5,
-                primary: 0x88a0b8,    // 北欧ブルー
-                secondary: 0xd4a5a5,  // 落ち着いたピンク/ウッド
-                tertiary: 0xa3be8c,   // グリーン
-                dark: 0x4c566a,       // ダークグレー
-                white: 0xffffff
-            },
-            cameraSpeed: 0.03
-        };
+<div class="sheet" id="qrSheet" role="dialog" aria-modal="true" aria-label="このページのQRコード">
+  <div class="sheet-card">
+    <div class="eyebrow" style="margin-bottom:12px">SCAN ME</div>
+    <span class="qr-frame"><img src="assets/qr/profile-qr.svg" alt="このページへのQRコード" id="qrImg"></span>
+    <div class="small mono" id="qrUrl" style="word-break:break-all;color:var(--text-faint);margin-bottom:14px"></div>
+    <button class="btn btn-sm" id="qrClose" type="button">
+      <span data-l="ja">閉じる</span><span data-l="en">Close</span>
+    </button>
+  </div>
+</div>
 
-        let scene, camera, renderer;
-        let mouse = new THREE.Vector2();
-        let targetCameraPosition = new THREE.Vector3();
-        let targetLookAt = new THREE.Vector3();
-        let currentLookAt = new THREE.Vector3();
-        
-        // Objects stored for animation
-        const floatingObjects = [];
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-        // Current section index
-        let currentSection = 0;
-        const totalSections = 4;
-        let isScrolling = false;
+<noscript>
+  <div class="wrap" style="padding:40px 16px">
+    <p>このページはJavaScriptでリンクを描画しています。JavaScriptを有効にしてください。</p>
+    <p><a href="https://github.com/eigokono1058-tech">GitHub</a></p>
+  </div>
+</noscript>
 
-        // Define Camera positions for each section
-        const sections = [
-            { // 0: Home
-                camPos: { x: 0, y: 0, z: 10 },
-                lookAt: { x: 0, y: 0, z: 0 }
-            },
-            { // 1: Philosophy (Camera moves right, rotates slightly)
-                camPos: { x: 8, y: 2, z: 5 },
-                lookAt: { x: 2, y: 0, z: -2 }
-            },
-            { // 2: Works (Camera zooms in to a specific cluster)
-                camPos: { x: -5, y: -3, z: 6 },
-                lookAt: { x: -1, y: -1, z: 0 }
-            },
-            { // 3: Contact (Center focus, looking up slightly)
-                camPos: { x: 0, y: -8, z: 4 },
-                lookAt: { x: 0, y: -2, z: 0 }
-            }
-        ];
-
-        function init() {
-            const container = document.getElementById('canvas-container');
-
-            // Scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(config.colors.background);
-            // Fog for depth (Nordic misty feel)
-            scene.fog = new THREE.Fog(config.colors.background, 8, 25);
-
-            // Camera
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            
-            // Initial position setup
-            targetCameraPosition.set(sections[0].camPos.x, sections[0].camPos.y, sections[0].camPos.z);
-            targetLookAt.set(sections[0].lookAt.x, sections[0].lookAt.y, sections[0].lookAt.z);
-            camera.position.copy(targetCameraPosition);
-            currentLookAt.copy(targetLookAt);
-
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            container.appendChild(renderer.domElement);
-
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(5, 10, 7);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 1024;
-            dirLight.shadow.mapSize.height = 1024;
-            scene.add(dirLight);
-
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
-            scene.add(hemiLight);
-
-            // --- CREATE OBJECTS ---
-            createWorld();
-
-            // Event Listeners
-            window.addEventListener('resize', onWindowResize, false);
-            document.addEventListener('mousemove', onMouseMove, false);
-            document.addEventListener('wheel', onWheel, { passive: false });
-
-            // Touch support for mobile swipe
-            let touchStartY = 0;
-            document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: false });
-            document.addEventListener('touchend', e => {
-                let touchEndY = e.changedTouches[0].clientY;
-                if (touchStartY - touchEndY > 50) nextSection();
-                if (touchEndY - touchStartY > 50) prevSection();
-            }, { passive: false });
-
-            animate();
-        }
-
-        function createWorld() {
-            // Main central abstract shape (Sphere)
-            const mainGeo = new THREE.IcosahedronGeometry(1.5, 1);
-            const mainMat = new THREE.MeshStandardMaterial({ 
-                color: config.colors.primary, 
-                flatShading: true,
-                roughness: 0.4,
-                metalness: 0.1
-            });
-            const mainObj = new THREE.Mesh(mainGeo, mainMat);
-            mainObj.castShadow = true;
-            mainObj.receiveShadow = true;
-            scene.add(mainObj);
-            floatingObjects.push({ mesh: mainObj, speed: 0.005, rotSpeed: 0.002 });
-
-            // Secondary shapes (Wood blocks, accent spheres) scattered
-            const geometries = [
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.SphereGeometry(0.6, 32, 32),
-                new THREE.ConeGeometry(0.5, 1.5, 4),
-                new THREE.TorusGeometry(0.8, 0.2, 16, 100)
-            ];
-
-            const materials = [
-                new THREE.MeshStandardMaterial({ color: config.colors.secondary, roughness: 0.6 }), // Wood/Pink
-                new THREE.MeshStandardMaterial({ color: config.colors.white, roughness: 0.2 }),     // White ceramic
-                new THREE.MeshStandardMaterial({ color: config.colors.tertiary, roughness: 0.8 }),  // Green matte
-                new THREE.MeshStandardMaterial({ color: config.colors.dark, roughness: 0.5 })       // Dark accent
-            ];
-
-            // Create scattered floating debris/decor
-            for (let i = 0; i < 40; i++) {
-                const geo = geometries[Math.floor(Math.random() * geometries.length)];
-                const mat = materials[Math.floor(Math.random() * materials.length)];
-                const mesh = new THREE.Mesh(geo, mat);
-
-                // Random positions around the center, spread out
-                const spread = 15;
-                mesh.position.set(
-                    (Math.random() - 0.5) * spread,
-                    (Math.random() - 0.5) * spread,
-                    (Math.random() - 0.5) * spread
-                );
-                
-                // Don't put objects too close to center (0,0,0)
-                if (mesh.position.length() < 3) mesh.position.setX(mesh.position.x + 4);
-
-                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-                mesh.scale.setScalar(Math.random() * 0.5 + 0.3);
-                
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-
-                scene.add(mesh);
-                
-                // Store for animation
-                floatingObjects.push({
-                    mesh: mesh,
-                    speed: (Math.random() * 0.005) + 0.001,
-                    rotSpeed: (Math.random() * 0.005),
-                    originalY: mesh.position.y,
-                    phase: Math.random() * Math.PI * 2
-                });
-            }
-
-            // Add "Ground" planes at different levels to suggest architectural levels without solid floors
-            const planeGeo = new THREE.BoxGeometry(10, 0.2, 10);
-            const planeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
-            
-            const p1 = new THREE.Mesh(planeGeo, planeMat);
-            p1.position.set(0, -3, 0);
-            p1.receiveShadow = true;
-            scene.add(p1);
-
-            const p2 = new THREE.Mesh(planeGeo, planeMat);
-            p2.position.set(6, 2, -5);
-            p2.rotation.z = 0.1;
-            p2.receiveShadow = true;
-            scene.add(p2);
-        }
-
-        function onMouseMove(event) {
-            // Normalize mouse position from -1 to 1
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // --- NAVIGATION LOGIC ---
-
-        function updateSection(index) {
-            if (index < 0) index = 0;
-            if (index >= totalSections) index = totalSections - 1;
-            
-            currentSection = index;
-
-            // Update Camera Targets
-            const sec = sections[currentSection];
-            targetCameraPosition.set(sec.camPos.x, sec.camPos.y, sec.camPos.z);
-            targetLookAt.set(sec.lookAt.x, sec.lookAt.y, sec.lookAt.z);
-
-            // Update UI Classes
-            document.querySelectorAll('.content-section').forEach((el, i) => {
-                el.classList.remove('active', 'hidden-left', 'hidden-right');
-                if (i === currentSection) {
-                    el.classList.add('active');
-                } else if (i < currentSection) {
-                    el.classList.add('hidden-left');
-                } else {
-                    el.classList.add('hidden-right');
-                }
-            });
-
-            // Update Dots
-            document.querySelectorAll('.nav-dot').forEach((dot, i) => {
-                if (i === currentSection) dot.classList.add('active');
-                else dot.classList.remove('active');
-            });
-        }
-
-        function navigateTo(index) {
-            updateSection(index);
-        }
-
-        function nextSection() {
-            updateSection(currentSection + 1);
-        }
-        
-        function prevSection() {
-            updateSection(currentSection - 1);
-        }
-
-        function onWheel(event) {
-            // Simple throttle
-            if (isScrolling) return;
-            isScrolling = true;
-            setTimeout(() => { isScrolling = false; }, 1000); // Wait 1s before allowing next scroll
-
-            if (event.deltaY > 0) {
-                nextSection();
-            } else {
-                prevSection();
-            }
-        }
-
-        // --- ANIMATION LOOP ---
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const time = Date.now() * 0.001;
-
-            // 1. Camera Movement (Lerp towards target)
-            // Adding mouse influence for parallax
-            const mouseInfluence = 0.5;
-            const camTargetX = targetCameraPosition.x + (mouse.x * mouseInfluence);
-            const camTargetY = targetCameraPosition.y + (mouse.y * mouseInfluence);
-
-            camera.position.x += (camTargetX - camera.position.x) * config.cameraSpeed;
-            camera.position.y += (camTargetY - camera.position.y) * config.cameraSpeed;
-            camera.position.z += (targetCameraPosition.z - camera.position.z) * config.cameraSpeed;
-
-            // LookAt Interpolation
-            currentLookAt.x += (targetLookAt.x - currentLookAt.x) * config.cameraSpeed;
-            currentLookAt.y += (targetLookAt.y - currentLookAt.y) * config.cameraSpeed;
-            currentLookAt.z += (targetLookAt.z - currentLookAt.z) * config.cameraSpeed;
-            
-            camera.lookAt(currentLookAt);
-
-            // 2. Object Animation (Floating)
-            floatingObjects.forEach((obj, i) => {
-                // Rotate
-                obj.mesh.rotation.x += obj.rotSpeed;
-                obj.mesh.rotation.y += obj.rotSpeed;
-
-                // Float up and down
-                obj.mesh.position.y = obj.originalY + Math.sin(time + obj.phase) * 0.3;
-            });
-
-            renderer.render(scene, camera);
-        }
-
-        // Start
-        init();
-
-    </script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/profile-config.js"></script>
+<script src="assets/js/profile.js"></script>
+<script>
+  /* 表紙をタップしたら再生する。終わったら表紙に戻す */
+  (function () {
+    var film = document.getElementById("film");
+    var cover = document.getElementById("filmPlay");
+    if (!film || !cover) return;
+    cover.addEventListener("click", function () {
+      cover.classList.add("is-hidden");
+      film.setAttribute("controls", "");
+      var played = film.play();
+      // 自動再生がブロックされた場合はコントロールから再生してもらう
+      if (played && played.catch) played.catch(function () {});
+    });
+    film.addEventListener("ended", function () {
+      cover.classList.remove("is-hidden");
+      film.removeAttribute("controls");
+    });
+  })();
+</script>
 </body>
 </html>

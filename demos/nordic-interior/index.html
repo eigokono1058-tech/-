@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYS & RO | Nordic Interior Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+            background-color: #f0f2f5; /* フォールバック色 */
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            outline: none;
+        }
+        .content-section {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            max-width: 500px;
+            color: #2c3e50;
+            pointer-events: none; /* 3D操作を邪魔しないように */
+            opacity: 0;
+            transition: opacity 1s ease, transform 1s ease;
+            z-index: 10;
+        }
+        .content-section.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(-50%) translateX(0);
+        }
+        .content-section.hidden-left {
+            transform: translateY(-50%) translateX(-50px);
+        }
+        .content-section.hidden-right {
+            transform: translateY(-50%) translateX(50px);
+        }
+        
+        /* グラスモーフィズム風のカード */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #cbd5e0;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-dot.active {
+            background-color: #4a5568;
+            transform: scale(1.3);
+        }
+        
+        /* カスタムスクロールバー非表示 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation Dots (Right side) -->
+    <div class="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 flex flex-col items-center">
+        <div class="nav-dot active" onclick="navigateTo(0)" title="Home"></div>
+        <div class="nav-dot" onclick="navigateTo(1)" title="Philosophy"></div>
+        <div class="nav-dot" onclick="navigateTo(2)" title="Works"></div>
+        <div class="nav-dot" onclick="navigateTo(3)" title="Contact"></div>
+    </div>
+
+    <!-- Logo -->
+    <div class="fixed top-8 left-8 z-50">
+        <h1 class="text-2xl font-light tracking-widest text-slate-700">LYS & RO</h1>
+    </div>
+
+    <!-- Progress / Scroll Hint -->
+    <div class="fixed bottom-8 right-8 z-50 text-slate-500 text-sm tracking-widest animate-bounce cursor-pointer" onclick="nextSection()">
+        SCROLL OR DRAG ↓
+    </div>
+
+    <!-- CONTENT SECTIONS (HTML Overlays) -->
+    
+    <!-- Section 1: Hero -->
+    <div id="section-0" class="content-section active">
+        <div class="glass-panel">
+            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">NORDIC INTERIOR DESIGN</p>
+            <h2 class="text-5xl font-light mb-6 text-slate-800 leading-tight">静寂と光を、<br>日常に。</h2>
+            <p class="text-slate-600 mb-8 leading-relaxed">
+                北欧の美学と日本の感性を融合させた、<br>
+                心安らぐミニマルな空間デザインをご提案します。
+            </p>
+            <button onclick="nextSection()" class="px-8 py-3 bg-slate-700 text-white text-sm tracking-widest hover:bg-slate-600 transition rounded-sm">
+                VIEW CONCEPT
+            </button>
+        </div>
+    </div>
+
+    <!-- Section 2: Philosophy -->
+    <div id="section-1" class="content-section hidden-right" style="left: auto; right: 10%;">
+        <div class="glass-panel">
+            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">OUR PHILOSOPHY</p>
+            <h2 class="text-4xl font-light mb-6 text-slate-800">「余白」をデザインする</h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">
+                物は少なく、豊かさは多く。<br>
+                自然素材の温もりと、計算された採光。<br>
+                私たちは「住む人の心が整う」空間作りを目指しています。
+            </p>
+            <ul class="text-slate-600 space-y-2 mb-6">
+                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>サステナブルな素材選定</li>
+                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>機能美の追求</li>
+                <li class="flex items-center"><span class="w-2 h-2 bg-blue-300 rounded-full mr-3"></span>自然との調和</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 3: Works -->
+    <div id="section-2" class="content-section hidden-right">
+        <div class="glass-panel">
+            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">RECENT WORKS</p>
+            <h2 class="text-4xl font-light mb-6 text-slate-800">空間の事例</h2>
+            <p class="text-slate-600 mb-6">
+                個人邸宅からオフィス、カフェまで。<br>
+                それぞれの物語に寄り添うデザイン。
+            </p>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-100 p-4 text-center rounded">
+                    <div class="text-2xl mb-1 text-slate-700">01</div>
+                    <div class="text-xs text-slate-500">PRIVATE HOME</div>
+                </div>
+                <div class="bg-gray-100 p-4 text-center rounded">
+                    <div class="text-2xl mb-1 text-slate-700">02</div>
+                    <div class="text-xs text-slate-500">CO-WORKING</div>
+                </div>
+            </div>
+            <button class="text-slate-700 border-b border-slate-700 pb-1 hover:text-blue-500 hover:border-blue-500 transition">
+                すべての実績を見る ->
+            </button>
+        </div>
+    </div>
+
+    <!-- Section 4: Contact -->
+    <div id="section-3" class="content-section hidden-right" style="left: 50%; transform: translate(-50%, -50%); text-align: center;">
+        <div class="glass-panel">
+            <p class="text-sm font-semibold tracking-widest text-slate-500 mb-2">CONTACT US</p>
+            <h2 class="text-4xl font-light mb-6 text-slate-800">お問い合わせ</h2>
+            <p class="text-slate-600 mb-8">
+                理想の空間づくりについて、<br>まずはお話をお聞かせください。
+            </p>
+            <form class="space-y-4 text-left max-w-xs mx-auto" onsubmit="event.preventDefault(); alert('デモ送信完了しました');">
+                <input type="email" placeholder="Email Address" class="w-full px-4 py-2 bg-white border border-slate-200 focus:outline-none focus:border-blue-300 rounded-sm">
+                <button type="submit" class="w-full py-3 bg-slate-700 text-white tracking-widest hover:bg-slate-600 transition rounded-sm">
+                    SEND MESSAGE
+                </button>
+            </form>
+            <div class="mt-8 flex justify-center space-x-6 text-slate-400">
+                <span>Instagram</span>
+                <span>Pinterest</span>
+                <span>Twitter</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- THREE.JS SETUP ---
+        
+        // Config
+        const config = {
+            colors: {
+                background: 0xf0f2f5,
+                primary: 0x88a0b8,    // 北欧ブルー
+                secondary: 0xd4a5a5,  // 落ち着いたピンク/ウッド
+                tertiary: 0xa3be8c,   // グリーン
+                dark: 0x4c566a,       // ダークグレー
+                white: 0xffffff
+            },
+            cameraSpeed: 0.03
+        };
+
+        let scene, camera, renderer;
+        let mouse = new THREE.Vector2();
+        let targetCameraPosition = new THREE.Vector3();
+        let targetLookAt = new THREE.Vector3();
+        let currentLookAt = new THREE.Vector3();
+        
+        // Objects stored for animation
+        const floatingObjects = [];
+
+        // Current section index
+        let currentSection = 0;
+        const totalSections = 4;
+        let isScrolling = false;
+
+        // Define Camera positions for each section
+        const sections = [
+            { // 0: Home
+                camPos: { x: 0, y: 0, z: 10 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            },
+            { // 1: Philosophy (Camera moves right, rotates slightly)
+                camPos: { x: 8, y: 2, z: 5 },
+                lookAt: { x: 2, y: 0, z: -2 }
+            },
+            { // 2: Works (Camera zooms in to a specific cluster)
+                camPos: { x: -5, y: -3, z: 6 },
+                lookAt: { x: -1, y: -1, z: 0 }
+            },
+            { // 3: Contact (Center focus, looking up slightly)
+                camPos: { x: 0, y: -8, z: 4 },
+                lookAt: { x: 0, y: -2, z: 0 }
+            }
+        ];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(config.colors.background);
+            // Fog for depth (Nordic misty feel)
+            scene.fog = new THREE.Fog(config.colors.background, 8, 25);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            
+            // Initial position setup
+            targetCameraPosition.set(sections[0].camPos.x, sections[0].camPos.y, sections[0].camPos.z);
+            targetLookAt.set(sections[0].lookAt.x, sections[0].lookAt.y, sections[0].lookAt.z);
+            camera.position.copy(targetCameraPosition);
+            currentLookAt.copy(targetLookAt);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 7);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
+
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
+            scene.add(hemiLight);
+
+            // --- CREATE OBJECTS ---
+            createWorld();
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('wheel', onWheel, { passive: false });
+
+            // Touch support for mobile swipe
+            let touchStartY = 0;
+            document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: false });
+            document.addEventListener('touchend', e => {
+                let touchEndY = e.changedTouches[0].clientY;
+                if (touchStartY - touchEndY > 50) nextSection();
+                if (touchEndY - touchStartY > 50) prevSection();
+            }, { passive: false });
+
+            animate();
+        }
+
+        function createWorld() {
+            // Main central abstract shape (Sphere)
+            const mainGeo = new THREE.IcosahedronGeometry(1.5, 1);
+            const mainMat = new THREE.MeshStandardMaterial({ 
+                color: config.colors.primary, 
+                flatShading: true,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+            const mainObj = new THREE.Mesh(mainGeo, mainMat);
+            mainObj.castShadow = true;
+            mainObj.receiveShadow = true;
+            scene.add(mainObj);
+            floatingObjects.push({ mesh: mainObj, speed: 0.005, rotSpeed: 0.002 });
+
+            // Secondary shapes (Wood blocks, accent spheres) scattered
+            const geometries = [
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.SphereGeometry(0.6, 32, 32),
+                new THREE.ConeGeometry(0.5, 1.5, 4),
+                new THREE.TorusGeometry(0.8, 0.2, 16, 100)
+            ];
+
+            const materials = [
+                new THREE.MeshStandardMaterial({ color: config.colors.secondary, roughness: 0.6 }), // Wood/Pink
+                new THREE.MeshStandardMaterial({ color: config.colors.white, roughness: 0.2 }),     // White ceramic
+                new THREE.MeshStandardMaterial({ color: config.colors.tertiary, roughness: 0.8 }),  // Green matte
+                new THREE.MeshStandardMaterial({ color: config.colors.dark, roughness: 0.5 })       // Dark accent
+            ];
+
+            // Create scattered floating debris/decor
+            for (let i = 0; i < 40; i++) {
+                const geo = geometries[Math.floor(Math.random() * geometries.length)];
+                const mat = materials[Math.floor(Math.random() * materials.length)];
+                const mesh = new THREE.Mesh(geo, mat);
+
+                // Random positions around the center, spread out
+                const spread = 15;
+                mesh.position.set(
+                    (Math.random() - 0.5) * spread,
+                    (Math.random() - 0.5) * spread,
+                    (Math.random() - 0.5) * spread
+                );
+                
+                // Don't put objects too close to center (0,0,0)
+                if (mesh.position.length() < 3) mesh.position.setX(mesh.position.x + 4);
+
+                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                mesh.scale.setScalar(Math.random() * 0.5 + 0.3);
+                
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                scene.add(mesh);
+                
+                // Store for animation
+                floatingObjects.push({
+                    mesh: mesh,
+                    speed: (Math.random() * 0.005) + 0.001,
+                    rotSpeed: (Math.random() * 0.005),
+                    originalY: mesh.position.y,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Add "Ground" planes at different levels to suggest architectural levels without solid floors
+            const planeGeo = new THREE.BoxGeometry(10, 0.2, 10);
+            const planeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+            
+            const p1 = new THREE.Mesh(planeGeo, planeMat);
+            p1.position.set(0, -3, 0);
+            p1.receiveShadow = true;
+            scene.add(p1);
+
+            const p2 = new THREE.Mesh(planeGeo, planeMat);
+            p2.position.set(6, 2, -5);
+            p2.rotation.z = 0.1;
+            p2.receiveShadow = true;
+            scene.add(p2);
+        }
+
+        function onMouseMove(event) {
+            // Normalize mouse position from -1 to 1
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- NAVIGATION LOGIC ---
+
+        function updateSection(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSections) index = totalSections - 1;
+            
+            currentSection = index;
+
+            // Update Camera Targets
+            const sec = sections[currentSection];
+            targetCameraPosition.set(sec.camPos.x, sec.camPos.y, sec.camPos.z);
+            targetLookAt.set(sec.lookAt.x, sec.lookAt.y, sec.lookAt.z);
+
+            // Update UI Classes
+            document.querySelectorAll('.content-section').forEach((el, i) => {
+                el.classList.remove('active', 'hidden-left', 'hidden-right');
+                if (i === currentSection) {
+                    el.classList.add('active');
+                } else if (i < currentSection) {
+                    el.classList.add('hidden-left');
+                } else {
+                    el.classList.add('hidden-right');
+                }
+            });
+
+            // Update Dots
+            document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+                if (i === currentSection) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function navigateTo(index) {
+            updateSection(index);
+        }
+
+        function nextSection() {
+            updateSection(currentSection + 1);
+        }
+        
+        function prevSection() {
+            updateSection(currentSection - 1);
+        }
+
+        function onWheel(event) {
+            // Simple throttle
+            if (isScrolling) return;
+            isScrolling = true;
+            setTimeout(() => { isScrolling = false; }, 1000); // Wait 1s before allowing next scroll
+
+            if (event.deltaY > 0) {
+                nextSection();
+            } else {
+                prevSection();
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            // 1. Camera Movement (Lerp towards target)
+            // Adding mouse influence for parallax
+            const mouseInfluence = 0.5;
+            const camTargetX = targetCameraPosition.x + (mouse.x * mouseInfluence);
+            const camTargetY = targetCameraPosition.y + (mouse.y * mouseInfluence);
+
+            camera.position.x += (camTargetX - camera.position.x) * config.cameraSpeed;
+            camera.position.y += (camTargetY - camera.position.y) * config.cameraSpeed;
+            camera.position.z += (targetCameraPosition.z - camera.position.z) * config.cameraSpeed;
+
+            // LookAt Interpolation
+            currentLookAt.x += (targetLookAt.x - currentLookAt.x) * config.cameraSpeed;
+            currentLookAt.y += (targetLookAt.y - currentLookAt.y) * config.cameraSpeed;
+            currentLookAt.z += (targetLookAt.z - currentLookAt.z) * config.cameraSpeed;
+            
+            camera.lookAt(currentLookAt);
+
+            // 2. Object Animation (Floating)
+            floatingObjects.forEach((obj, i) => {
+                // Rotate
+                obj.mesh.rotation.x += obj.rotSpeed;
+                obj.mesh.rotation.y += obj.rotSpeed;
+
+                // Float up and down
+                obj.mesh.position.y = obj.originalY + Math.sin(time + obj.phase) * 0.3;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

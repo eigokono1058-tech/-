@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Launchpad Brief — Eigo (Ayden) Kono</title>
+<meta name="description" content="Launchpad brief for OpenAI DevDay 2026 (Product design and UXR): a more flexible delivery experience for Japan, a working prototype that is probably too big, and the questions I want help with.">
+<meta name="theme-color" content="#0a0c12">
+<link rel="icon" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/i18n.js"></script>
+<style>
+  :root { --maxw: 760px; }
+
+  .brief-head { padding: 56px 0 10px; }
+  .brief-head h1 { font-size: clamp(25px, 6vw, 34px); letter-spacing: -0.02em; margin: 12px 0 10px; text-wrap: balance; }
+  .session-chip {
+    display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--brand-2);
+  }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+  section.blk { padding: 28px 0; border-top: 1px solid var(--border-soft); }
+  section.blk:first-of-type { border-top: 0; }
+  h2.sec {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-faint); margin: 0 0 12px;
+  }
+  h3.q { font-size: 18px; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  p { font-size: 14.5px; color: var(--text-dim); line-height: 1.75; }
+  .lede { font-size: 16px; color: var(--text); }
+
+  .submitted {
+    padding: 16px 18px; border-radius: var(--radius);
+    border-left: 3px solid var(--brand-1);
+    background: color-mix(in srgb, var(--brand-1) 9%, transparent);
+  }
+  .submitted .tag {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--brand-1); display: block; margin-bottom: 8px;
+  }
+  .submitted p { color: var(--text); margin: 0; }
+  .submitted + .submitted { margin-top: 10px; }
+
+  .qcard {
+    padding: 18px; border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    margin-bottom: 12px;
+  }
+  .qcard.is-key {
+    border-color: color-mix(in srgb, var(--brand-2) 40%, var(--border));
+    background:
+      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 11%, transparent), transparent 62%),
+      color-mix(in srgb, var(--surface) 90%, transparent);
+  }
+  .qnum { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--brand-2); }
+  .qwhy {
+    margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);
+    font-size: 13px; color: var(--text-faint);
+  }
+  .qwhy b { color: var(--text-dim); }
+
+  .status { display: grid; gap: 7px; }
+  .status div {
+    display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+    font-size: 14px; color: var(--text-dim); align-items: start;
+  }
+  .status .yes { color: var(--ok); font-weight: 700; }
+  .status .no { color: var(--danger); font-weight: 700; }
+
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 620px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi {
+    padding: 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 82%, transparent);
+  }
+  .kpi .kv { font-size: 23px; font-weight: 650; line-height: 1.05; letter-spacing: -0.02em; }
+  .kpi .kv small { font-size: 0.52em; font-weight: 600; color: var(--text-dim); margin-left: 2px; }
+  .kpi .kl { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; line-height: 1.4; }
+
+  .cons { display: grid; gap: 8px; }
+  @media (min-width: 620px) { .cons { grid-template-columns: 1fr 1fr; } }
+  .con {
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface); font-size: 13.5px;
+  }
+  .con b { display: block; font-size: 13px; margin-bottom: 3px; }
+
+  .script {
+    padding: 16px 18px; border-radius: var(--radius);
+    border-left: 3px solid var(--brand-3);
+    background: color-mix(in srgb, var(--brand-3) 9%, transparent);
+    font-size: 15px; line-height: 1.8; color: var(--text);
+  }
+  .script .pause { color: var(--brand-3); font-weight: 700; }
+  .script + .script { margin-top: 10px; }
+
+  .cut-list { display: grid; gap: 8px; }
+  .cut {
+    display: grid; grid-template-columns: auto 1fr; gap: 10px;
+    padding: 11px 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface); font-size: 13.5px;
+  }
+  .cut .n { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-faint); }
+
+  @media print {
+    .aurora, .grid-lines, .top-controls, .noprint { display: none !important; }
+    body { background: #fff; }
+    :root { --text: #000; --text-dim: #222; --text-faint: #555; --surface: #fff; --border: #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls noprint">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
+
+<main class="wrap">
+
+  <header class="brief-head">
+    <div class="session-chip">
+      <span>LAUNCHPAD BRIEF</span><span>·</span><span>PRODUCT DESIGN &amp; UXR</span>
+    </div>
+    <h1>I built the prototype. Now I need to cut it down to a product.</h1>
+    <p class="lede">
+      <span data-l="en">I am exploring a more flexible way to receive parcels in Japan. I already built a working
+        prototype — and I am fairly sure it is three products wide and zero products deep. I want help choosing
+        what to keep, and help figuring out how to validate it honestly.</span>
+      <span data-l="ja">日本での、もっと柔軟な荷物の受け取り方を検討しています。すでに動くプロトタイプを作りましたが、たぶん「横に3製品ぶん広くて、縦に1製品ぶんもない」状態です。何を残すかの判断と、正直な検証のやり方を相談したいです。</span>
+    </p>
+    <div class="meta-row">
+      <span class="pill">Eigo “Ayden” Kono</span>
+      <span class="pill">Hitachi, Ltd. · Tokyo</span>
+      <span class="pill pill-info">OpenAI DevDay · Sep 29, 2026</span>
+    </div>
+  </header>
+
+  <!-- ============ WHAT I SUBMITTED ============ -->
+  <section class="blk">
+    <h2 class="sec">What I told you when I applied</h2>
+    <div class="submitted">
+      <span class="tag">WHAT ARE YOU BUILDING?</span>
+      <p>
+        I’m exploring a new delivery experience in Japan to reduce failed deliveries and redeliveries.
+        While doorstep delivery is common in the U.S., Japan still relies more on direct handoffs, creating
+        redeliveries when recipients are unavailable. I want to explore a service that lets people receive
+        packages more flexibly based on when and where they are available.
+      </p>
+    </div>
+    <div class="submitted">
+      <span class="tag">WHAT WOULD YOU LIKE TO DISCUSS?</span>
+      <p>
+        How should I validate this idea and design the simplest first product? I’d like to explore how AI could
+        match recipients’ availability and preferred locations with delivery operations, while creating a simple
+        experience that both customers and delivery providers would actually use.
+      </p>
+    </div>
+    <p class="small faint" style="margin-top:12px">
+      <span data-l="en">Everything below is the detail behind those two paragraphs.</span>
+      <span data-l="ja">以下はこの2段落の中身です。応募時に書いた内容と食い違わないようにしています。</span>
+    </p>
+    <div class="row row-wrap" style="margin-top:10px">
+      <a class="btn btn-sm" href="../assets/video/last-meters-en.mp4" target="_blank" rel="noopener">
+        ▶ <span data-l="en">Or watch the 2-minute film</span><span data-l="ja">2分の動画で見る</span>
+      </a>
+      <a class="btn btn-sm btn-ghost" href="../">
+        <span data-l="en">It is on my profile page too</span><span data-l="ja">プロフィールページにも置いています</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ THE PROBLEM, BRIEFLY ============ -->
+  <section class="blk">
+    <h2 class="sec">The problem, in four numbers</h2>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kv">5.0<small>bn</small></div>
+        <div class="kl">
+          <span data-l="en">parcels handled per year in Japan</span>
+          <span data-l="ja">日本の宅配便取扱個数（年間）</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kv">8.3<small>%</small></div>
+        <div class="kl">
+          <span data-l="en">still redelivered (Oct 2025) — about 400m parcels</span>
+          <span data-l="ja">再配達率（2025年10月）。約4億個</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kv">90<small>k</small></div>
+        <div class="kl">
+          <span data-l="en">drivers’ worth of labour lost to redelivery per year</span>
+          <span data-l="ja">再配達に費やされる労働時間（ドライバー約9万人分）</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kv">34<small>%</small></div>
+        <div class="kl">
+          <span data-l="en">projected freight capacity shortfall by FY2030</span>
+          <span data-l="ja">2030年度に不足する輸送能力の見通し</span>
+        </div>
+      </div>
+    </div>
+    <p class="small faint" style="margin-top:12px">
+      <span data-l="en">Sources: Japan’s Ministry of Land, Infrastructure, Transport and Tourism. The rate is
+        falling — but mostly because parcels moved to the doorstep, which does nothing for chilled, frozen,
+        medicine or high-value items.</span>
+      <span data-l="ja">出典：国土交通省。再配達率は下がっていますが、その多くは置き配に移した結果で、冷蔵・冷凍・医薬品・高額品には効いていません。</span>
+    </p>
+  </section>
+
+  <!-- ============ WHAT I BUILT ============ -->
+  <section class="blk">
+    <h2 class="sec">What I have already built</h2>
+    <p>
+      <span data-l="en">A working prototype you can open on your phone right now. It simulates a parcel in
+        transit and lets you move where it lands — a station locker, a convenience store, your office, a friend,
+        or to you while you are still walking home. A policy engine decides whether that move is allowed and
+        returns the reason when it is not.</span>
+      <span data-l="ja">いますぐスマホで開ける動くプロトタイプです。配送中の荷物の受取先を差し替えられます。駅のロッカー、コンビニ、勤務先、友人、そして帰宅途中の自分自身。移動先が許されるかどうかをポリシーエンジンが判定し、だめなときは理由を返します。</span>
+    </p>
+    <div class="row row-wrap" style="margin:14px 0 18px">
+      <a class="btn btn-primary" href="../app/">
+        <span data-l="en">Open the prototype</span><span data-l="ja">プロトタイプを開く</span>
+      </a>
+      <a class="btn btn-ghost" href="../pitch/">
+        <span data-l="en">The longer pitch</span><span data-l="ja">長めのピッチ</span>
+      </a>
+    </div>
+    <div class="status">
+      <div><span class="yes">✓</span><span>
+        <span data-l="en">8 ways to receive, a rules engine, scoped time-boxed permissions, an exception
+          simulator, and a built-in survey.</span>
+        <span data-l="ja">8種類の受取方法、ルールエンジン、最小スコープ・時限付きの受取権限、例外シミュレータ、内蔵アンケート。</span>
+      </span></div>
+      <div><span class="no">✗</span><span>
+        <span data-l="en">That list is my problem, not my achievement. It is a platform, and I cannot ship a
+          platform alone.</span>
+        <span data-l="ja">この一覧は成果ではなく問題です。これは基盤であって、一人で出せるものではありません。</span>
+      </span></div>
+      <div><span class="no">✗</span><span>
+        <span data-l="en">Zero conversations with a delivery company. I do not know what one redelivery costs
+          them, and that number decides whether any of this is a business.</span>
+        <span data-l="ja">配送事業者との会話がゼロです。再配達1件のコストを知らないのに、その数字が事業になるかを決めます。</span>
+      </span></div>
+      <div><span class="no">✗</span><span>
+        <span data-l="en">No real users yet. The survey exists; nobody has filled it in.</span>
+        <span data-l="ja">実ユーザーがまだいません。アンケートはありますが、誰も回答していません。</span>
+      </span></div>
+    </div>
+  </section>
+
+  <!-- ============ THE QUESTIONS ============ -->
+  <section class="blk">
+    <h2 class="sec">What I want your help with</h2>
+
+    <div class="qcard is-key">
+      <div class="qnum">Q1 · VALIDATION</div>
+      <h3 class="q">
+        <span data-l="en">Which side do I validate first — and what test could actually kill this?</span>
+        <span data-l="ja">どちら側を先に検証すべきで、どんなテストならこのアイデアを否定できるのか？</span>
+      </h3>
+      <p>
+        <span data-l="en">This needs recipients <i>and</i> delivery companies. If I only talk to recipients I will
+          hear “that sounds convenient” forever and learn nothing. What is the cheapest test that would genuinely
+          change my mind? And is a survey attached to a prototype real evidence, or am I just measuring
+          politeness?</span>
+        <span data-l="ja">これは受け取る人と配送事業者の両方が必要です。受け取る人にだけ聞けば「便利そう」と永遠に言われ、何も学べません。本当に考えを変えさせるいちばん安いテストは何でしょうか。そしてプロトタイプに付けたアンケートは証拠になるのか、それとも社交辞令を測っているだけなのでしょうか。</span>
+      </p>
+      <div class="qwhy">
+        <b>Why it matters:</b>
+        <span data-l="en">I have 7 days of event and then my evenings. I can run exactly one validation loop
+          before I lose momentum.</span>
+        <span data-l="ja">使える時間はイベントと、あとは夜と週末だけです。勢いを失う前に回せる検証は1周ぶんしかありません。</span>
+      </div>
+    </div>
+
+    <div class="qcard is-key">
+      <div class="qnum">Q2 · SIMPLEST FIRST PRODUCT</div>
+      <h3 class="q">
+        <span data-l="en">What would you cut? Which single thing ships first?</span>
+        <span data-l="ja">何を削りますか？ 最初に出す1つは何でしょうか？</span>
+      </h3>
+      <p>
+        <span data-l="en">I can show you the prototype and you can point at what to delete. My instinct says pick
+          one item type and one place — for example “frozen groceries, to a station locker on your commute” — and
+          throw the other seven away. But I do not trust my own instinct here, because every feature I built felt
+          necessary while I was building it.</span>
+        <span data-l="ja">プロトタイプをお見せするので、消すところを指してもらえます。私の直感は「1つの品目 × 1つの場所」、たとえば「冷凍食品を、通勤経路の駅ロッカーへ」に絞って残り7つを捨てることです。ただ自分の直感を信用していません。作っている最中は、どの機能も必要に見えたからです。</span>
+      </p>
+      <div class="qwhy">
+        <b>Why it matters:</b>
+        <span data-l="en">A platform needs partners on day one. A single use case might only need one locker
+          operator and 20 people.</span>
+        <span data-l="ja">基盤は初日からパートナーが必要ですが、ユースケースを1つに絞れば、ロッカー事業者1社と20人で始められるかもしれません。</span>
+      </div>
+    </div>
+
+    <div class="qcard is-key">
+      <div class="qnum">Q3 · TWO-SIDED EXPERIENCE</div>
+      <h3 class="q">
+        <span data-l="en">How do you design one experience for two sides that want opposite things?</span>
+        <span data-l="ja">正反対のものを求める2者に、1つの体験をどう設計するのか？</span>
+      </h3>
+      <p>
+        <span data-l="en">The recipient wants to change their mind late — ideally while the van is already moving.
+          Operations wants route density, predictable stops and no surprises. Where does the flexibility have to
+          stop so that a driver’s day still works? Is there a version where the driver experiences <i>less</i>
+          chaos, not more?</span>
+        <span data-l="ja">受け取る人は、できれば車が走り出したあとでも予定を変えたい。配送側はルートの密度と、予測できる停車と、驚きがないことを求めます。ドライバーの1日が成立するために、柔軟さはどこで止まるべきでしょうか。ドライバーにとって混乱が「減る」形はありうるでしょうか。</span>
+      </p>
+      <div class="qwhy">
+        <b>Why it matters:</b>
+        <span data-l="en">If the carrier experiences this as more variability, they will never adopt it, and the
+          recipient side becomes worthless.</span>
+        <span data-l="ja">配送事業者にとって「変動が増えるもの」に見えたら採用されず、受け取る人側の価値もゼロになります。</span>
+      </div>
+    </div>
+
+    <div class="qcard is-key">
+      <div class="qnum">Q4 · WHERE AI ACTUALLY BELONGS</div>
+      <h3 class="q">
+        <span data-l="en">Does the first version need AI at all?</span>
+        <span data-l="ja">最初のバージョンに、そもそもAIは必要なのか？</span>
+      </h3>
+      <p>
+        <span data-l="en">I wrote in my application that AI could match availability and preferred locations with
+          delivery operations, and I still think that is where this goes. But I want to ask the uncomfortable
+          version of the question at an OpenAI event: is v1 just a good scheduling interface, with AI arriving
+          only once there is enough behaviour to predict? If AI does belong in v1 — is it the matching, the
+          prediction of where I will be, or the conversation that replaces the scheduling UI entirely?</span>
+        <span data-l="ja">応募文には「AIが、受取可能な時間と場所を配送オペレーションと突き合わせられる」と書きましたし、最終的にはそこに行くと今も思っています。ただ、OpenAIのイベントで居心地の悪い形の問いを聞きたいです。v1は単に良いスケジュール調整のUIで、AIは予測できるだけの行動データが溜まってから来るのではないか。もしv1にAIが入るなら、それはマッチングなのか、居場所の予測なのか、それともスケジュール画面そのものを置き換える対話なのか。</span>
+      </p>
+      <div class="qwhy">
+        <b>Why it matters:</b>
+        <span data-l="en">I would rather be told “not yet” by you than find out after building it.</span>
+        <span data-l="ja">作ったあとで気づくより、いま「まだ早い」と言われた方がいいです。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MY OWN GUESS ============ -->
+  <section class="blk">
+    <h2 class="sec">My own current guess (tell me if it is wrong)</h2>
+    <div class="cut-list">
+      <div class="cut"><span class="n">KEEP</span><span>
+        <span data-l="en">One item type where failure actually hurts: <b>chilled and frozen groceries</b>. You
+          cannot leave them at a door, so the problem is real and unsolved.</span>
+        <span data-l="ja">失敗が本当に痛む品目を1つ：<b>冷蔵・冷凍食品</b>。置き配にできないので、課題が実在していて未解決です。</span>
+      </span></div>
+      <div class="cut"><span class="n">KEEP</span><span>
+        <span data-l="en">One place that already exists: <b>a temperature-controlled locker on a commute</b>.
+          No new hardware, no new building access.</span>
+        <span data-l="ja">すでに存在する場所を1つ：<b>通勤経路上の温度帯対応ロッカー</b>。新しい機器も建物への立ち入り権限も要りません。</span>
+      </span></div>
+      <div class="cut"><span class="n">CUT</span><span>
+        <span data-l="en">Delivery to a moving person, delegation to friends, robot handover, indoor delivery,
+          the autonomy levels, the whole permission model. All of it is interesting. None of it is v1.</span>
+        <span data-l="ja">移動中の人への配送、友人への委任、ロボットとの受渡し、屋内搬入、自律レベル、権限モデル全体。どれも面白いですが、v1ではありません。</span>
+      </span></div>
+      <div class="cut"><span class="n">TEST</span><span>
+        <span data-l="en">Whether anyone will walk 3 extra minutes for a parcel they could have had at home
+          tomorrow. That single behaviour decides everything.</span>
+        <span data-l="ja">明日自宅で受け取れる荷物のために、3分多く歩く人がいるか。この1つの行動がすべてを決めます。</span>
+      </span></div>
+    </div>
+  </section>
+
+  <!-- ============ CONSTRAINTS ============ -->
+  <section class="blk">
+    <h2 class="sec">Context you may not have about Japan</h2>
+    <div class="cons">
+      <div class="con">
+        <b>Handoff is cultural, not just regulatory</b>
+        <span data-l="en">Direct handoff has been the norm for security reasons. Unattended delivery is now
+          standard but many people still dislike it.</span>
+        <span data-l="ja">対面での受け渡しは防犯上の理由で長く標準でした。置き配は制度化されましたが、抵抗のある人はまだ多いです。</span>
+      </div>
+      <div class="con">
+        <b>Carriers are already at the limit</b>
+        <span data-l="en">Driver shortage plus a projected 34% capacity shortfall by 2030 means reducing
+          redelivery is now a continuity problem, not a cost-saving nice-to-have.</span>
+        <span data-l="ja">ドライバー不足に加え、2030年に輸送能力が34%不足する見通しです。再配達削減はコスト削減ではなく事業継続の問題になっています。</span>
+      </div>
+      <div class="con">
+        <b>Each carrier has its own app</b>
+        <span data-l="en">Changing a pickup location is already possible — per carrier, in silos. A cross-carrier
+          layer is the opportunity and also the political problem.</span>
+        <span data-l="ja">受取場所の変更は各社のアプリで既に可能ですが、会社ごとに分断されています。横断できることが機会であり、同時に政治的な難所です。</span>
+      </div>
+      <div class="con">
+        <b>Lockers already exist at scale</b>
+        <span data-l="en">A carrier-neutral open locker network is already at roughly 6,000 locations. I do not
+          need to build boxes.</span>
+        <span data-l="ja">キャリア横断のオープンロッカーが既に約6,000カ所あります。箱を作る必要はありません。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHAT I'LL DO WITH IT ============ -->
+  <section class="blk">
+    <h2 class="sec">What I will do with your answer</h2>
+    <div class="status">
+      <div><span class="yes">1</span><span>
+        <span data-l="en">Cut the prototype down to whatever we agree ships first — within the week.</span>
+        <span data-l="ja">合意した「最初に出すもの」までプロトタイプを削ります。その週のうちに。</span>
+      </span></div>
+      <div><span class="yes">2</span><span>
+        <span data-l="en">Run the validation test you suggest, and send you the result — including if it fails.</span>
+        <span data-l="ja">提案された検証を実行し、結果を送ります。失敗した場合もそのまま送ります。</span>
+      </span></div>
+      <div><span class="yes">3</span><span>
+        <span data-l="en">Get the cost of one redelivery from an actual carrier. That is my single biggest
+          unknown.</span>
+        <span data-l="ja">再配達1件のコストを、実際の配送事業者から取ってきます。これが最大の未知です。</span>
+      </span></div>
+    </div>
+    <p class="small faint" style="margin-top:14px;margin-bottom:0">
+      <span data-l="en">If you are another builder in this group: I would like to talk to anyone working on
+        two-sided products where one side is an operations team. The design problem looks identical from
+        where I sit.</span>
+      <span data-l="ja">同じグループの他の参加者へ：片側が現場オペレーションである二面性のプロダクトを扱っている方と話したいです。私の立場からは、設計上の課題がまったく同じに見えています。</span>
+    </p>
+  </section>
+
+  <!-- ============ SPOKEN SCRIPT ============ -->
+  <section class="blk noprint">
+    <h2 class="sec">Spoken script (for me)</h2>
+    <p class="small faint">
+      <span data-l="en">Read once before the session. Slashes are breath marks.</span>
+      <span data-l="ja">セッション前に一度音読する用。スラッシュは息継ぎの位置。</span>
+    </p>
+
+    <div class="script">
+      <b>20 seconds — who I am, what I am building</b><br>
+      “I’m Eigo Kono <span class="pause">/</span> people call me Ayden. I work at Hitachi <span class="pause">/</span>
+      in Tokyo. In Japan <span class="pause">/</span> parcels are still handed over in person
+      <span class="pause">/</span> so when you’re not home <span class="pause">/</span> it comes back tomorrow.
+      Four hundred million parcels a year get redelivered.
+      I’m building a way to receive a parcel <span class="pause">/</span> based on when and where you can actually
+      be <span class="pause">/</span> instead of one fixed address.”
+    </div>
+
+    <div class="script">
+      <b>15 seconds — the ask</b><br>
+      “I already built a prototype <span class="pause">/</span> and I think it’s too big.
+      So my questions are <span class="pause">/</span> what would you cut to get to a first product
+      <span class="pause">/</span> how do I validate this when I need both recipients and delivery companies
+      <span class="pause">/</span> and honestly <span class="pause">/</span> does version one even need AI?”
+    </div>
+
+    <div class="script">
+      <b>10 seconds — show it</b><br>
+      “Can I show you? <span class="pause">/</span> It takes twenty seconds.”
+      <span class="faint">→ open the prototype, tap the station locker, then tap the friend option on the
+      prescription medicine so they see the policy engine refuse it.</span>
+    </div>
+
+    <div class="script">
+      <b>If they ask “why you?”</b><br>
+      “I’m not a logistics person <span class="pause">/</span> I’m the customer who kept missing deliveries
+      <span class="pause">/</span> and I can build. I work at a company that builds infrastructure in Japan
+      <span class="pause">/</span> so I can get into the room with carriers.”
+    </div>
+
+    <div class="script">
+      <b>If the answer is “this is not a business”</b><br>
+      “That’s useful <span class="pause">/</span> tell me why. Is it the willingness to pay
+      <span class="pause">/</span> or the two-sided cold start?”
+      <span class="faint">→ do not defend. Write down the reason.</span>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="row row-wrap">
+      <a class="btn btn-primary" href="../">
+        <span data-l="en">Profile &amp; contact</span><span data-l="ja">プロフィール・連絡先</span>
+      </a>
+      <a class="btn" href="../app/">
+        <span data-l="en">The prototype</span><span data-l="ja">プロトタイプ</span>
+      </a>
+      <a class="btn btn-ghost" href="../plan/">
+        <span data-l="en">Open questions</span><span data-l="ja">足りないもの一覧</span>
+      </a>
+      <button class="btn btn-ghost noprint" id="printBtn" type="button">
+        <span data-l="en">Print</span><span data-l="ja">印刷</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="footer">
+    Launchpad brief · Product design &amp; UXR · OpenAI DevDay, September 29, 2026 · Fort Mason, San Francisco
+  </p>
+</main>
+
+<script src="../assets/js/theme.js"></script>
+<script>
+  if (window.LMTheme) window.LMTheme.bind("#themeBtn");
+  if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
+  var pb = document.getElementById("printBtn");
+  if (pb) pb.addEventListener("click", function () { window.print(); });
+</script>
+</body>
+</html>
