@@ -43,14 +43,14 @@ STRINGS = {
         "hold": "カメラをかざしてください",
         "menu": "プロフィール · 動くデモ · 事業構想",
         "noname": "氏名未設定",
-        "eyebrow": "AIエージェント · 公共分野",
+        "eyebrow": "LAST METERS",
     },
     "en": {
         "scan": "SCAN &#8594; PROFILE / DEMO",
         "hold": "Point your camera here",
         "menu": "Profile · Live demo · Business plan",
         "noname": "Name not set",
-        "eyebrow": "AI AGENTS · PUBLIC SECTOR",
+        "eyebrow": "LAST METERS",
     },
 }
 
@@ -323,7 +323,7 @@ def build(url: str, name: str, name_ja: str) -> None:
     nickname = read_config("nickname")
     for lang in ("ja", "en"):
         suffix = "" if lang == "ja" else "-en"
-        headline = read_config("headline", lang)
+        headline = read_config("headlineShort", lang) or read_config("headline", lang)
         if lang == "ja":
             card_name = name_ja or name
         else:

@@ -17,19 +17,18 @@ window.PROFILE = {
   nameJa: "河野 瑛吾", // 日本語表記
   nickname: "Ayden",   // 呼ばれ方（空にすると表示されません）
 
-  /* DevDayの応募文で使った「生成AIエバンジェリスト（公共分野）」に合わせています。
-     名刺どおりの表記に戻す場合は下のコメント側と入れ替えてください。
-       ja: "ITエンジニア / 営業 · 日立製作所 公共システム営業統括本部",
-       en: "IT Engineer / Solution Sales · Public Sector Systems, Hitachi, Ltd." */
+  /* 部署が変わったため、特定の本部名は書いていません。
+     いまの所属に合わせて書き換えてください（名刺の表記は
+     「ITエンジニア / 営業 · 日立製作所 公共システム営業統括本部」でした）。 */
   role: {
-    ja: "生成AIエバンジェリスト（公共分野）· 日立製作所",
-    en: "Generative AI Evangelist, Public Sector · Hitachi, Ltd."
+    ja: "ITエンジニア / 営業 · 日立製作所",
+    en: "IT Engineer / Solution Sales · Hitachi, Ltd."
   },
 
   // 名刺・ポスターの印刷に使う短い肩書き（長いと文字が小さくなるため）
   roleShort: {
-    ja: "生成AIエバンジェリスト（公共分野）· 日立製作所",
-    en: "Generative AI Evangelist, Public Sector · Hitachi"
+    ja: "ITエンジニア / 営業 · 日立製作所",
+    en: "IT Engineer / Solution Sales · Hitachi, Ltd."
   },
 
   location: { ja: "東京", en: "Tokyo, Japan" },
@@ -37,17 +36,23 @@ window.PROFILE = {
   // 顔写真（任意）。例: "assets/img/me.jpg" を置いてパスを書く。空ならイニシャル表示
   avatar: "",
 
-  /* 自己紹介1行 = 2つのプロジェクトを貫く1つの主張。
-     「難しいのはモデルではなく、エージェントに渡す権限」が共通の論旨。 */
+  /* 自己紹介1行 = DevDayに提出した「What are you building?」と同じ内容にしている。
+     メンターが読んでいる文章と食い違わせないため。 */
   headline: {
-    ja: "最先端AIを、政府機関が安全に使えて監査もできる業務の仕組みに変えています。難しいのはモデルではなく、エージェントに渡す「権限」の設計です。",
-    en: "I turn frontier AI into secure, auditable workflows for government. The hard part is never the model — it is the authority you hand an agent."
+    ja: "日本の不在配送・再配達を減らしたい。荷物が、住所ではなく「受け取れる時間と場所」に届くようにする。",
+    en: "Reducing failed deliveries in Japan — so a parcel arrives when and where you can actually receive it, not at one fixed address."
+  },
+
+  // 名刺・ポスターの印刷に使う短いタグライン（長いと途中で切れるため）
+  headlineShort: {
+    ja: "受け取れる場所と時間に、荷物が届くようにする。",
+    en: "Making parcels arrive where and when you can actually receive them."
   },
 
   // 興味・専門タグ / interests
   tags: {
-    ja: ["AIエージェント", "公共・行政", "根拠付き生成", "権限を反映した検索", "評価(Evals)", "物流"],
-    en: ["AI Agents", "Public Sector", "Grounded RAG", "Permission-aware retrieval", "Evals", "Logistics"]
+    ja: ["配送体験", "ラストワンマイル", "再配達", "アイデア検証", "AIマッチング", "プロトタイピング"],
+    en: ["Delivery experience", "Last-mile logistics", "Failed deliveries", "Validation", "AI matching", "Prototyping"]
   },
 
   /* ---- 連絡先 / contact -----------------------------------------------
@@ -67,10 +72,10 @@ window.PROFILE = {
       id: "hitachi",
       label: { ja: "日立での実績", en: "My work at Hitachi" },
       sublabel: {
-        ja: "AIナレッジ検索の導入事例（公開記事）",
-        en: "AI knowledge retrieval, published case study (Japanese)"
+        ja: "日立の公開記事",
+        en: "A published article about my work (Japanese)"
       },
-      // DevDayの応募文に載せた記事。deh.hitachi.co.jp/_ct/17805441 と同じ記事です
+      // deh.hitachi.co.jp/_ct/17805441 と同じ記事です
       url: "https://www.hitachi.com/ja-jp/products/digital/highlights/usecases/gyoumu-ai/17805441",
       icon: "briefcase",
       accent: "#e0736f",
@@ -112,44 +117,19 @@ window.PROFILE = {
     }
   ],
 
-  /* ---- プロジェクト / projects ----------------------------------------
-     上から順に表示。1つ目を主役にしています（DevDayの応募軸）。           */
+  /* ---- プロジェクト / project -----------------------------------------
+     DevDayに提出した「What are you building?」と同じ内容にしている。         */
   projects: [
     {
-      codename: "GOVERNMENT KNOWLEDGE AGENT",
-      badge: { ja: "本業 · 導入実績あり", en: "Day job · deployed" },
-      title: {
-        ja: "政府機関向け AIナレッジ・エージェント基盤",
-        en: "Government Knowledge Agent Platform"
-      },
-      summary: {
-        ja: "行政の仕事は法令・要件書・調達資料・運用知識に支えられているのに、それらは分散していて判断につながらない。権限を反映した検索、ハイブリッド検索、根拠に基づく生成、ツールを使うエージェントを組み合わせ、1つの機関での成功を複数省庁で再利用できるアーキテクチャに育てる。",
-        en: "Government work runs on regulations, requirements, procurement materials and operational know-how — all fragmented, none of it decision-ready. Permission-aware retrieval, hybrid search, grounded generation and tool-using agents, built so one agency deployment becomes an architecture other ministries can reuse."
-      },
-      links: [
-        {
-          label: { ja: "Launchpad用ブリーフ", en: "Launchpad brief" },
-          href: "./launchpad/",
-          cta: true,
-          note: { ja: "いま聞きたい3つの問い", en: "The 3 questions I'm bringing" }
-        },
-        {
-          label: { ja: "日立の公開事例", en: "Published case study" },
-          href: "https://www.hitachi.com/ja-jp/products/digital/highlights/usecases/gyoumu-ai/17805441",
-          note: { ja: "日本語記事", en: "in Japanese" }
-        }
-      ]
-    },
-    {
       codename: "LAST METERS",
-      badge: { ja: "個人プロジェクト · 試作", en: "Side project · prototype" },
+      badge: { ja: "検討中 · 動く試作あり", en: "Exploring · working prototype" },
       title: {
-        ja: "AIが発注する時代の「受取」インフラ",
-        en: "Receiving infrastructure for the age of AI agents"
+        ja: "「受け取れない」をなくす、物流の受取体験",
+        en: "A delivery experience built around when and where you can receive"
       },
       summary: {
-        ja: "同じ問いを物理世界で解いたらどうなるか。AIエージェントが発注まで自動化しても荷物は物理的に届き、その受取は今も人間の在宅が前提。受取権限を最小スコープ・時限付き・失効可能なかたちで発行する層をつくる。",
-        en: "The same question in the physical world. Even when AI agents handle ordering end to end, goods still arrive physically — and receiving them still assumes a human is home. A layer that issues the right to receive with least privilege, a time box and revocation."
+        ja: "日本では対面での受け渡しが多く、受取人が不在だと再配達になる。自宅という固定された場所ではなく、「いつ・どこなら受け取れるか」に合わせて荷物が届く形にしたい。むずかしいのは、受け取る人の都合と配送側の都合を、どちらも成立する形で合わせることだと思っている。",
+        en: "Japan still relies on direct handoffs, so a parcel becomes a redelivery whenever nobody is home. I want packages to arrive around when and where the recipient can actually be, instead of at one fixed address. The hard part is matching that flexibility with what delivery operations can absorb."
       },
       links: [
         {
@@ -157,6 +137,11 @@ window.PROFILE = {
           href: "./app/",
           cta: true,
           note: { ja: "ピンを差して受取先を変える", en: "Drop a pin, change where it lands" }
+        },
+        {
+          label: { ja: "Launchpad用ブリーフ", en: "Launchpad brief" },
+          href: "./launchpad/",
+          note: { ja: "当日メンターに聞く4つの問い", en: "The questions I'm bringing" }
         },
         {
           label: { ja: "構想を読む（ピッチ）", en: "Read the pitch" },

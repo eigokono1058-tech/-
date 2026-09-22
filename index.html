@@ -4,31 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Eigo (Ayden) Kono — Profile</title>
-<meta name="description" content="Generative AI Evangelist for the public sector at Hitachi. Building a Government Knowledge Agent Platform, and exploring the same idea for physical delivery. / 日立の公共分野で生成AIエバンジェリスト。政府機関向けAIナレッジ基盤と、物流のラスト数メートル。">
+<meta name="description" content="Exploring a new delivery experience in Japan: receiving parcels based on when and where you can actually be, instead of one fixed address. / 日本の不在配送・再配達を減らす、物流の受取体験を検討しています。">
 <meta name="theme-color" content="#0a0c12">
-<meta property="og:title" content="Eigo (Ayden) Kono — Generative AI Evangelist, Public Sector">
-<meta property="og:description" content="I turn frontier AI into secure, auditable workflows for government. The hard part is never the model — it is the authority you hand an agent.">
+<meta property="og:title" content="Eigo (Ayden) Kono — LAST METERS">
+<meta property="og:description" content="Reducing failed deliveries in Japan by letting people receive packages based on when and where they can actually be available.">
 <meta property="og:type" content="profile">
 <link rel="icon" href="assets/favicon.svg">
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/i18n.js"></script>
 <style>
   /* ---------- hero ---------- */
-  .hero { padding: 56px 0 8px; text-align: center; }
+  .hero { padding: 34px 0 6px; text-align: center; }
   .avatar {
-    width: 92px; height: 92px; margin: 0 auto 18px;
+    width: 74px; height: 74px; margin: 0 auto 12px;
     border-radius: 50%; display: grid; place-items: center;
-    font-size: 32px; font-weight: 700; letter-spacing: 0.02em;
+    font-size: 26px; font-weight: 700; letter-spacing: 0.02em;
     color: #06121f;
     background: linear-gradient(135deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-1) 12%, transparent), var(--shadow);
     object-fit: cover; overflow: hidden;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .hero h1 { font-size: 30px; margin-bottom: 2px; }
-  .hero .roman { font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; }
+  .hero h1 { font-size: 27px; margin-bottom: 2px; }
+  .hero .roman { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
   .nick-chip {
-    display: inline-block; margin: 0 0 12px;
+    display: inline-block; margin: 0 0 10px;
     padding: 3px 12px; border-radius: 999px;
     font-size: 12.5px; font-weight: 700;
     color: var(--brand-2);
@@ -36,12 +36,62 @@
     border: 1px solid color-mix(in srgb, var(--brand-2) 34%, transparent);
   }
   .hero .role { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; text-wrap: balance; }
-  .hero .loc { font-size: 13px; color: var(--text-faint); margin-bottom: 16px; }
+  .hero .loc { font-size: 13px; color: var(--text-faint); margin-bottom: 12px; }
   .hero .headline {
-    font-size: 15px; color: var(--text-dim); max-width: 460px; margin: 0 auto 18px;
+    font-size: 14.5px; color: var(--text-dim); max-width: 430px; margin: 0 auto 16px;
     text-align: left; text-wrap: pretty;
   }
-  .tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 26px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin: 0 0 22px; }
+
+  /* ---------- hero film ---------- */
+  .film { margin: 2px 0 22px; }
+  .film-frame {
+    position: relative;
+    width: min(72vw, 272px);
+    aspect-ratio: 9 / 16;
+    margin: 0 auto;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #05070c;
+    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, var(--border));
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-2) 8%, transparent), var(--shadow);
+  }
+  .film-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #05070c; }
+
+  /* 動画の表紙。コーデックの都合でフレームを抜き出せないので自前で描く */
+  .film-cover {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 18px 16px;
+    border: 0; cursor: pointer; text-align: left; font: inherit; color: var(--text);
+    background:
+      radial-gradient(85% 55% at 22% 8%, color-mix(in srgb, var(--brand-1) 52%, transparent), transparent 70%),
+      radial-gradient(75% 50% at 88% 96%, color-mix(in srgb, var(--brand-2) 46%, transparent), transparent 72%),
+      linear-gradient(160deg, #10162a 0%, #070a12 60%, #05070c 100%);
+    transition: opacity 0.25s ease;
+  }
+  .film-cover.is-hidden { opacity: 0; pointer-events: none; }
+  .fc-eyebrow {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
+    color: var(--brand-2); display: block;
+  }
+  .fc-title {
+    display: block; margin-top: 7px;
+    font-size: 21px; font-weight: 700; line-height: 1.18; letter-spacing: -0.015em;
+    color: #fff; text-wrap: balance;
+  }
+  .fc-mid { display: grid; place-items: center; }
+  .fc-play {
+    width: 62px; height: 62px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7);
+  }
+  .fc-play svg { margin-left: 3px; }
+  .film-cover:hover .fc-play { transform: scale(1.06); }
+  .fc-play { transition: transform 0.18s ease; }
+  .fc-bottom { font-size: 11.5px; color: rgba(255, 255, 255, 0.72); font-weight: 600; }
+  .film-cap { font-size: 12.5px; color: var(--text-faint); text-align: center; margin: 12px auto 0; max-width: 340px; }
 
   /* ---------- link list ---------- */
   .links { display: grid; gap: 10px; }
@@ -155,8 +205,8 @@
   .toast[data-show="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (min-width: 560px) {
-    .hero { padding-top: 72px; }
-    .hero h1 { font-size: 34px; }
+    .hero { padding-top: 48px; }
+    .hero h1 { font-size: 31px; }
   }
 </style>
 </head>
@@ -180,8 +230,42 @@
     <div class="role" id="role"></div>
     <div class="loc" id="loc"></div>
     <p class="headline" id="headline"></p>
-    <div class="tags" id="tags"></div>
   </header>
+
+  <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い -->
+  <section class="film" aria-label="Concept film">
+    <div class="film-frame">
+      <video id="film" playsinline preload="metadata" controlslist="nodownload">
+        <source src="assets/video/last-meters-en.mp4" type="video/mp4">
+      </video>
+      <button class="film-cover" id="filmPlay" type="button"
+              aria-label="Play the concept film, 2 minutes 24 seconds, English narration">
+        <span>
+          <span class="fc-eyebrow">LAST METERS</span>
+          <span class="fc-title">AI-first<br>Last Meters</span>
+        </span>
+        <span class="fc-mid">
+          <span class="fc-play">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#06121f" aria-hidden="true">
+              <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2z"/>
+            </svg>
+          </span>
+        </span>
+        <span class="fc-bottom">
+          <span data-l="en">2:24 · English narration · tap to play</span>
+          <span data-l="ja">2分24秒 · 英語ナレーション · タップで再生</span>
+        </span>
+      </button>
+    </div>
+    <p class="film-cap">
+      <span data-l="en">The idea in two minutes — what breaks in delivery today, and what it looks like when
+        a parcel meets you instead of your address.</span>
+      <span data-l="ja">2分でわかる構想。いまの配送で何が壊れているのか、そして荷物が住所ではなく「人」に届くとどうなるのか。</span>
+    </p>
+  </section>
+
+  <div class="wrap" style="padding:0"><div class="tags" id="tags"></div></div>
+
 
   <nav class="links" id="links" aria-label="リンク一覧"></nav>
 
@@ -233,5 +317,24 @@
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/profile-config.js"></script>
 <script src="assets/js/profile.js"></script>
+<script>
+  /* 表紙をタップしたら再生する。終わったら表紙に戻す */
+  (function () {
+    var film = document.getElementById("film");
+    var cover = document.getElementById("filmPlay");
+    if (!film || !cover) return;
+    cover.addEventListener("click", function () {
+      cover.classList.add("is-hidden");
+      film.setAttribute("controls", "");
+      var played = film.play();
+      // 自動再生がブロックされた場合はコントロールから再生してもらう
+      if (played && played.catch) played.catch(function () {});
+    });
+    film.addEventListener("ended", function () {
+      cover.classList.remove("is-hidden");
+      film.removeAttribute("controls");
+    });
+  })();
+</script>
 </body>
 </html>
