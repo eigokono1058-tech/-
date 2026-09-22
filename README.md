@@ -42,7 +42,10 @@ links: [
 ### 2. 公開する（GitHub Pages）
 
 1. GitHubの **Settings → Pages**
-2. **Source: Deploy from a branch** → Branch: `main` / フォルダ: `/ (root)` → Save
+2. **Source: Deploy from a branch** → フォルダ: `/ (root)` → Save
+   - すぐ公開したい場合は Branch に `claude/ai-logistics-delivery-service-ec1b4t`
+     （このコードが入っているブランチ）を指定すればそのまま公開できる
+   - `main` に取り込んでから公開する場合は、先にPull Requestをマージして Branch: `main`
 3. 数分後 `https://eigokono1058-tech.github.io/-/` で公開される
 
 > リポジトリ名が `-` なのでURLに `/-/` が入る。見た目を整えたい場合は
