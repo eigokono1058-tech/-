@@ -11,6 +11,7 @@
 <meta property="og:type" content="profile">
 <link rel="icon" href="assets/favicon.svg">
 <link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/i18n.js"></script>
 <style>
   /* ---------- hero ---------- */
   .hero { padding: 56px 0 8px; text-align: center; }
@@ -126,7 +127,7 @@
     border: 1px dashed color-mix(in srgb, var(--warn) 55%, transparent);
     background: color-mix(in srgb, var(--warn) 10%, transparent);
     color: var(--text); border-radius: var(--radius-sm);
-    padding: 12px 52px 12px 14px; font-size: 13px;
+    padding: 12px 14px; font-size: 13px; margin-top: 56px;
   }
   .setup code { background: color-mix(in srgb, var(--warn) 16%, transparent); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 
@@ -148,7 +149,10 @@
 <div class="aurora"></div>
 <div class="grid-lines"></div>
 
-<button class="theme-toggle" id="themeBtn" type="button" aria-label="配色を切り替える">◐</button>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
 
 <main class="wrap">
   <div id="setupBanner"></div>
@@ -168,16 +172,24 @@
   <section class="project" id="project" aria-labelledby="projTitle"></section>
 
   <div class="actions">
-    <button class="btn btn-sm" id="qrBtn" type="button">QRを表示</button>
-    <button class="btn btn-sm" id="copyBtn" type="button">URLをコピー</button>
-    <button class="btn btn-sm hidden" id="shareBtn" type="button">共有</button>
-    <button class="btn btn-sm hidden" id="vcardBtn" type="button">連絡先を保存</button>
+    <button class="btn btn-sm" id="qrBtn" type="button">
+      <span data-l="ja">QRを表示</span><span data-l="en">Show QR</span>
+    </button>
+    <button class="btn btn-sm" id="copyBtn" type="button">
+      <span data-l="ja">URLをコピー</span><span data-l="en">Copy link</span>
+    </button>
+    <button class="btn btn-sm hidden" id="shareBtn" type="button">
+      <span data-l="ja">共有</span><span data-l="en">Share</span>
+    </button>
+    <button class="btn btn-sm hidden" id="vcardBtn" type="button">
+      <span data-l="ja">連絡先を保存</span><span data-l="en">Save contact</span>
+    </button>
   </div>
 
   <p class="footer">
     <span id="footName"></span>
-    · <a href="./qr/">QRを作り直す</a>
-    · <a href="./plan/">事業計画</a>
+    · <a href="./qr/"><span data-l="ja">QRを作り直す</span><span data-l="en">QR kit</span></a>
+    · <a href="./plan/"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></a>
   </p>
 </main>
 
@@ -186,7 +198,9 @@
     <div class="eyebrow" style="margin-bottom:12px">SCAN ME</div>
     <span class="qr-frame"><img src="assets/qr/profile-qr.svg" alt="このページへのQRコード" id="qrImg"></span>
     <div class="small mono" id="qrUrl" style="word-break:break-all;color:var(--text-faint);margin-bottom:14px"></div>
-    <button class="btn btn-sm" id="qrClose" type="button">閉じる</button>
+    <button class="btn btn-sm" id="qrClose" type="button">
+      <span data-l="ja">閉じる</span><span data-l="en">Close</span>
+    </button>
   </div>
 </div>
 

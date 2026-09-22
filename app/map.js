@@ -6,6 +6,8 @@ window.LM_MAP = (function () {
   var D = window.LM_DATA;
   var W = 360, H = 240;
 
+  function T(v) { return window.LM_I18N ? window.LM_I18N.t(v) : (v && (v.ja || v)) || ""; }
+
   var svg = null;
   var layers = {};
   var onPick = null;
@@ -132,7 +134,8 @@ window.LM_MAP = (function () {
     var depot = el("g", { class: "m-depot" });
     depot.appendChild(el("rect", { x: 6, y: 188, width: 28, height: 24, rx: 4, class: "m-depot-box" }));
     depot.appendChild(el("text", { x: 20, y: 204, class: "m-depot-ico", "text-anchor": "middle" }, "🏭"));
-    depot.appendChild(el("text", { x: 20, y: 222, class: "m-label", "text-anchor": "middle" }, "物流Hub"));
+    depot.appendChild(el("text", { x: 20, y: 222, class: "m-label", "text-anchor": "middle" },
+      T({ ja: "物流Hub", en: "Depot" })));
     svg.appendChild(depot);
 
     /* 受取地点 */
@@ -163,7 +166,8 @@ window.LM_MAP = (function () {
     layers.rdv = el("g", { class: "m-rdv" });
     layers.rdv.appendChild(el("circle", { cx: 0, cy: 0, r: 9, class: "m-rdv-ring" }));
     layers.rdv.appendChild(el("circle", { cx: 0, cy: 0, r: 3, class: "m-rdv-dot" }));
-    layers.rdv.appendChild(el("text", { x: 0, y: -14, class: "m-label m-label-accent", "text-anchor": "middle" }, "ランデブー"));
+    layers.rdv.appendChild(el("text", { x: 0, y: -14, class: "m-label m-label-accent", "text-anchor": "middle" },
+      T({ ja: "ランデブー", en: "Rendezvous" })));
     layers.rdv.setAttribute("opacity", "0");
     svg.appendChild(layers.rdv);
 
@@ -171,7 +175,8 @@ window.LM_MAP = (function () {
     layers.person.appendChild(el("circle", { cx: 0, cy: 0, r: 11, class: "m-person-halo" }));
     layers.person.appendChild(el("circle", { cx: 0, cy: 0, r: 7, class: "m-person-dot" }));
     layers.person.appendChild(el("text", { x: 0, y: 3, class: "m-point-ico", "text-anchor": "middle" }, "🧑"));
-    layers.person.appendChild(el("text", { x: 0, y: 19, class: "m-label", "text-anchor": "middle" }, "自分"));
+    layers.person.appendChild(el("text", { x: 0, y: 19, class: "m-label", "text-anchor": "middle" },
+      T({ ja: "自分", en: "Me" })));
     svg.appendChild(layers.person);
 
     layers.vehicles = el("g", { class: "m-vehicles" });
@@ -179,11 +184,7 @@ window.LM_MAP = (function () {
   }
 
   function shortName(pt) {
-    var map = {
-      home_door: "自宅ドア前", home_locker: "宅配ロッカー", konbini: "コンビニ",
-      station_locker: "駅ロッカー", office: "勤務先", friend: "友人宅", indoor: "屋内搬入"
-    };
-    return map[pt.id] || pt.name;
+    return T(pt.label || pt.name);
   }
 
   /* ---------- update ---------- */

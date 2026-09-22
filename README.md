@@ -5,6 +5,10 @@
 
 すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・外部ライブラリ依存なしで動く。
 
+**全ページが日本語/英語の両対応**。ブラウザの言語設定で自動判定し、右上のボタンで手動切り替えもできる
+（選択は端末に記憶される）。`?lang=en` / `?lang=ja` をURLに付ければ言語を指定してリンクを共有できる。
+海外参加者にはそのまま英語で表示されるので、当日は言語を気にせずQRを見せればいい。
+
 | ページ | 場所 | 用途 |
 |---|---|---|
 | プロフィール（QRの着地先） | [`/`](./index.html) | 名前・実績・各SNSへワンタップで飛ぶハブ |
@@ -20,11 +24,13 @@
 ### 1. プロフィールを埋める（必須）
 
 `assets/js/profile-config.js` の **`REPLACE_ME` を全部置き換える**。
+`{ ja: "...", en: "..." }` になっている項目は**英語側も必ず書く**（海外参加者にはそちらが表示される）。
 
 ```js
-name:   "REPLACE_ME",   // 例: "Eigo Kono"
-nameJa: "REPLACE_ME",   // 例: "河野 英悟"
-role:   "REPLACE_ME",   // 例: "ITエンジニア / 日立製作所"
+name:   "REPLACE_ME",                        // 例: "Eigo Kono"（ローマ字・両言語共通）
+nameJa: "REPLACE_ME",                        // 例: "河野 英悟"
+role:   { ja: "REPLACE_ME",                  // 例: "ITエンジニア / 日立製作所"
+          en: "REPLACE_ME" },                // e.g. "IT Engineer / Hitachi, Ltd."
 
 links: [
   { id: "hitachi",   url: "REPLACE_ME" },  // 実績紹介サイト（公開可能なURLのみ）
@@ -34,6 +40,9 @@ links: [
   { id: "facebook",  url: "REPLACE_ME" }   // https://www.facebook.com/xxxx
 ]
 ```
+
+`headline`（自己紹介1行）、リンクのラベル、プロジェクト紹介文には日英の既定文が入っているので、
+気に入らなければ両方書き換える。日本語表示は和名を大きく、英語表示はローマ字を大きく出す。
 
 - `REPLACE_ME` が残っているリンクは **サイトに表示されない**（壊れたリンクを人に見せないため）
 - 代わりにページ上部に「セットアップ未完了」バナーが出るので、当日忘れていても気づける
@@ -68,10 +77,12 @@ python3 tools/gen_qr.py --url https://your.domain/  # 直接指定する場合
 |---|---|
 | `profile-qr.svg` | サイト埋め込み用（ベクタ） |
 | `profile-qr.png` | スライド貼り付け用（1080×1080px） |
-| `profile-qr-card.svg` | 名刺サイズ（91×55mm）の印刷用カード |
-| `profile-qr-poster.svg` | A6（105×148mm）の卓上ポスター |
+| `profile-qr-card.svg` / `-en.svg` | 名刺サイズ（91×55mm）の印刷用カード（日本語 / 英語） |
+| `profile-qr-poster.svg` / `-en.svg` | A6（105×148mm）の卓上ポスター（日本語 / 英語） |
 
-誤り訂正レベルは **H（30%）** 固定。印刷が汚れても暗い会場でも読める。
+誤り訂正レベルは **H（30%）** 固定、クワイエットゾーンは規格どおり4モジュール確保。
+印刷が汚れても暗い会場でも読める。QRが読む先のURLは日英で同じ（サイト側が言語を自動判定する）ので、
+名刺は**日本語版と英語版を両方刷って相手に合わせて渡す**のが楽。
 
 ### 4. 印刷する
 
@@ -88,6 +99,9 @@ python3 tools/gen_qr.py --url https://your.domain/  # 直接指定する場合
 ---
 
 ## 🧭 デモの操作ガイド（人に説明するとき用）
+
+英語で話す相手には、渡す前に**右上のボタンで EN にしてから**渡す
+（相手のブラウザではなく自分の端末を渡す運用なので、言語は自分で切り替える必要がある）。
 
 30秒で見せる順番:
 
@@ -124,17 +138,21 @@ python3 tools/gen_qr.py --url https://your.domain/  # 直接指定する場合
 │   ├── js/profile.js           プロフィールの描画・vCard書き出し・QR表示
 │   ├── js/icons.js             インラインSVGアイコン
 │   ├── js/theme.js             配色切り替え
-│   ├── qr/                     生成済みQR素材（4種）
+│   ├── js/i18n.js              日英切り替え（自動判定 + 手動トグル + ?lang=）
+│   ├── qr/                     生成済みQR素材（6種：日英 × 名刺/ポスター + 汎用2種）
 │   ├── video/                  コンセプト動画2本
 │   └── favicon.svg
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
 ├── pitch/index.html            事業構想1ページ
 ├── plan/
-│   ├── index.html              ドキュメントビューア
+│   ├── index.html              ドキュメントビューア（言語で .md / .en.md を切り替え）
 │   ├── md.js                   最小限のMarkdownレンダラ
 │   ├── business-plan.md        事業計画（全体構想）
+│   ├── business-plan.en.md     Business plan (English)
 │   ├── open-questions.md       足りないもの・未解決論点
-│   └── validation-plan.md      検証計画（インタビュースクリプト付き）
+│   ├── open-questions.en.md    Open questions (English)
+│   ├── validation-plan.md      検証計画（インタビュースクリプト付き）
+│   └── validation-plan.en.md   Validation plan (English)
 ├── app/
 │   ├── index.html              デモ本体
 │   ├── app.css                 デモ専用スタイル
@@ -183,3 +201,30 @@ POSTが失敗してもlocalStorageへの保存は必ず行われるので、会�
 - 事業計画中の数値のうち、出典のないものは `[要検証]` を付けた仮定
 - 動画2本は構想を映像化したもの（このリポジトリを作った環境では再生できるコーデックがなかったため、
   内容を確認せずファイル名とメタデータのみでキャプションを付けている。文言は必要に応じて直すこと）
+- 英語版はすべて書き下ろし（機械翻訳の直訳ではない）。固有名詞や社名を入れるときは英語側も直すこと
+
+---
+
+## About this repository (English)
+
+A self-introduction site with a printable QR code, plus the business plan and a working prototype for
+**LAST METERS** — an idea about the receiving side of AI-driven commerce.
+
+Everything is static HTML, CSS and plain JavaScript: no build step, no external libraries.
+**Every page is bilingual (Japanese / English)** — the language is detected from the browser, can be
+switched with the button in the top right, and can be forced with `?lang=en` or `?lang=ja`.
+
+| Page | Path | What it is |
+|---|---|---|
+| Profile (where the QR lands) | [`/`](./index.html) | One tap to each social profile and to the project |
+| QR kit | [`/qr/`](./qr/) | Preview, download and print (business card 91×55mm, A6 poster) in both languages |
+| Pitch | [`/pitch/`](./pitch/) | The problem in numbers, the solution, who pays, what is unproven |
+| Demo | [`/app/`](./app/) | Change the destination mid-delivery, watch a policy engine rule on it, issue a scoped receipt grant, break it on purpose |
+| Business plan | [`/plan/`](./plan/) | Plan, open questions and validation plan (English versions are `*.en.md`) |
+
+The short version of the idea: AI agents will soon order and pay on our behalf, but goods still arrive
+physically, and today's delivery assumes somebody is home. This project treats the **last few meters**
+as a permissions-and-liability problem rather than a robotics problem — issuing a scoped, time-boxed,
+revocable "receipt grant" so the handover can happen anywhere except inside your home.
+
+The demo runs on fictional data and is not connected to any real carrier.
