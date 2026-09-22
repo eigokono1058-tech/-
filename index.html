@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Profile — LAST METERS</title>
-<meta name="description" content="自己紹介とリンク集。AIエージェント前提の物流「ラスト数メートル」を再設計するプロジェクト LAST METERS。">
+<title>Eigo (Ayden) Kono — Profile</title>
+<meta name="description" content="Generative AI Evangelist for the public sector at Hitachi. Building a Government Knowledge Agent Platform, and exploring the same idea for physical delivery. / 日立の公共分野で生成AIエバンジェリスト。政府機関向けAIナレッジ基盤と、物流のラスト数メートル。">
 <meta name="theme-color" content="#0a0c12">
-<meta property="og:title" content="Profile — LAST METERS">
-<meta property="og:description" content="AIエージェント前提の社会インフラを、物流の「ラスト数メートル」から再設計しています。">
+<meta property="og:title" content="Eigo (Ayden) Kono — Generative AI Evangelist, Public Sector">
+<meta property="og:description" content="I turn frontier AI into secure, auditable workflows for government. The hard part is never the model — it is the authority you hand an agent.">
 <meta property="og:type" content="profile">
 <link rel="icon" href="assets/favicon.svg">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -76,11 +76,18 @@
     border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
   }
 
-  /* ---------- project ---------- */
+  /* ---------- projects ---------- */
   .project {
-    margin-top: 28px; padding: 20px;
+    margin-top: 16px; padding: 20px;
     border-radius: var(--radius-lg);
-    border: 1px solid color-mix(in srgb, var(--brand-2) 30%, var(--border));
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    box-shadow: var(--shadow-soft);
+  }
+  /* 主役のプロジェクト（DevDayの応募軸）だけ強調する */
+  .project.is-lead {
+    margin-top: 28px;
+    border-color: color-mix(in srgb, var(--brand-2) 34%, var(--border));
     background:
       radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 13%, transparent), transparent 62%),
       color-mix(in srgb, var(--surface) 90%, transparent);
@@ -178,7 +185,7 @@
 
   <nav class="links" id="links" aria-label="リンク一覧"></nav>
 
-  <section class="project" id="project" aria-labelledby="projTitle"></section>
+  <div id="projects"></div>
 
   <div class="actions">
     <button class="btn btn-sm" id="qrBtn" type="button">

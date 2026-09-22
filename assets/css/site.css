@@ -78,9 +78,41 @@
 
 /* ---------- 言語切り替え / language switching ----------
    両言語をDOMに置き、使わない方を隠すだけにする。
-   display を上書きしないので grid/flex のレイアウトを壊さない。         */
-html[lang="ja"] [data-l="en"],
-html[lang="en"] [data-l="ja"] { display: none !important; }
+   display を上書きしないので grid/flex のレイアウトを壊さない。
+   併記モード（data-lang-both）では何も隠さず、日本語側を副テキストとして装飾する。 */
+html[lang="ja"]:not([data-lang-both]) [data-l="en"],
+html[lang="en"]:not([data-lang-both]) [data-l="ja"] { display: none !important; }
+
+/* 併記モードの日本語側 */
+html[data-lang-both] p[data-l="ja"],
+html[data-lang-both] div[data-l="ja"],
+html[data-lang-both] section[data-l="ja"] {
+  border-left: 2px solid color-mix(in srgb, var(--brand-3) 45%, transparent);
+  padding-left: 11px;
+  margin-top: 6px;
+  font-size: 0.93em;
+  color: var(--text-faint);
+}
+html[data-lang-both] span[data-l="ja"] { color: var(--text-faint); font-weight: 400; }
+html[data-lang-both] span[data-l="ja"]::before { content: " / "; }
+/* 明るいCTAの上では薄いグレーだと読めないので濃い色にする */
+html[data-lang-both] .btn-primary span[data-l="ja"],
+html[data-lang-both] .plink.cta span[data-l="ja"],
+html[data-lang-both] .plink.cta .faint,
+html[data-lang-both] .btn-primary .faint { color: color-mix(in srgb, #06121f 72%, transparent); }
+html[data-lang-both] li > span[data-l="ja"]::before { content: " — "; }
+/* SVG内のテキストは同じ座標に重なるので併記しない */
+html[data-lang-both] text[data-l="ja"] { display: none !important; }
+/* 併記時のJS生成テキストの副訳 */
+.alt-ja {
+  display: block;
+  margin-top: 6px;
+  padding-left: 11px;
+  border-left: 2px solid color-mix(in srgb, var(--brand-3) 45%, transparent);
+  font-size: 0.93em;
+  color: var(--text-faint);
+  font-weight: 400;
+}
 
 .lang-btn {
   min-width: 46px;

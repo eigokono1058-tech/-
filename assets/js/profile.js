@@ -46,6 +46,21 @@
     if (node) node.textContent = value || "";
   }
 
+  /* 併記モード用。長文は下にブロックで和訳を添える */
+  function withAlt(value) {
+    var b = I18N ? I18N.both(value) : { main: t(value), alt: "" };
+    return esc(b.main) + (b.alt ? '<span class="alt-ja">' + esc(b.alt) + "</span>" : "");
+  }
+  /* 併記モード用。短い語句は同じ行に「 / 和訳」を足す */
+  function withAltInline(value) {
+    var b = I18N ? I18N.both(value) : { main: t(value), alt: "" };
+    return esc(b.main) + (b.alt ? ' <span class="faint">/ ' + esc(b.alt) + "</span>" : "");
+  }
+  function setHtml(id, html) {
+    var node = $(id);
+    if (node) node.innerHTML = html;
+  }
+
   /* 表示名：日本語なら和名を大きく、英語ならローマ字を大きく出す */
   function names() {
     var roman = isUnset(P.name) ? "" : P.name;
@@ -73,9 +88,9 @@
         nick.innerHTML = "";
       }
     }
-    setText("role", isUnset(P.role) ? "" : t(P.role));
+    setHtml("role", isUnset(P.role) ? "" : withAltInline(P.role));
     setText("loc", t(P.location));
-    setText("headline", t(P.headline));
+    setHtml("headline", withAlt(P.headline));
     setText("footName", "© " + new Date().getFullYear() + " " + (isUnset(P.name) ? (isUnset(P.nameJa) ? "" : P.nameJa) : P.name));
 
     var avatar = $("avatar");
@@ -121,27 +136,35 @@
           (external ? ' target="_blank" rel="noopener noreferrer"' : "") +
           ' style="--accent:' + esc(l.accent || "#5b8cff") + '" data-id="' + esc(l.id) + '">' +
           '<span class="link-ico">' + (I[l.icon] || I.link) + "</span>" +
-          '<span class="link-txt"><b>' + esc(t(l.label)) + "</b><span>" + esc(t(l.sublabel)) + "</span></span>" +
+          '<span class="link-txt"><b>' + withAltInline(l.label) + "</b><span>" + withAltInline(l.sublabel) + "</span></span>" +
           '<span class="chev">' + I.arrow + "</span></a>"
         );
       }).join("");
     }
 
-    /* ---- project ---- */
-    var proj = P.project || {};
-    var projBox = $("project");
-    if (projBox && proj.title) {
-      projBox.innerHTML =
-        '<span class="codename">' + esc(proj.codename || "PROJECT") + "</span>" +
-        '<h2 id="projTitle">' + esc(t(proj.title)) + "</h2>" +
-        "<p>" + esc(t(proj.summary)) + "</p>" +
-        '<div class="project-links">' +
-        (proj.links || []).map(function (l) {
-          return '<a class="plink' + (l.cta ? " cta" : "") + '" href="' + esc(l.href) + '">' +
-            (l.cta ? I.spark : I.arrow) + "<span>" + esc(t(l.label)) + "</span>" +
-            (l.note ? '<span class="pnote">' + esc(t(l.note)) + "</span>" : "") + "</a>";
-        }).join("") +
-        "</div>";
+    /* ---- projects ---- */
+    // projects: [...] が本来の形。古い project: {...} も一応受け付ける
+    var projects = P.projects || (P.project ? [P.project] : []);
+    var projBox = $("projects");
+    if (projBox) {
+      projBox.innerHTML = projects.map(function (proj, idx) {
+        var external = function (href) { return /^https?:/i.test(href); };
+        return '<section class="project' + (idx === 0 ? " is-lead" : "") + '">' +
+          '<div class="row spread" style="align-items:flex-start;gap:10px">' +
+          '<span class="codename">' + esc(proj.codename || "PROJECT") + "</span>" +
+          (proj.badge ? '<span class="pill nowrap">' + esc(t(proj.badge)) + "</span>" : "") +
+          "</div>" +
+          "<h2>" + withAltInline(proj.title) + "</h2>" +
+          "<p>" + withAlt(proj.summary) + "</p>" +
+          '<div class="project-links">' +
+          (proj.links || []).map(function (l) {
+            return '<a class="plink' + (l.cta ? " cta" : "") + '" href="' + esc(l.href) + '"' +
+              (external(l.href) ? ' target="_blank" rel="noopener noreferrer"' : "") + ">" +
+              (l.cta ? I.spark : I.arrow) + "<span>" + withAltInline(l.label) + "</span>" +
+              (l.note ? '<span class="pnote">' + withAltInline(l.note) + "</span>" : "") + "</a>";
+          }).join("") +
+          "</div></section>";
+      }).join("");
     }
 
     /* ---- setup banner ---- */

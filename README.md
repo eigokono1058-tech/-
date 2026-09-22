@@ -1,17 +1,34 @@
-# LAST METERS
+# OpenAI DevDay 2026 — 自己紹介サイト・Launchpad資料・プロトタイプ
 
-イベント（デベロッパーデイ）用の **自己紹介サイト＋QRコード** と、
-事業アイデア「AIエージェント前提の受取インフラ」の **事業計画＋動くプロトタイプ** をまとめたリポジトリ。
+**2026年9月29日（火）／ Fort Mason, San Francisco ／ 8:00–19:00**
+Launchpad セッション: **Product design and UXR**（OpenAIのメンターとの少人数セッション）
+
+このリポジトリに入っているもの:
+
+1. QRをかざすと開く **自己紹介サイト**（各SNS・実績サイトへワンタップ）
+2. Launchpadで見せる **ブリーフ**（現状と、メンターに聞く3つの質問）
+3. 主役プロジェクト **政府機関向けAIナレッジ・エージェント基盤**（DevDayの応募軸）
+4. 副プロジェクト **LAST METERS**（受取インフラ）の事業計画と動くプロトタイプ
 
 すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・外部ライブラリ依存なしで動く。
 
-**全ページが日本語/英語の両対応**。ブラウザの言語設定で自動判定し、右上のボタンで手動切り替えもできる
-（選択は端末に記憶される）。`?lang=en` / `?lang=ja` をURLに付ければ言語を指定してリンクを共有できる。
-海外参加者にはそのまま英語で表示されるので、当日は言語を気にせずQRを見せればいい。
+### 言語は3モード
+
+右上のボタンで **EN → 日本語 → EN+日本語（併記）** の順に切り替わる（選択は端末に記憶される）。
+
+| モード | 用途 |
+|---|---|
+| **EN**（既定） | DevDayで相手に見せるとき。日本語端末でも英語で開く |
+| 日本語 | 日本人に見せるとき |
+| EN+日本語 | **あとから自分で内容を確認するとき。全文に和訳が並んで出る** |
+
+URLに `?lang=en` / `?lang=ja` / `?lang=both` を付ければ指定して開ける。
+既定言語を変えたい場合は `assets/js/i18n.js` の `DEFAULT_LANG`（`"auto"` でブラウザ設定に追従）。
 
 | ページ | 場所 | 用途 |
 |---|---|---|
 | プロフィール（QRの着地先） | [`/`](./index.html) | 名前・実績・各SNSへワンタップで飛ぶハブ |
+| **Launchpadブリーフ** | [`/launchpad/`](./launchpad/) | **当日の中心資料。30秒の自己紹介・現状・聞く3つの質問・英語の口頭スクリプト** |
 | QRキット | [`/qr/`](./qr/) | QRのプレビュー・印刷（名刺91×55mm / A6ポスター）・ダウンロード |
 | ピッチ（事業構想1ページ） | [`/pitch/`](./pitch/) | 課題・数字・解決策・誰が払うか・足りないもの |
 | デモ（動くプロトタイプ） | [`/app/`](./app/) | 受取先の動的変更・ポリシー判定・権限発行・例外処理・需要検証 |
@@ -29,11 +46,16 @@
 | 項目 | 設定値 |
 |---|---|
 | 名前 | Eigo Kono / 河野 瑛吾 / 呼ばれ方 Ayden |
-| 肩書き（日本語） | ITエンジニア / 営業 · 日立製作所 公共システム営業統括本部 |
-| 肩書き（英語） | IT Engineer / Solution Sales · Public Sector Systems, Hitachi, Ltd. |
-| 実績 | 日立の公開導入事例（業務AI） |
+| 肩書き（日本語） | 生成AIエバンジェリスト（公共分野）· 日立製作所 |
+| 肩書き（英語） | Generative AI Evangelist, Public Sector · Hitachi, Ltd. |
+| 実績 | 日立の公開導入事例（AIナレッジ検索） |
+| 主役プロジェクト | 政府機関向けAIナレッジ・エージェント基盤（DevDay応募軸） |
+| 副プロジェクト | LAST METERS（受取インフラ・動くプロトタイプあり） |
 | GitHub / LinkedIn / Instagram / Facebook | 設定済み |
 | メール・携帯番号 | **公開ページには載せていません**（下記参照） |
+
+肩書きはDevDayの応募文で使った表現に合わせています。名刺どおりの「ITエンジニア / 営業 ·
+日立製作所 公共システム営業統括本部」に戻す場合は `profile-config.js` のコメント側と入れ替えてください。
 
 公開ページにメールを載せる場合は `email:` のコメントを外してください。ボットに収集されて
 迷惑メールが増えるため既定はオフにしています。携帯番号は載せていません（名刺で直接渡す想定）。
@@ -44,7 +66,17 @@
 
 - リンクの `url` に `REPLACE_ME` が残っているものは **サイトに表示されない**（壊れたリンクを人に見せないため）
 - その場合はページ上部に「セットアップ未完了」バナーが出る（いまは全部埋まっているので出ない）
-- 顔写真を出したい場合は `assets/img/me.jpg` などを置いて `avatar: "assets/img/me.jpg"`
+- 顔写真は `tools/make_avatar.py` でサイトのトーンに合わせられる（証明写真の無地背景を暗い
+  グラデーションに置き換えて、わずかに寒色へ寄せる）。詳細は [`assets/img/README.md`](./assets/img/README.md)
+
+```bash
+pip install Pillow
+python3 tools/make_avatar.py ~/Desktop/photo.jpg --replace-bg   # 証明写真から
+python3 tools/make_avatar.py ~/Desktop/group.jpg --crop 0.51,0.13,0.20,0.45 --preview  # 集合写真から
+```
+
+  できたら `avatar: "assets/img/me.jpg"` を設定する。
+  **集合写真をそのまま公開ページに載せないこと**（写っている他の人の同意がない）
 - 名前や肩書きを変えたら、名刺に印刷される文字も変わるので `python3 tools/gen_qr.py` を再実行する
 
 ### 2. 公開する（GitHub Pages）
@@ -137,12 +169,13 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── js/profile.js           プロフィールの描画・vCard書き出し・QR表示
 │   ├── js/icons.js             インラインSVGアイコン
 │   ├── js/theme.js             配色切り替え
-│   ├── js/i18n.js              日英切り替え（自動判定 + 手動トグル + ?lang=）
+│   ├── js/i18n.js              言語切り替え（EN / 日本語 / 併記の3モード・?lang=）
 │   ├── qr/                     生成済みQR素材（6種：日英 × 名刺/ポスター + 汎用2種）
 │   ├── video/                  コンセプト動画2本
 │   └── favicon.svg
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
-├── pitch/index.html            事業構想1ページ
+├── launchpad/index.html        Launchpadセッション用ブリーフ（当日の中心資料）
+├── pitch/index.html            事業構想1ページ（LAST METERS）
 ├── plan/
 │   ├── index.html              ドキュメントビューア（言語で .md / .en.md を切り替え）
 │   ├── md.js                   最小限のMarkdownレンダラ
@@ -160,7 +193,9 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── map.js                  街区マップ（自前SVG・外部タイル不要）
 │   ├── ui.js                   画面描画とインタラクション
 │   └── survey.js               需要検証フォーム・集計・CSV/JSON書き出し
-├── tools/gen_qr.py             QR生成ツール（segnoを使用）
+├── tools/
+│   ├── gen_qr.py               QR生成ツール（segnoを使用）
+│   └── make_avatar.py          顔写真をサイト用アバターに整える（Pillowを使用）
 └── demos/nordic-interior/      以前アップロードされていた3Dデモ（退避）
 ```
 

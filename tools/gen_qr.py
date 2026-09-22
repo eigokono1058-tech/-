@@ -43,12 +43,14 @@ STRINGS = {
         "hold": "カメラをかざしてください",
         "menu": "プロフィール · 動くデモ · 事業構想",
         "noname": "氏名未設定",
+        "eyebrow": "AIエージェント · 公共分野",
     },
     "en": {
         "scan": "SCAN &#8594; PROFILE / DEMO",
         "hold": "Point your camera here",
         "menu": "Profile · Live demo · Business plan",
         "noname": "Name not set",
+        "eyebrow": "AI AGENTS · PUBLIC SECTOR",
     },
 }
 
@@ -217,10 +219,20 @@ def make_card(matrix, url: str, name: str, sub: str, headline: str, lang: str) -
     qr_x = 91 - total - 4.0
     qr_y = (55 - total) / 2 + 0.8
     text_w = qr_x - 6.5 - 2.0
+
+    # 肩書きは縮小せず2行まで折り返す（縮めるとQRに重なるか読めなくなる）
+    sub_size = 2.2
+    sub_lines = wrap_lines(sub_line, max_units=text_w / (sub_size * 0.5), max_lines=2)
+    sub_svg = "".join(
+        f'<text x="6.5" y="{19.2 + i * 3.3:.1f}" font-size="{sub_size}" fill="#5b6478">{esc(l)}</text>'
+        for i, l in enumerate(sub_lines)
+    )
+
+    head_top = 28.6 if len(sub_lines) > 1 else 26.6
     head_size = 2.45
     lines = wrap_lines(headline, max_units=text_w / (head_size * 0.5), max_lines=4)
     head_svg = "".join(
-        f'<text x="6.5" y="{27.4 + i * 3.5:.1f}" font-size="{head_size}" fill="#5b6478">{esc(l)}</text>'
+        f'<text x="6.5" y="{head_top + i * 3.5:.1f}" font-size="{head_size}" fill="#5b6478">{esc(l)}</text>'
         for i, l in enumerate(lines)
     )
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="91mm" height="55mm" viewBox="0 0 91 55">
@@ -232,8 +244,8 @@ def make_card(matrix, url: str, name: str, sub: str, headline: str, lang: str) -
   <rect width="91" height="55" fill="#ffffff"/>
   <rect x="0" y="0" width="91" height="1.6" fill="url(#g)"/>
   <g font-family="{FONT}">
-    <text x="6.5" y="14" font-size="{fit_font(disp_name, text_w, 4.6, 3.0, factor=0.56):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
-    <text x="6.5" y="20" font-size="{fit_font(sub_line, text_w, 2.9, 2.1):.2f}" fill="#5b6478">{esc(sub_line)}</text>
+    <text x="6.5" y="13.5" font-size="{fit_font(disp_name, text_w, 4.6, 3.0, factor=0.56):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
+    {sub_svg}
     {head_svg}
     <text x="6.5" y="45.5" font-size="2.5" font-weight="700" fill="{BRAND_1}">{s["scan"]}</text>
     <text x="6.5" y="49.8" font-size="2.0" fill="#8b93a5">{esc(url[:46])}</text>
@@ -249,6 +261,12 @@ def make_poster(matrix, url: str, name: str, sub: str, lang: str) -> str:
     sub_line = sub if (name and sub) else ""
     total, qr_svg = qr_block(matrix, 66.0, x=0, y=0)
     qr_x = (105 - total) / 2
+    p_sub_size = 3.1
+    p_sub_lines = wrap_lines(sub_line, max_units=92 / (p_sub_size * 0.5), max_lines=2)
+    poster_sub_svg = "".join(
+        f'<text x="52.5" y="{39.5 + i * 4.2:.1f}" font-size="{p_sub_size}" fill="#5b6478">{esc(l)}</text>'
+        for i, l in enumerate(p_sub_lines)
+    )
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="105mm" height="148mm" viewBox="0 0 105 148">
   <defs>
     <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
@@ -258,9 +276,9 @@ def make_poster(matrix, url: str, name: str, sub: str, lang: str) -> str:
   <rect width="105" height="148" fill="#ffffff"/>
   <rect x="0" y="0" width="105" height="3" fill="url(#pg)"/>
   <g font-family="{FONT}" text-anchor="middle">
-    <text x="52.5" y="20" font-size="3.4" font-weight="700" fill="{BRAND_1}" letter-spacing="1.2">LAST METERS</text>
+    <text x="52.5" y="20" font-size="3.4" font-weight="700" fill="{BRAND_1}" letter-spacing="1.2">{s["eyebrow"]}</text>
     <text x="52.5" y="32" font-size="{fit_font(disp_name, 92, 6.6, 3.6, factor=0.56):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
-    <text x="52.5" y="39.5" font-size="{fit_font(sub_line, 92, 3.3, 2.4):.2f}" fill="#5b6478">{esc(sub_line)}</text>
+    {poster_sub_svg}
     <text x="52.5" y="130" font-size="{fit_font(s["hold"], 92, 3.9, 2.8):.2f}" font-weight="700" fill="{DARK}">{s["hold"]}</text>
     <text x="52.5" y="136.5" font-size="{fit_font(s["menu"], 96, 2.9, 2.2):.2f}" fill="#5b6478">{s["menu"]}</text>
     <text x="52.5" y="142.5" font-size="2.5" fill="#8b93a5">{esc(url[:52])}</text>
