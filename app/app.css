@@ -99,14 +99,18 @@ body { padding-bottom: 76px; }
 .m-road { stroke: var(--map-road); stroke-width: 7; fill: none; stroke-linecap: round; }
 .m-road-minor { stroke: var(--map-road-minor); stroke-width: 3; fill: none; }
 .m-walk { stroke: var(--brand-3); stroke-width: 1.6; fill: none; stroke-dasharray: 3 4; opacity: 0.5; }
-.m-label { font-size: 6.4px; fill: var(--text-dim); font-family: var(--font); font-weight: 600; }
+/* ラベルは道路やルート線の上に来るので、背景色で縁取りして読めるようにする */
+.m-label {
+  font-size: 6.4px; fill: var(--text-dim); font-family: var(--font); font-weight: 600;
+  paint-order: stroke; stroke: var(--map-bg-2); stroke-width: 2.2px; stroke-linejoin: round;
+}
 .m-label-accent { fill: var(--brand-2); }
 .m-point { cursor: pointer; }
 .m-point-hit { fill: transparent; }
 .m-point-dot {
   fill: color-mix(in srgb, var(--surface) 92%, transparent);
   stroke: var(--border); stroke-width: 1.2;
-  transition: stroke 0.2s ease, r 0.2s ease;
+  transition: stroke 0.2s ease;
 }
 .m-point:hover .m-point-dot { stroke: var(--brand-1); }
 .m-point.is-selected .m-point-dot {
@@ -118,17 +122,71 @@ body { padding-bottom: 76px; }
 .m-route { fill: none; stroke-width: 2; stroke-dasharray: 4 5; stroke-linecap: round; }
 .m-route.is-focus { stroke-width: 2.6; stroke-dasharray: 6 4; animation: dash 1.4s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -20; } }
+.m-van { transition: opacity 0.35s ease; }
 .m-van-body { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.6; }
 .m-van-halo { opacity: 0.18; }
 .m-van-ico { font-size: 7.4px; }
 .m-van.is-focus .m-van-halo { opacity: 0.32; }
 .m-van.is-blocked .m-van-body { fill: var(--danger) !important; }
+
+/* 自分（GPS）。精度円は測位の誤差を表すもので、大きさも濃さも変えない。 */
 .m-person-dot { fill: var(--brand-3); }
-.m-person-halo { fill: var(--brand-3); opacity: 0.2; animation: pulse 2.4s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: 0.16; } 50% { opacity: 0.34; } }
-.m-rdv-ring { fill: none; stroke: var(--brand-2); stroke-width: 1.6; stroke-dasharray: 3 3; animation: spin 6s linear infinite; transform-origin: center; }
-.m-rdv-dot { fill: var(--brand-2); }
-@keyframes spin { to { transform: rotate(360deg); } }
+.m-person-acc {
+  fill: var(--brand-3); opacity: 0.14;
+  stroke: var(--brand-3); stroke-opacity: 0.35; stroke-width: 0.7;
+}
+/* 追従中はピンが自分の真上に立つので、こちらのラベルは出さない */
+.m-person.is-pinned .m-label { display: none; }
+
+/* ---------- 受取ピン / the pickup pin ---------- *
+   地図に常に1本だけ立っている。判定結果で色だけが変わる。         */
+.m-pin { cursor: grab; touch-action: none; }
+.m-pin.is-dragging { cursor: grabbing; }
+.m-pin-hit { fill: transparent; }
+.m-pin-shadow { fill: rgba(0, 0, 0, 0.4); }
+.m-pin-body {
+  fill: var(--ok); stroke: var(--bg); stroke-width: 1;
+  transition: fill 0.18s ease;
+}
+.m-pin-hole { fill: var(--bg); transition: opacity 0.18s ease; }
+.m-pin-check {
+  fill: none; stroke: var(--bg); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0; transition: opacity 0.18s ease;
+}
+.m-pin-label {
+  font-size: 7.2px; font-family: var(--font); font-weight: 700;
+  fill: var(--text);
+  paint-order: stroke; stroke: var(--map-bg-2); stroke-width: 2.8px; stroke-linejoin: round;
+}
+.m-pin[data-verdict="conditional"] .m-pin-body { fill: var(--warn); }
+.m-pin[data-verdict="deny"] .m-pin-body { fill: var(--danger); }
+.m-pin[data-state="set"] .m-pin-hole { opacity: 0; }
+.m-pin[data-state="set"] .m-pin-check { opacity: 1; }
+.m-pin[data-state="set"] .m-pin-body { filter: url(#glow); }
+.m-pin[data-mode="follow"] .m-pin-label { fill: var(--brand-3); }
+.m-pin:focus { outline: none; }
+.m-pin:focus-visible .m-pin-body { stroke: var(--brand-1); stroke-width: 2; }
+
+/* ---------- ピンの操作カード（地図の下） ---------- */
+.pin-card {
+  display: flex; align-items: center; gap: 11px; flex-wrap: wrap;
+  margin-top: 8px; padding: 11px 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+.pin-card .pc-ico { font-size: 17px; line-height: 1; }
+.pin-card .pc-main { flex: 1 1 150px; min-width: 0; }
+.pin-card .pc-where {
+  display: block; font-weight: 700; font-size: 14px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pin-card .pc-meta { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
+.pin-card .pc-why { flex: 1 1 100%; font-size: 11.5px; color: var(--text-dim); margin: 0; }
+.pin-card .pc-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+.pin-card .btn-follow.is-on { border-color: var(--brand-3); color: var(--brand-3); }
+.pin-card.is-deny { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.pin-card.is-set { border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
 
 /* ---------- parcels ---------- */
 .parcel {
