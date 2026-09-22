@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAST METERS — AIが発注する時代の受取インフラ</title>
+<meta name="description" content="AIエージェントが発注まで自動化しても、荷物は物理的に届く。受取を人の在宅からシステムの権限管理に置き換える構想。">
+<meta name="theme-color" content="#0a0c12">
+<meta property="og:title" content="LAST METERS — AIが発注する時代の受取インフラ">
+<meta property="og:description" content="配送は自動化できても、受取は人間の在宅が前提。ラスト数メートルを機械同士の受渡しに置き換える。">
+<link rel="icon" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/site.css">
+<style>
+  :root { --maxw: 720px; }
+
+  .hero-p { padding: 64px 0 28px; }
+  .hero-p h1 { font-size: clamp(27px, 7vw, 40px); letter-spacing: -0.02em; margin: 14px 0 14px; text-wrap: balance; }
+  .hero-p .lede { font-size: 16px; color: var(--text-dim); max-width: 56ch; text-wrap: pretty; }
+  .codename {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.2em; color: var(--brand-2);
+  }
+  .codename::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 10px var(--brand-2); }
+
+  h2.sec { font-size: 22px; margin: 0 0 6px; letter-spacing: -0.015em; }
+  .sec-note { font-size: 13.5px; color: var(--text-faint); margin-bottom: 20px; }
+  section { padding: 34px 0; border-top: 1px solid var(--border-soft); }
+  section:first-of-type { border-top: 0; }
+
+  /* ---- stat tiles (値はテキストトークンで表示。色はシリーズ色にしない) ---- */
+  .hero-figure { margin: 4px 0 22px; }
+  .hero-figure .hv {
+    font-size: clamp(44px, 12vw, 62px); font-weight: 650; line-height: 1;
+    letter-spacing: -0.03em; color: var(--text);
+  }
+  .hero-figure .hv small { font-size: 0.42em; font-weight: 600; margin-left: 4px; color: var(--text-dim); }
+  .hero-figure .hl { font-size: 14px; color: var(--text-dim); margin-top: 8px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 620px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi {
+    padding: 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 82%, transparent);
+  }
+  .kpi .kv { font-size: 25px; font-weight: 650; line-height: 1.05; letter-spacing: -0.02em; }
+  .kpi .kv small { font-size: 0.5em; font-weight: 600; color: var(--text-dim); margin-left: 2px; }
+  .kpi .kl { font-size: 11.5px; color: var(--text-faint); margin-top: 6px; line-height: 1.4; }
+  .kpi .kd { font-size: 11px; font-weight: 700; margin-top: 6px; }
+  .kd.good { color: var(--ok); }
+  .kd.bad { color: var(--danger); }
+  .src { font-size: 11px; color: var(--text-faint); margin-top: 14px; line-height: 1.6; }
+
+  /* ---- flow diagram ---- */
+  .flow-wrap { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 10px 8px; background: color-mix(in srgb, var(--surface) 70%, transparent); overflow-x: auto; }
+  .flow-wrap svg { display: block; min-width: 600px; width: 100%; height: auto; }
+  .f-node { fill: var(--surface-2); stroke: var(--border); stroke-width: 1; }
+  .f-node-auto { fill: color-mix(in srgb, var(--brand-2) 14%, var(--surface-2)); stroke: color-mix(in srgb, var(--brand-2) 55%, transparent); }
+  .f-node-gap { fill: color-mix(in srgb, var(--danger) 16%, var(--surface-2)); stroke: var(--danger); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .f-txt { font-family: var(--font); font-size: 11px; font-weight: 600; fill: var(--text); }
+  .f-sub { font-family: var(--font); font-size: 9px; fill: var(--text-faint); }
+  .f-arrow { stroke: var(--border); stroke-width: 1.6; fill: none; }
+  .f-cap { font-family: var(--font); font-size: 10px; font-weight: 700; }
+
+  /* ---- component cards ---- */
+  .comps { display: grid; gap: 12px; }
+  @media (min-width: 720px) { .comps { grid-template-columns: repeat(3, 1fr); } }
+  .comp { padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 84%, transparent); }
+  .comp .cn { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--brand-2); font-weight: 700; }
+  .comp h3 { font-size: 15.5px; margin: 8px 0 6px; }
+  .comp p { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+  /* ---- ladder ---- */
+  .ladder { display: grid; gap: 6px; }
+  .rung {
+    display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: center;
+    padding: 11px 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+  }
+  .rung .rl { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text-faint); }
+  .rung b { font-size: 13.5px; display: block; }
+  .rung span.rd { font-size: 11.5px; color: var(--text-faint); }
+  .rung.on { border-color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 10%, var(--surface)); }
+  .rung.on .rl { color: var(--brand-2); }
+  .rung.no { border-color: color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+  .rung.no .rl { color: var(--danger); }
+
+  /* ---- table ---- */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th, .tbl td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  .tbl th { font-size: 11px; color: var(--text-faint); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tbl td b { font-weight: 650; }
+  .tbl-wrap { overflow-x: auto; }
+  .tbl-wrap .tbl { min-width: 460px; }
+
+  /* ---- video ---- */
+  .vids { display: grid; gap: 14px; }
+  @media (min-width: 620px) { .vids { grid-template-columns: 1fr 1fr; } }
+  .vid { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #000; }
+  .vid video { display: block; width: 100%; max-height: 62vh; background: #000; }
+  .vid figcaption { padding: 10px 12px; font-size: 12px; color: var(--text-faint); background: var(--surface); }
+
+  /* ---- honest section ---- */
+  .gap-list { display: grid; gap: 8px; }
+  .gap-item {
+    display: grid; grid-template-columns: auto 1fr; gap: 10px;
+    padding: 12px 13px; border-radius: var(--radius-sm);
+    border: 1px dashed color-mix(in srgb, var(--warn) 45%, transparent);
+    background: color-mix(in srgb, var(--warn) 7%, transparent);
+    font-size: 13px;
+  }
+  .gap-item .gn { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--warn); }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  blockquote.pull {
+    margin: 0; padding: 16px 18px; border-left: 3px solid var(--brand-2);
+    background: color-mix(in srgb, var(--brand-2) 8%, transparent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 15px; color: var(--text);
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<button class="theme-toggle" id="themeBtn" type="button" aria-label="配色を切り替える">◐</button>
+
+<main class="wrap">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero-p">
+    <span class="codename">LAST METERS</span>
+    <h1>AIが発注する時代、<br>ボトルネックは「受取」になる。</h1>
+    <p class="lede">
+      AIエージェントが在庫を見て、判断して、発注・決済まで済ませる。
+      それでも荷物は<b>物理的に人のところへ運ばれる</b>。
+      いまの物流は「本人が家にいる」前提で設計されているので、自動化はここで詰まる。
+      この最後の数メートルを、人の在宅から<b>システムの権限管理</b>に置き換える。
+    </p>
+    <div class="cta-row" style="margin-top:22px">
+      <a class="btn btn-primary" href="../app/">動くデモを触る</a>
+      <a class="btn" href="../plan/">事業計画を読む</a>
+    </div>
+  </header>
+
+  <!-- ===== PROBLEM ===== -->
+  <section>
+    <h2 class="sec">1. 課題は「まだ残っている受取」</h2>
+    <p class="sec-note">再配達率は11%台から8.3%まで下がった。改善している。だが下がった分の多くは置き配に逃がしただけで、置き配できない荷物がそのまま残っている。</p>
+
+    <div class="hero-figure">
+      <div class="hv">4<small>億個 / 年</small></div>
+      <div class="hl">いまも再配達されている荷物の量（宅配便50億個 × 再配達率8.3%）</div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kv">50<small>億個</small></div>
+        <div class="kl">宅配便取扱個数（年間）</div>
+      </div>
+      <div class="kpi">
+        <div class="kv">8.3<small>%</small></div>
+        <div class="kl">再配達率（2025年10月）</div>
+        <div class="kd good">▼ 2.2pt（2022年10月比）</div>
+      </div>
+      <div class="kpi">
+        <div class="kv">9<small>万人分</small></div>
+        <div class="kl">再配達に費やされる労働時間（年1.8億時間相当）</div>
+      </div>
+      <div class="kpi">
+        <div class="kv">34<small>%</small></div>
+        <div class="kl">2030年度に不足する輸送能力</div>
+        <div class="kd bad">▲ 対策なしの場合</div>
+      </div>
+    </div>
+    <p class="src">
+      出典：国土交通省（宅配便取扱個数：2023・2024年度いずれも約50億個／再配達率サンプル調査：2025年10月 約8.3%／
+      再配達の社会的損失試算：2015年／2030年度の輸送能力不足：持続可能な物流の実現に向けた検討会）。
+      「4億個」は50億個×8.3%による概算。
+    </p>
+
+    <blockquote class="pull" style="margin-top:22px">
+      残っている問題は「再配達をゼロにする」ことではない。<br>
+      <b>置き配に逃がせない荷物（冷蔵・冷凍・医薬品・高額品）を、人が家にいなくても安全に渡すこと</b>である。
+      そしてAIが自動発注するのは、まさにその定期消費財だ。
+    </blockquote>
+  </section>
+
+  <!-- ===== GAP ===== -->
+  <section>
+    <h2 class="sec">2. 自動化は「到着」までしか進まない</h2>
+    <p class="sec-note">配送員をロボットやドローンに置き換えても、最後に「誰が受け取るのか」が残る。ラストワンマイルの先の、ラスト数メートル。</p>
+
+    <div class="flow-wrap">
+      <svg viewBox="0 0 700 150" role="img" aria-label="AI発注から家庭内保管までの流れ。到着後の受渡しだけが未解決であることを示す図">
+        <g class="f-cap">
+          <text x="10" y="16" fill="var(--brand-2)">自動化できる領域</text>
+          <text x="455" y="16" fill="var(--danger)">⛔ 未解決</text>
+        </g>
+        <rect x="8" y="24" width="430" height="66" rx="8" fill="none" stroke="var(--brand-2)" stroke-opacity="0.35" stroke-dasharray="4 4"/>
+        <rect x="450" y="24" width="120" height="66" rx="8" fill="none" stroke="var(--danger)" stroke-opacity="0.5" stroke-dasharray="4 4"/>
+
+        <!-- nodes -->
+        <g>
+          <rect class="f-node f-node-auto" x="18" y="38" width="94" height="40" rx="7"/>
+          <text class="f-txt" x="65" y="56" text-anchor="middle">AIが発注</text>
+          <text class="f-sub" x="65" y="69" text-anchor="middle">在庫検知・決済</text>
+
+          <path class="f-arrow" d="M116 58h16"/>
+          <rect class="f-node f-node-auto" x="136" y="38" width="86" height="40" rx="7"/>
+          <text class="f-txt" x="179" y="56" text-anchor="middle">自動倉庫</text>
+          <text class="f-sub" x="179" y="69" text-anchor="middle">ピッキング</text>
+
+          <path class="f-arrow" d="M226 58h16"/>
+          <rect class="f-node f-node-auto" x="246" y="38" width="96" height="40" rx="7"/>
+          <text class="f-txt" x="294" y="56" text-anchor="middle">自動配送</text>
+          <text class="f-sub" x="294" y="69" text-anchor="middle">ロボット・車両</text>
+
+          <path class="f-arrow" d="M346 58h16"/>
+          <rect class="f-node f-node-auto" x="366" y="38" width="66" height="40" rx="7"/>
+          <text class="f-txt" x="399" y="56" text-anchor="middle">到着</text>
+          <text class="f-sub" x="399" y="69" text-anchor="middle">建物の前</text>
+
+          <path class="f-arrow" d="M436 58h16" stroke="var(--danger)"/>
+          <rect class="f-node f-node-gap" x="456" y="38" width="108" height="40" rx="7"/>
+          <text class="f-txt" x="510" y="55" text-anchor="middle" fill="var(--danger)">誰が受け取る？</text>
+          <text class="f-sub" x="510" y="68" text-anchor="middle">在宅・解錠・本人確認</text>
+
+          <path class="f-arrow" d="M568 58h16"/>
+          <rect class="f-node" x="588" y="38" width="96" height="40" rx="7"/>
+          <text class="f-txt" x="636" y="56" text-anchor="middle">家庭内で保管</text>
+          <text class="f-sub" x="636" y="69" text-anchor="middle">冷蔵庫まで</text>
+        </g>
+
+        <g class="f-sub">
+          <text x="18" y="112">ラストワンマイル</text>
+          <path class="f-arrow" d="M18 118h414" stroke-width="1"/>
+          <text x="456" y="112" fill="var(--danger)">ラスト数メートル</text>
+          <path class="f-arrow" d="M456 118h108" stroke="var(--danger)" stroke-width="1"/>
+          <text x="18" y="140">ここは技術で解ける</text>
+          <text x="456" y="140" fill="var(--danger)">ここは権限と責任の問題</text>
+        </g>
+      </svg>
+    </div>
+
+    <p class="small muted" style="margin-top:16px">
+      人間型ロボットが家で代わりに受け取る、という解もある。だがそれは<b>玄関の解錠権限をロボットに渡す</b>ことを意味する。
+      ロボットを制圧・偽装できれば住居侵入がそのまま成立してしまう。
+      だからこのプロジェクトは逆を選ぶ ——
+      <b>「家で受け取らなければならない」という前提そのものを消す。</b>
+    </p>
+  </section>
+
+  <!-- ===== SOLUTION ===== -->
+  <section>
+    <h2 class="sec">3. 解くのは「箱」ではなく「権限」</h2>
+    <p class="sec-note">ロッカーやロボットを増やす競争ではなく、その手前の制御層を取る。既存のコンビニ・駅ロッカー・宅配BOXは、新しく作らなくてもそのままノードになる。</p>
+
+    <div class="comps">
+      <div class="comp">
+        <div class="cn">① RECEIPT GRANT</div>
+        <h3>物理世界のアクセストークン</h3>
+        <p>誰に・どこで・いつまで・何を許すかを、最小スコープ・時限付き・失効可能な形で発行する。AIエージェントにTool権限を渡すのと同じ発想。<b>渡していない権限を明示できる</b>のが要点。</p>
+      </div>
+      <div class="comp">
+        <div class="cn">② RECEIVING GRAPH</div>
+        <h3>受取地点を能力で抽象化</h3>
+        <p>温度帯・本人確認・施錠・空き枠・動的（人や車両）という能力でモデル化し、コンビニも駅ロッカーも勤務先も<b>移動中の本人</b>も同じインターフェースで扱う。</p>
+      </div>
+      <div class="comp">
+        <div class="cn">③ HANDOFF PROTOCOL</div>
+        <h3>占有移転の証跡</h3>
+        <p>「置いた／受け取った」ではなく、機体認証→グラント照合→認証→温度証跡→スコープ内解錠→占有移転を、署名付きイベントとして残す。これが責任分界の土台になる。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="eyebrow">受取先を、住所ではなく「地点と人」にする</div>
+      <p class="small muted" style="margin:10px 0 0">
+        タクシーに乗るついでに受け取る。コンビニで受け取る。勤務先で受け取る。暗証番号を一時的に共有して友人に委任する。
+        <b>移動中の自分（GPS）に届けてもらう。</b>
+        シェア自転車の返却場所をピンで指すように、受取地点を指定する。
+        個別の機能は既にある。足りないのは<b>配送中にこれらを安全に・即時に切り替える層</b>だけだ。
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== GOVERNANCE ===== -->
+  <section>
+    <h2 class="sec">4. 全部自動化しないことを設計する</h2>
+    <p class="sec-note">AIエージェントのガードレール設計とまったく同じ構造。リスクに応じて人間の介入点を決める。</p>
+
+    <div class="ladder">
+      <div class="rung"><span class="rl">L0</span><span><b>手動</b><span class="rd">受取方法の決定も受渡しも人間。いまの宅配</span></span></div>
+      <div class="rung"><span class="rl">L1</span><span><b>提案のみ</b><span class="rd">AIが提案し、実行は毎回人間が承認</span></span></div>
+      <div class="rung"><span class="rl">L2</span><span><b>低リスク自動</b><span class="rd">常温・低額のみ自動実行</span></span></div>
+      <div class="rung on"><span class="rl">L3</span><span><b>例外時のみ人間 ／ 既定値</b><span class="rd">正常系は自律実行。認証失敗・温度逸脱・破損だけ人間へエスカレーション</span></span></div>
+      <div class="rung no"><span class="rl">L4</span><span><b>屋内まで委譲 ／ 採らない</b><span class="rd">玄関解錠と屋内搬入まで渡すと、乗っ取りリスクを人間が肩代わりできない</span></span></div>
+    </div>
+
+    <p class="small muted" style="margin-top:16px">
+      価値が出るのは正常系ではなく<b>例外時の処理速度</b>。設計原則は4つ:
+      ①権限は時間で切れる（通信が切れたら開かないのが正しい） ②認証失敗はリトライで突破させない
+      ③ロボットを制圧しても中身と住居権限は取れない ④例外の大半は「時間切れ」なので期限設計が運用コストを決める。
+    </p>
+  </section>
+
+  <!-- ===== WHO PAYS ===== -->
+  <section>
+    <h2 class="sec">5. 困っている人と、払う人は違う</h2>
+    <p class="sec-note">「困っている人」「使う人」「設備を入れる人」「金を払う人」は同じではない。ここを間違えると、良い仕組みを作っても売れない。</p>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>立場</th><th>ペイン</th><th>経済インパクト</th><th>課金</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>生活者</b></td><td>不在で受け取れない／冷蔵冷凍の時間制約／置き配の盗難不安</td><td>時間と手間（金額化しにくい）</td><td>無料</td></tr>
+          <tr><td><b>配送事業者</b></td><td>再配達の人的負荷／ドライバー不足／小口化</td><td><b>直接コスト</b></td><td><b>成功報酬（一次）</b></td></tr>
+          <tr><td><b>マンション・不動産</b></td><td>宅配BOX不足／建物内アクセス管理／住民向け差別化</td><td>設備投資と資産価値</td><td>SaaS（二次）</td></tr>
+          <tr><td><b>EC・小売</b></td><td>配送コスト／配送品質がCVRに影響</td><td>売上への間接影響</td><td>API従量（三次）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="small muted" style="margin-top:14px">
+      だから<b>最初の課金者は生活者ではない</b>。生活者は「支払者」ではなく「受取成功率を上げる参加者」として無料で参加してもらう。
+    </p>
+
+    <div class="tbl-wrap" style="margin-top:20px">
+      <table class="tbl">
+        <thead><tr><th>Phase</th><th>やること</th><th>設備投資</th><th>検証する仮説</th></tr></thead>
+        <tbody>
+          <tr><td><b>0</b></td><td>既存のコンビニ・駅ロッカー・宅配BOXを束ね、配送中の受取先変更を可能にする</td><td><b>ゼロ</b></td><td>動的に変えるだけで再配達は減るか</td></tr>
+          <tr><td><b>1</b></td><td>動的ランデブー（移動中の本人・委任先への配送）</td><td>ゼロ〜小</td><td>「人に届ける」需要は実在するか</td></tr>
+          <tr><td><b>2</b></td><td>配送ロボットとのM2M受渡し（グラントによる庫室解錠）</td><td>中</td><td>機械同士の受渡しはコストを下げるか</td></tr>
+          <tr><td>3</td><td>屋内搬入</td><td>大</td><td><b>やらない</b>（権限リスクが利得を上回る）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted" style="margin-top:12px">
+      個人が「荷物を自動で受け取るため」に設備投資をすることはほぼ無い。だから<b>設備投資ゼロのPhase 0から始める</b>。
+      ここで収益が立たないなら、Phase 2以降に進む意味はない。
+    </p>
+  </section>
+
+  <!-- ===== WHY NOW ===== -->
+  <section>
+    <h2 class="sec">6. なぜ今か</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <tbody>
+          <tr><td><b>労働供給の崖</b></td><td>2030年度に輸送能力が約34%不足する試算。再配達削減が「コスト削減」から「事業継続」の問題になった</td></tr>
+          <tr><td><b>置き配の標準化</b></td><td>置き配が制度として前提化し、その副作用（盗難・プライバシー）が顕在化した</td></tr>
+          <tr><td><b>法制度</b></td><td>2023年4月の改正道路交通法で自動配送ロボットが「遠隔操作型小型車」として届出制で公道走行可能に（長さ120cm×幅70cm×高さ120cm以下・最高速度6km/h）。2025年2月には経産省WGがより配送能力の高いロボットの社会実装を検討</td></tr>
+          <tr><td><b>AIエージェント</b></td><td>発注・決済までAIが実行する設計が現実的になり、<b>受取が相対的にボトルネックになった</b></td></tr>
+          <tr><td><b>世帯構造</b></td><td>単独世帯は34.6%（2024年）、2050年に44.3%の見込み。「家に人がいない」が標準になる</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src">
+      出典：国土交通省、経済産業省（自動配送ロボットの社会実装検討WG, 2025年2月）、厚生労働省 国民生活基礎調査（2024年）、
+      国立社会保障・人口問題研究所 世帯数将来推計（2024年推計）。
+    </p>
+
+    <blockquote class="pull" style="margin-top:20px">
+      AI時代に重要なのは、既存プロセスの一部をAIに置換することではなく、
+      <b>AIが自律的に動く前提でプロセス自体を再設計すること</b>。<br>
+      IT運用で起きている「認識 → 推論 → Action → ガードレール → 監督」の設計が、
+      物流では「認識 → 判断 → 発注 → 移動 → アクセス → 受渡 → 保管」として現れる。
+      どちらも、誰が実行し・どこまで自律化し・誰が監督し・誰が責任を持つかの設計問題だ。
+    </blockquote>
+  </section>
+
+  <!-- ===== VIDEOS ===== -->
+  <section>
+    <h2 class="sec">7. コンセプト動画</h2>
+    <p class="sec-note">構想を映像にしたもの。音声が含まれます（タップで再生／モバイル通信では読み込みに数MBかかります）。</p>
+    <div class="vids">
+      <figure class="vid" style="margin:0">
+        <video controls preload="metadata" playsinline>
+          <source src="../assets/video/last-meters-en.mp4" type="video/mp4">
+          お使いのブラウザは動画再生に対応していません。
+        </video>
+        <figcaption>AI-first Last Meters（英語ナレーション・約2分24秒）</figcaption>
+      </figure>
+      <figure class="vid" style="margin:0">
+        <video controls preload="metadata" playsinline>
+          <source src="../assets/video/last-meters-concept-3d.mp4" type="video/mp4">
+          お使いのブラウザは動画再生に対応していません。
+        </video>
+        <figcaption>コンセプト3D（約3分3秒）</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== WHAT'S MISSING ===== -->
+  <section>
+    <h2 class="sec">8. まだ検証できていないこと</h2>
+    <p class="sec-note">この構想の弱点を先に出す。ここが埋まらないと事業は成立しない。</p>
+
+    <div class="gap-list">
+      <div class="gap-item"><span class="gn">P0</span><span><b>再配達1件の実コストが分からない。</b>成功報酬の単価が決まらない。いま使っている「300円」は仮定にすぎない。<br><span class="faint">→ 配送事業者に「社内では何円で計算していますか」を直接聞く</span></span></div>
+      <div class="gap-item"><span class="gn">P0</span><span><b>受取先を動的に変えると再配達が何%減るのか分からない。</b>効果がなければ払う理由がない。<br><span class="faint">→ 既存の「受取場所変更」機能の利用率データを取る</span></span></div>
+      <div class="gap-item"><span class="gn">P0</span><span><b>削減効果の測り方に合意できるか分からない。</b>測れない改善には誰も払わない。</span></div>
+      <div class="gap-item"><span class="gn">P1</span><span><b>「移動中の自分に届く」が魅力か気持ち悪いか分からない。</b>位置共有の拒否感が強ければ、目玉機能が折れる。<br><span class="faint">→ デモの検証タブで実測中</span></span></div>
+      <div class="gap-item"><span class="gn">P1</span><span><b>法務が未整理。</b>医薬品の受取代替（薬機法）、位置情報の第三者提供（個情法）、受取委任の法的性質、AI自動発注の責任。</span></div>
+      <div class="gap-item"><span class="gn">P1</span><span><b>キャリアが横断プラットフォームに乗るか分からない。</b>自社アプリでの囲い込みと利益相反する。</span></div>
+    </div>
+
+    <p class="small muted" style="margin-top:16px">
+      撤退条件も決めてある: 45日以内に「再配達1件のコスト」の実数が誰からも出てこなければ、課金根拠が存在しないということなので前提を組み替える。
+      詳細は <a href="../plan/open-questions.md">足りないもの一覧</a> と <a href="../plan/validation-plan.md">検証計画</a> に分けて書いた。
+    </p>
+  </section>
+
+  <!-- ===== ASK ===== -->
+  <section>
+    <h2 class="sec">9. 聞きたいこと</h2>
+    <p class="sec-note">話しかけてもらえたら、この3つを聞きたいです。</p>
+    <div class="stack">
+      <div class="card card-tight"><b>1.</b> 荷物を受け取れなくて困ったこと、直近1ヶ月でありましたか？</div>
+      <div class="card card-tight"><b>2.</b> 冷凍食品を家以外で受け取るとしたら、どこなら許容できますか？</div>
+      <div class="card card-tight"><b>3.</b>（物流・不動産の方へ）再配達1件のコスト、社内では何円で計算していますか？</div>
+    </div>
+    <div class="cta-row" style="margin-top:22px">
+      <a class="btn btn-primary" href="../app/">デモを触って答える</a>
+      <a class="btn" href="../">プロフィール・連絡先</a>
+    </div>
+  </section>
+
+  <p class="footer">LAST METERS · 事業構想ドラフト v0.1 · 2026-09-22</p>
+</main>
+
+<script src="../assets/js/theme.js"></script>
+<script>if (window.LMTheme) window.LMTheme.bind("#themeBtn");</script>
+</body>
+</html>

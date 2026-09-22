@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>事業計画 — LAST METERS</title>
+<meta name="description" content="LAST METERS の事業計画・未解決論点・検証計画。AIエージェント前提の受取インフラ構想のドキュメント。">
+<meta name="theme-color" content="#0a0c12">
+<link rel="icon" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/css/site.css">
+<style>
+  :root { --maxw: 760px; }
+  .doc-bar {
+    position: sticky; top: 0; z-index: 30;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .doc-bar-inner { display: flex; gap: 6px; padding: 10px 0; overflow-x: auto; }
+  .doc-tab {
+    flex: 0 0 auto; padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-dim); font: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .doc-tab[aria-selected="true"] { border-color: var(--brand-2); color: var(--text); background: color-mix(in srgb, var(--brand-2) 12%, var(--surface)); }
+
+  .md { padding: 26px 0 48px; }
+  .md h1 { font-size: 27px; margin: 0 0 14px; letter-spacing: -0.02em; }
+  .md h2 { font-size: 20px; margin: 36px 0 12px; padding-top: 8px; letter-spacing: -0.015em; }
+  .md h3 { font-size: 16px; margin: 26px 0 10px; }
+  .md h4 { font-size: 14px; margin: 20px 0 8px; color: var(--text-dim); }
+  .md p { font-size: 14.5px; color: var(--text-dim); line-height: 1.75; }
+  .md ul, .md ol { font-size: 14.5px; color: var(--text-dim); padding-left: 1.4em; line-height: 1.75; }
+  .md li { margin-bottom: 5px; }
+  .md li ul { margin-top: 5px; font-size: 13.5px; }
+  .md strong { color: var(--text); font-weight: 650; }
+  .md code {
+    font-family: var(--mono); font-size: 0.86em;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    padding: 1px 5px; border-radius: 5px; color: var(--brand-2);
+  }
+  .md pre.md-pre {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px; overflow-x: auto;
+    font-size: 12px; line-height: 1.6; color: var(--text-dim);
+  }
+  .md pre.md-pre code { background: none; border: 0; padding: 0; color: inherit; font-size: 12px; }
+  .md blockquote.md-quote {
+    margin: 18px 0; padding: 14px 16px;
+    border-left: 3px solid var(--brand-2);
+    background: color-mix(in srgb, var(--brand-2) 8%, transparent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 14.5px; color: var(--text);
+  }
+  .md hr { margin: 32px 0; }
+  /* 表はスマホで潰さず、横スクロールさせる（列が細くなると読めなくなるため） */
+  .md-tblwrap {
+    overflow-x: auto; margin: 14px 0 18px;
+    border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+    -webkit-overflow-scrolling: touch;
+  }
+  .md-tbl { border-collapse: collapse; font-size: 13px; min-width: 620px; width: 100%; }
+  .md-tbl th, .md-tbl td {
+    text-align: left; padding: 9px 10px;
+    border-bottom: 1px solid var(--border-soft); vertical-align: top;
+  }
+  .md-tbl th {
+    font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-faint); font-weight: 700; white-space: nowrap;
+    border-bottom-color: var(--border);
+  }
+  .md-tbl td { color: var(--text-dim); }
+  .md-tbl tr:hover td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .md-tbl code { white-space: nowrap; }
+
+  .loading { padding: 40px 0; color: var(--text-faint); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<button class="theme-toggle" id="themeBtn" type="button" aria-label="配色を切り替える">◐</button>
+
+<div class="doc-bar">
+  <div class="wrap">
+    <div class="doc-bar-inner" role="tablist" aria-label="ドキュメント切り替え">
+      <button class="doc-tab" role="tab" data-doc="business-plan.md" aria-selected="true">事業計画</button>
+      <button class="doc-tab" role="tab" data-doc="open-questions.md" aria-selected="false">足りないもの</button>
+      <button class="doc-tab" role="tab" data-doc="validation-plan.md" aria-selected="false">検証計画</button>
+      <a class="doc-tab" href="../pitch/" style="text-decoration:none">ピッチ ↗</a>
+      <a class="doc-tab" href="../app/" style="text-decoration:none">デモ ↗</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <article class="md" id="doc">
+    <p class="loading">読み込み中…</p>
+  </article>
+  <p class="footer"><a href="../">← プロフィールに戻る</a></p>
+</main>
+
+<script src="../assets/js/theme.js"></script>
+<script src="md.js"></script>
+<script>
+  (function () {
+    if (window.LMTheme) window.LMTheme.bind("#themeBtn");
+    var docEl = document.getElementById("doc");
+    var tabs = Array.prototype.slice.call(document.querySelectorAll("[data-doc]"));
+
+    function show(name) {
+      tabs.forEach(function (t) {
+        t.setAttribute("aria-selected", t.getAttribute("data-doc") === name ? "true" : "false");
+      });
+      docEl.innerHTML = '<p class="loading">読み込み中…</p>';
+      fetch(name, { cache: "no-cache" })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status + "");
+          return r.text();
+        })
+        .then(function (md) {
+          docEl.innerHTML = window.LM_MD.render(md);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
+        })
+        .catch(function () {
+          docEl.innerHTML =
+            '<div class="card"><b>ドキュメントを読み込めませんでした。</b>' +
+            '<p class="small muted" style="margin:8px 0 0">ローカルでファイルを直接開いた場合はブラウザの制約で読み込めません。' +
+            '<code>python3 -m http.server</code> で配信するか、' +
+            '<a href="' + name + '">' + name + '</a> を直接開いてください。</p></div>';
+        });
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener("click", function () { show(t.getAttribute("data-doc")); });
+    });
+    var initial = location.hash.slice(1);
+    var valid = tabs.map(function (t) { return t.getAttribute("data-doc"); });
+    show(valid.indexOf(initial) !== -1 ? initial : "business-plan.md");
+  })();
+</script>
+</body>
+</html>
