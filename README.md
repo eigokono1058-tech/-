@@ -21,32 +21,31 @@
 
 ## 🚀 イベント前にやること（この順番で）
 
-### 1. プロフィールを埋める（必須）
+### 1. プロフィール（設定済み・内容の確認だけお願いします）
 
-`assets/js/profile-config.js` の **`REPLACE_ME` を全部置き換える**。
-`{ ja: "...", en: "..." }` になっている項目は**英語側も必ず書く**（海外参加者にはそちらが表示される）。
+`assets/js/profile-config.js` に以下を反映済みです。直したいところがあればこのファイルを編集してください。
+`{ ja: "...", en: "..." }` の項目は**英語側も必ず埋めた状態**にしてください（海外参加者にはそちらが表示されます）。
 
-```js
-name:   "REPLACE_ME",                        // 例: "Eigo Kono"（ローマ字・両言語共通）
-nameJa: "REPLACE_ME",                        // 例: "河野 英悟"
-role:   { ja: "REPLACE_ME",                  // 例: "ITエンジニア / 日立製作所"
-          en: "REPLACE_ME" },                // e.g. "IT Engineer / Hitachi, Ltd."
+| 項目 | 設定値 |
+|---|---|
+| 名前 | Eigo Kono / 河野 瑛吾 / 呼ばれ方 Ayden |
+| 肩書き（日本語） | ITエンジニア / 営業 · 日立製作所 公共システム営業統括本部 |
+| 肩書き（英語） | IT Engineer / Solution Sales · Public Sector Systems, Hitachi, Ltd. |
+| 実績 | 日立の公開導入事例（業務AI） |
+| GitHub / LinkedIn / Instagram / Facebook | 設定済み |
+| メール・携帯番号 | **公開ページには載せていません**（下記参照） |
 
-links: [
-  { id: "hitachi",   url: "REPLACE_ME" },  // 実績紹介サイト（公開可能なURLのみ）
-  { id: "github",    url: "https://github.com/eigokono1058-tech" },  // 設定済み
-  { id: "linkedin",  url: "REPLACE_ME" },  // https://www.linkedin.com/in/xxxx/
-  { id: "instagram", url: "REPLACE_ME" },  // https://www.instagram.com/xxxx/
-  { id: "facebook",  url: "REPLACE_ME" }   // https://www.facebook.com/xxxx
-]
-```
+公開ページにメールを載せる場合は `email:` のコメントを外してください。ボットに収集されて
+迷惑メールが増えるため既定はオフにしています。携帯番号は載せていません（名刺で直接渡す想定）。
 
-`headline`（自己紹介1行）、リンクのラベル、プロジェクト紹介文には日英の既定文が入っているので、
+`roleShort` は名刺・ポスターの印刷専用の短い肩書き（長いと自動で文字が小さくなるので分けている）。
+`headline`（自己紹介1行）、リンクのラベル、プロジェクト紹介文にも日英の文が入っているので、
 気に入らなければ両方書き換える。日本語表示は和名を大きく、英語表示はローマ字を大きく出す。
 
-- `REPLACE_ME` が残っているリンクは **サイトに表示されない**（壊れたリンクを人に見せないため）
-- 代わりにページ上部に「セットアップ未完了」バナーが出るので、当日忘れていても気づける
+- リンクの `url` に `REPLACE_ME` が残っているものは **サイトに表示されない**（壊れたリンクを人に見せないため）
+- その場合はページ上部に「セットアップ未完了」バナーが出る（いまは全部埋まっているので出ない）
 - 顔写真を出したい場合は `assets/img/me.jpg` などを置いて `avatar: "assets/img/me.jpg"`
+- 名前や肩書きを変えたら、名刺に印刷される文字も変わるので `python3 tools/gen_qr.py` を再実行する
 
 ### 2. 公開する（GitHub Pages）
 
@@ -63,15 +62,15 @@ links: [
 
 `.nojekyll` を置いてあるので、`plan/` の `.md` ファイルはそのまま配信される（Jekyll処理されない）。
 
-### 3. QRを作り直す（URLを変えた場合のみ）
+### 3. QRを作り直す（URL・名前・肩書きを変えた場合）
 
 ```bash
 pip install segno
-python3 tools/gen_qr.py                            # profile-config.js の siteUrl を使う
-python3 tools/gen_qr.py --url https://your.domain/  # 直接指定する場合
+python3 tools/gen_qr.py                            # profile-config.js の値を使う
+python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する場合
 ```
 
-`assets/qr/` の4ファイルが同時に更新される。
+`assets/qr/` の6ファイルが同時に更新される。
 
 | ファイル | 用途 |
 |---|---|

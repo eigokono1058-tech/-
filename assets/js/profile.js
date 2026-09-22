@@ -20,6 +20,7 @@
       en: "If you change the URL, regenerate the QR with <code>python3 tools/gen_qr.py</code>."
     },
     noName: { ja: "お名前を設定してください", en: "Set your name in the config" },
+    callMe: { ja: "と呼んでください", en: "Call me " },
     email: { ja: "Email", en: "Email" },
     copied: { ja: "URLをコピーしました", en: "URL copied" },
     copyFail: { ja: "コピーできませんでした", en: "Could not copy" },
@@ -61,6 +62,17 @@
     var nm = names();
     setText("nameJa", nm.primary);
     setText("nameRoman", nm.secondary);
+
+    var nick = $("nick");
+    if (nick) {
+      if (P.nickname && !isUnset(P.nickname)) {
+        nick.innerHTML = '<span class="nick-chip">' +
+          (lang() === "en" ? esc(t(UI.callMe)) + esc(P.nickname) : "「" + esc(P.nickname) + "」" + esc(t(UI.callMe))) +
+          "</span>";
+      } else {
+        nick.innerHTML = "";
+      }
+    }
     setText("role", isUnset(P.role) ? "" : t(P.role));
     setText("loc", t(P.location));
     setText("headline", t(P.headline));
@@ -102,9 +114,10 @@
     if (linkBox) {
       linkBox.setAttribute("aria-label", t(UI.linksLabel));
       linkBox.innerHTML = visible.map(function (l) {
-        var external = /^https?:/i.test(l.url);
+        var href = t(l.url); // url は文字列でも {ja, en} でもよい
+        var external = /^https?:/i.test(href);
         return (
-          '<a class="link-row' + (l.featured ? " featured" : "") + '" href="' + esc(l.url) + '"' +
+          '<a class="link-row' + (l.featured ? " featured" : "") + '" href="' + esc(href) + '"' +
           (external ? ' target="_blank" rel="noopener noreferrer"' : "") +
           ' style="--accent:' + esc(l.accent || "#5b8cff") + '" data-id="' + esc(l.id) + '">' +
           '<span class="link-ico">' + (I[l.icon] || I.link) + "</span>" +
@@ -232,6 +245,7 @@
         "BEGIN:VCARD",
         "VERSION:3.0",
         "FN:" + P.name,
+        P.nickname && !isUnset(P.nickname) ? "NICKNAME:" + P.nickname : null,
         "N:" + P.name.split(/\s+/).reverse().join(";") + ";;;",
         isUnset(P.nameJa) ? null : "NOTE:" + P.nameJa + " / " + t(P.headline),
         title ? "TITLE:" + title : null,
@@ -240,7 +254,8 @@
         "URL:" + shareUrl
       ];
       visible.forEach(function (l) {
-        if (/^https?:/.test(l.url)) lines.push("URL;TYPE=" + l.id + ":" + l.url);
+        var href = t(l.url);
+        if (/^https?:/.test(href)) lines.push("URL;TYPE=" + l.id + ":" + href);
       });
       lines.push("END:VCARD");
       var blob = new Blob([lines.filter(Boolean).join("\r\n") + "\r\n"], { type: "text/vcard;charset=utf-8" });

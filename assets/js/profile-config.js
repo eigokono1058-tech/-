@@ -6,18 +6,26 @@
      （代わりに画面上部に「未設定」バナーが出ます）
    * { ja: "...", en: "..." } は日本語/英語の切り替え用。両方書いてください。
      海外の参加者が多いので、英語側を空にしないこと。
+   * url も { ja: "...", en: "..." } にできます（言語別のページがある場合）
    * URL を書き換えたら QR も作り直すこと:
-         python3 tools/gen_qr.py --url https://<公開URL>
+         python3 tools/gen_qr.py
    ========================================================================== */
 
 window.PROFILE = {
   /* ---- 基本情報 / basics ---------------------------------------------- */
-  name: "REPLACE_ME", // ローマ字表記 / romanized name 例: "Eigo Kono"
-  nameJa: "REPLACE_ME", // 日本語表記 例: "河野 英悟"
+  name: "Eigo Kono",   // ローマ字表記 / romanized name
+  nameJa: "河野 瑛吾", // 日本語表記
+  nickname: "Ayden",   // 呼ばれ方（空にすると表示されません）
 
   role: {
-    ja: "REPLACE_ME", // 例: "ITエンジニア / 日立製作所"
-    en: "REPLACE_ME"  // e.g. "IT Engineer / Hitachi, Ltd."
+    ja: "ITエンジニア / 営業 · 日立製作所 公共システム営業統括本部",
+    en: "IT Engineer / Solution Sales · Public Sector Systems, Hitachi, Ltd."
+  },
+
+  // 名刺・ポスターの印刷に使う短い肩書き（長いと文字が小さくなるため）
+  roleShort: {
+    ja: "ITエンジニア / 営業 · 日立製作所",
+    en: "IT Engineer / Solution Sales · Hitachi, Ltd."
   },
 
   location: { ja: "東京", en: "Tokyo, Japan" },
@@ -33,13 +41,17 @@ window.PROFILE = {
 
   // 興味・専門タグ / interests
   tags: {
-    ja: ["AI Agent", "物流", "ServiceNow", "Dynatrace", "IT運用", "社会インフラ"],
-    en: ["AI Agents", "Logistics", "ServiceNow", "Dynatrace", "IT Operations", "Infrastructure"]
+    ja: ["AI Agent", "物流", "公共システム", "ServiceNow", "Dynatrace", "IT運用"],
+    en: ["AI Agents", "Logistics", "Public Sector", "ServiceNow", "Dynatrace", "IT Operations"]
   },
 
-  /* ---- 連絡先 / contact ----------------------------------------------- */
-  // 公開ページにメールを載せたい場合のみ記入（迷惑メール対策で既定は空）
+  /* ---- 連絡先 / contact -----------------------------------------------
+     公開サイトにメールを載せるとボットに収集されて迷惑メールが増えるので、
+     既定では載せていません。載せる場合は下の行のコメントを外してください。
+     携帯番号は公開ページには載せない方針にしています（名刺で直接渡す想定）。   */
   email: "",
+  // email: "eigo.kono.pa@hitachi.com",
+
   // 連絡先カード(.vcf)のダウンロードボタンを出すか
   enableVCard: true,
 
@@ -48,9 +60,13 @@ window.PROFILE = {
   links: [
     {
       id: "hitachi",
-      label: { ja: "これまでの実績", en: "Work & Projects" },
-      sublabel: { ja: "業務実績・取り組みの紹介", en: "What I have built at work" },
-      url: "REPLACE_ME", // 例: "https://www.hitachi.co.jp/..." ※公開可能なURLのみ
+      label: { ja: "日立での実績", en: "My work at Hitachi" },
+      sublabel: {
+        ja: "公開されている導入事例（業務AI）",
+        en: "Published case study (in Japanese)"
+      },
+      // 英語版のページが見つかったら { ja: "...", en: "..." } に変えられます
+      url: "https://www.hitachi.com/ja-jp/products/digital/highlights/usecases/gyoumu-ai/17805441",
       icon: "briefcase",
       accent: "#e0736f",
       featured: true
@@ -67,15 +83,17 @@ window.PROFILE = {
       id: "linkedin",
       label: { ja: "LinkedIn", en: "LinkedIn" },
       sublabel: { ja: "職歴・つながり", en: "Experience & connections" },
-      url: "REPLACE_ME", // 例: "https://www.linkedin.com/in/your-id/"
+      // 日本語を含むURLなのでパーセントエンコード済み（古い環境でも確実に開くため）
+      url: "https://www.linkedin.com/in/%E7%91%9B%E5%90%BE-%E6%B2%B3%E9%87%8E-5a74b52b7",
       icon: "linkedin",
       accent: "#4a9ae0"
     },
     {
       id: "instagram",
       label: { ja: "Instagram", en: "Instagram" },
-      sublabel: { ja: "日常・イベント記録", en: "Everyday & events" },
-      url: "REPLACE_ME", // 例: "https://www.instagram.com/your_id/"
+      sublabel: { ja: "@eigokono", en: "@eigokono" },
+      // ?hl=ja は付けない（海外の人が開いたときに日本語UIにならないように）
+      url: "https://www.instagram.com/eigokono/",
       icon: "instagram",
       accent: "#e1548a"
     },
@@ -83,7 +101,7 @@ window.PROFILE = {
       id: "facebook",
       label: { ja: "Facebook", en: "Facebook" },
       sublabel: { ja: "つながり申請はこちら", en: "Send me a request" },
-      url: "REPLACE_ME", // 例: "https://www.facebook.com/your.id"
+      url: "https://www.facebook.com/profile.php?id=100023757078491",
       icon: "facebook",
       accent: "#5b8cff"
     }

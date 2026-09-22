@@ -7,8 +7,8 @@
   <rect width="91" height="55" fill="#ffffff"/>
   <rect x="0" y="0" width="91" height="1.6" fill="url(#g)"/>
   <g font-family="Helvetica, Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif">
-    <text x="6.5" y="14" font-size="4.60" font-weight="700" fill="#0a0c12">氏名未設定</text>
-    <text x="6.5" y="20" font-size="2.90" fill="#5b6478"></text>
+    <text x="6.5" y="14" font-size="4.60" font-weight="700" fill="#0a0c12">河野 瑛吾</text>
+    <text x="6.5" y="20" font-size="2.40" fill="#5b6478">ITエンジニア / 営業 · 日立製作所</text>
     <text x="6.5" y="27.4" font-size="2.45" fill="#5b6478">AIエージェント前提の社会インフ</text><text x="6.5" y="30.9" font-size="2.45" fill="#5b6478">ラを、物流の「ラスト数メートル」</text><text x="6.5" y="34.4" font-size="2.45" fill="#5b6478">から再設計しています。</text>
     <text x="6.5" y="45.5" font-size="2.5" font-weight="700" fill="#5b8cff">SCAN &#8594; PROFILE / DEMO</text>
     <text x="6.5" y="49.8" font-size="2.0" fill="#8b93a5">https://eigokono1058-tech.github.io/-/</text>

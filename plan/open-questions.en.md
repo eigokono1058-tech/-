@@ -120,7 +120,7 @@ Separate from holes in the concept: things I do not have that are needed to move
 | I-1 | QR code and link site for introductions | **Done** ([site](../) / [QR kit](../qr/)) |
 | I-2 | A working demo | **Done** ([demo](../app/)) |
 | I-3 | A one-page pitch | **Done** ([pitch](../pitch/)) |
-| I-4 | Fill in the profile config (name, social URLs) | **Not done** → edit `assets/js/profile-config.js` |
+| I-4 | Fill in the profile config (name, social URLs) | **Done** (final read-through pending) |
 | I-5 | Print the QR (business card + A6 poster, both languages) | Not done → print from the [QR kit](../qr/) |
 | I-6 | Rehearse the 30-second and 3-minute spoken pitch, in English | Not started |
 | I-7 | Narrow "what I want to ask" down to three questions | Drafted below |

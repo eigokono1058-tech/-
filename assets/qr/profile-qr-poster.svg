@@ -8,8 +8,8 @@
   <rect x="0" y="0" width="105" height="3" fill="url(#pg)"/>
   <g font-family="Helvetica, Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif" text-anchor="middle">
     <text x="52.5" y="20" font-size="3.4" font-weight="700" fill="#5b8cff" letter-spacing="1.2">LAST METERS</text>
-    <text x="52.5" y="32" font-size="6.60" font-weight="700" fill="#0a0c12">氏名未設定</text>
-    <text x="52.5" y="39.5" font-size="3.30" fill="#5b6478"></text>
+    <text x="52.5" y="32" font-size="6.60" font-weight="700" fill="#0a0c12">河野 瑛吾</text>
+    <text x="52.5" y="39.5" font-size="3.30" fill="#5b6478">ITエンジニア / 営業 · 日立製作所</text>
     <text x="52.5" y="130" font-size="3.90" font-weight="700" fill="#0a0c12">カメラをかざしてください</text>
     <text x="52.5" y="136.5" font-size="2.90" fill="#5b6478">プロフィール · 動くデモ · 事業構想</text>
     <text x="52.5" y="142.5" font-size="2.5" fill="#8b93a5">https://eigokono1058-tech.github.io/-/</text>

@@ -126,12 +126,23 @@ def qr_block(matrix, size_mm: float, x: float, y: float):
     return total, svg
 
 
-def fit_font(text: str, max_width_mm: float, base_size: float, min_size: float = 2.2) -> float:
-    """与えた幅に収まるフォントサイズ(mm)を返す。全角は半角2つ分として数える。"""
+def fit_font(
+    text: str,
+    max_width_mm: float,
+    base_size: float,
+    min_size: float = 2.2,
+    factor: float = 0.5,
+) -> float:
+    """与えた幅に収まるフォントサイズ(mm)を返す。全角は半角2つ分として数える。
+
+    factor は1半角ぶんの送り幅（フォントサイズに対する比）。ブラウザで実測したところ
+    Helvetica は太字の欧文が約0.53、和文が約0.47、標準の欧文が約0.43だったので、
+    太字の見出しには余裕をみて 0.56 を渡している。
+    """
     if not text:
         return base_size
     units = sum(2.0 if ord(c) > 0x2E80 else 1.0 for c in text)
-    return max(min_size, min(base_size, max_width_mm / (units * 0.5)))
+    return max(min_size, min(base_size, max_width_mm / (units * factor)))
 
 
 def text_units(s: str) -> float:
@@ -221,7 +232,7 @@ def make_card(matrix, url: str, name: str, sub: str, headline: str, lang: str) -
   <rect width="91" height="55" fill="#ffffff"/>
   <rect x="0" y="0" width="91" height="1.6" fill="url(#g)"/>
   <g font-family="{FONT}">
-    <text x="6.5" y="14" font-size="{fit_font(disp_name, text_w, 4.6, 3.0):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
+    <text x="6.5" y="14" font-size="{fit_font(disp_name, text_w, 4.6, 3.0, factor=0.56):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
     <text x="6.5" y="20" font-size="{fit_font(sub_line, text_w, 2.9, 2.1):.2f}" fill="#5b6478">{esc(sub_line)}</text>
     {head_svg}
     <text x="6.5" y="45.5" font-size="2.5" font-weight="700" fill="{BRAND_1}">{s["scan"]}</text>
@@ -248,7 +259,7 @@ def make_poster(matrix, url: str, name: str, sub: str, lang: str) -> str:
   <rect x="0" y="0" width="105" height="3" fill="url(#pg)"/>
   <g font-family="{FONT}" text-anchor="middle">
     <text x="52.5" y="20" font-size="3.4" font-weight="700" fill="{BRAND_1}" letter-spacing="1.2">LAST METERS</text>
-    <text x="52.5" y="32" font-size="{fit_font(disp_name, 92, 6.6, 3.6):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
+    <text x="52.5" y="32" font-size="{fit_font(disp_name, 92, 6.6, 3.6, factor=0.56):.2f}" font-weight="700" fill="{DARK}">{esc(disp_name)}</text>
     <text x="52.5" y="39.5" font-size="{fit_font(sub_line, 92, 3.3, 2.4):.2f}" fill="#5b6478">{esc(sub_line)}</text>
     <text x="52.5" y="130" font-size="{fit_font(s["hold"], 92, 3.9, 2.8):.2f}" font-weight="700" fill="{DARK}">{s["hold"]}</text>
     <text x="52.5" y="136.5" font-size="{fit_font(s["menu"], 96, 2.9, 2.2):.2f}" fill="#5b6478">{s["menu"]}</text>
@@ -291,11 +302,19 @@ def build(url: str, name: str, name_ja: str) -> None:
 
     # ---- 3/4. 名刺カードと卓上ポスター（日本語・英語） ----------------------
     written = ["profile-qr.svg", "profile-qr.png"]
+    nickname = read_config("nickname")
     for lang in ("ja", "en"):
         suffix = "" if lang == "ja" else "-en"
         headline = read_config("headline", lang)
-        card_name = name if lang == "en" else (name or name_ja)
-        card_sub = read_config("role", lang) or (name_ja if lang == "ja" else "")
+        if lang == "ja":
+            card_name = name_ja or name
+        else:
+            # 海外の人には呼ばれ方まで出しておくと話しかけやすい
+            card_name = name or name_ja
+            if nickname and card_name:
+                card_name = f"{card_name} ({nickname})"
+        # 印刷は短い肩書きを優先する（長いと自動縮小されて読みにくい）
+        card_sub = read_config("roleShort", lang) or read_config("role", lang)
 
         card = OUT_DIR / f"profile-qr-card{suffix}.svg"
         card.write_text(make_card(matrix, url, card_name, card_sub, headline, lang), encoding="utf-8")
