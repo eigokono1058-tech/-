@@ -128,8 +128,9 @@ success rate rises *without building anything new*.
 - Collect it at a convenience store or a station locker
 - Collect it at the office
 - Share a temporary code so a friend or family member can collect it
-- **Have it delivered to you while you are moving (GPS)** — to a person, not an address
-- Drop a pin for the pickup point, the way you do returning a shared bike
+- **Have it delivered to you while you are moving** — to a person, not an address
+- Say "receive here" by dropping a pin on a map, the same gesture you already use to say
+  "pick me up here" in a ride-hailing app — and let the pin follow you while you walk
 
 Each of these exists in isolation already (store pickup, locker pickup, doorstep instructions).
 What is missing is **the layer that switches between them safely, instantly and automatically, mid-delivery.**

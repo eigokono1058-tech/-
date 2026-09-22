@@ -129,6 +129,7 @@ window.LM_DATA = (function () {
       icon: "locker",
       caps: ["ambient", "chilled", "frozen", "secure"],
       xy: [318, 62],
+      labelAbove: true,
       label: { ja: "駅ロッカー", en: "Station locker" },
       route: [[20, 200], [20, 130], [318, 130], [318, 62]],
       note: {
@@ -155,17 +156,19 @@ window.LM_DATA = (function () {
       eta_min: 16
     },
     {
+      /* 地図に差した受取ピン。固定の住所ではないので dynamic 扱い。
+         ピンを動かすと map.js が setPin() を呼び、この地点の名前・ETAを書き換える。 */
       id: "moving_me",
-      name: { ja: "移動中の自分（GPS）", en: "Me, in transit (GPS)" },
-      kind: { ja: "動的", en: "Dynamic" },
+      name: { ja: "いまいる自分の場所（ピン追従）", en: "Wherever I am (the pin follows me)" },
+      kind: { ja: "ピン", en: "Pin" },
       icon: "person",
       caps: ["ambient", "chilled", "frozen", "identity", "signature", "dynamic"],
       xy: null,
       dynamic: true,
-      label: { ja: "自分", en: "Me" },
+      label: { ja: "受取ピン", en: "Pin" },
       note: {
-        ja: "住所ではなく「人」に届ける。帰宅途中のランデブー地点で受け取る。",
-        en: "Deliver to a person, not an address. Meet the vehicle at a rendezvous point on your way home."
+        ja: "住所ではなく「人」に届ける。地図にピンを差すか、歩いている自分に追従させる。",
+        en: "Deliver to a person, not an address. Drop a pin on the map, or let it follow you as you walk."
       },
       eta_min: 9
     },
@@ -469,38 +472,44 @@ window.LM_DATA = (function () {
     },
     {
       id: "dynamic_rendezvous",
-      title: { ja: "動的ランデブー", en: "Dynamic rendezvous" },
+      title: { ja: "ピンでの受取（動的ランデブー）", en: "Pin pickup (dynamic rendezvous)" },
       test: function (p, pt, ctx) {
         if (!pt.dynamic) return null;
         if (ctx.autonomy < 2) {
           return {
             verdict: "conditional",
             reason: {
-              ja: "位置共有による受取はユーザーの都度承認が必要です（L2以上で自動化）",
-              en: "Location-based pickup needs your approval each time (automated from L2 up)"
+              ja: "ピンでの受取はユーザーの都度承認が必要です（L2以上で自動化）",
+              en: "Pin-based pickup needs your approval each time (automated from L2 up)"
             },
             adds: ["user_approval"]
           };
         }
-        if (p.temp !== "ambient") {
-          return {
-            verdict: "conditional",
-            reason: {
-              ja: "GPS共有：位置は受取直前の10分間のみ開示。" +
-                (p.temp === "frozen" ? "冷凍" : "冷蔵") + "品は保冷バッグで手渡し、受取後30分以内の持ち帰りが前提です",
-              en: "GPS: your location is exposed for ten minutes before pickup only. " +
-                (p.temp === "frozen" ? "Frozen" : "Chilled") + " goods are handed over in a cool bag and must be home within 30 minutes"
-            },
-            adds: ["ephemeral_location", "one_time_code", "cold_bag_handover"]
-          };
-        }
+        /* 追従モード（自分についてくるピン）だけが現在地の共有を必要とする。
+           路上に差した固定ピンなら、渡すのはその座標だけで済む。 */
+        var following = PIN.mode === "follow";
+        var cold = p.temp !== "ambient";
+        var adds = following ? ["ephemeral_location", "one_time_code"] : ["one_time_code"];
+        if (cold) adds = adds.concat(["cold_bag_handover"]);
+        var coldJa = cold
+          ? "。" + (p.temp === "frozen" ? "冷凍" : "冷蔵") + "品は保冷バッグで手渡し、受取後30分以内の持ち帰りが前提です"
+          : "";
+        var coldEn = cold
+          ? ". " + (p.temp === "frozen" ? "Frozen" : "Chilled") +
+            " goods are handed over in a cool bag and must be home within 30 minutes"
+          : "";
         return {
           verdict: "conditional",
-          reason: {
-            ja: "GPS共有：受取直前の10分間のみ位置を配送側に開示し、受取完了で即失効します",
-            en: "GPS: location is shared with the carrier for ten minutes before pickup and revoked on handover"
-          },
-          adds: ["ephemeral_location", "one_time_code"]
+          reason: following
+            ? {
+              ja: "追従ピン：現在地は受取直前の10分間だけ配送側に開示し、受取完了で即失効します" + coldJa,
+              en: "Following pin: your live location is shared with the carrier for ten minutes before pickup and revoked on handover" + coldEn
+            }
+            : {
+              ja: "固定ピン：渡すのは差したピンの座標だけで、あなたの現在地は共有しません" + coldJa,
+              en: "Fixed pin: only the pin's coordinates are handed over — your live location is not shared" + coldEn
+            },
+          adds: adds
         };
       }
     }
@@ -651,6 +660,62 @@ window.LM_DATA = (function () {
     }
   ];
 
+  function findPoint(id) {
+    for (var i = 0; i < POINTS.length; i++) if (POINTS[i].id === id) return POINTS[i];
+    return null;
+  }
+
+  /* ---- 受取ピン / the pickup pin ---------------------------------------
+     GOタクシーやUberで乗車地点を指定するのと同じ操作を、受取に持ち込む。
+     地図（map.js）が書き込み、UIとエンジンが読む唯一の共有状態。
+       mode  "follow" = 歩いている自分に追従 / "fixed" = 差した場所で固定
+       kind  "me" 自分の現在地 / "street" 路上 / "point" 既存の受取地点     */
+  var PIN = {
+    x: 150, y: 96,
+    mode: "follow",
+    kind: "me",
+    pointId: null,          // 既存の受取地点にスナップしていればそのid
+    label: { ja: "いまいる場所", en: "Where I am" },
+    etaMin: 9,
+    walkM: 0,
+    committed: false        // この場所を受取先として確定済みか
+  };
+
+  /** 地図がピンを動かすたびに呼ぶ。受取地点「moving_me」の表示名とETAを追従させる。 */
+  function setPin(next) {
+    PIN.x = next.x;
+    PIN.y = next.y;
+    PIN.mode = next.mode;
+    PIN.kind = next.kind;
+    PIN.pointId = next.pointId || null;
+    PIN.label = next.label;
+    PIN.etaMin = next.etaMin;
+    PIN.walkM = next.walkM;
+    if (typeof next.committed === "boolean") PIN.committed = next.committed;
+
+    var mm = findPoint("moving_me");
+    mm.eta_min = next.etaMin;
+    if (next.kind === "me") {
+      mm.name = { ja: "いまいる自分の場所（ピン追従）", en: "Wherever I am (the pin follows me)" };
+      mm.label = { ja: "自分", en: "Me" };
+      mm.note = {
+        ja: "住所ではなく「人」に届ける。歩き続けても、そのときいる場所がそのまま受取地点になる。",
+        en: "Deliver to a person, not an address. Keep walking — wherever you are is the pickup point."
+      };
+    } else {
+      mm.name = {
+        ja: "差したピンの場所：" + next.label.ja,
+        en: "The pin you dropped: " + next.label.en
+      };
+      mm.label = { ja: "ピン", en: "Pin" };
+      mm.note = {
+        ja: "路上にピンを差して、そこで配送車と落ち合う。配車アプリで乗車地点を指定するのと同じ操作。",
+        en: "Drop a pin on the street and meet the van there — the same gesture as setting a pickup point in a ride-hailing app."
+      };
+    }
+    return PIN;
+  }
+
   return {
     AUTONOMY: AUTONOMY,
     POINTS: POINTS,
@@ -658,10 +723,9 @@ window.LM_DATA = (function () {
     RULES: RULES,
     EXCEPTIONS: EXCEPTIONS,
     CUSTODY_CHAIN: CUSTODY_CHAIN,
-    pointById: function (id) {
-      for (var i = 0; i < POINTS.length; i++) if (POINTS[i].id === id) return POINTS[i];
-      return null;
-    },
+    PIN: PIN,
+    setPin: setPin,
+    pointById: findPoint,
     parcelById: function (id) {
       for (var i = 0; i < PARCELS.length; i++) if (PARCELS[i].id === id) return PARCELS[i];
       return null;

@@ -97,6 +97,26 @@ window.LM_UI = (function () {
     blockedBody: {
       ja: "。AIは発注までを自動化できても、受取の制約（温度帯・本人確認・置き配不可）で止まります。荷物を選んで受取先を変えてみてください。",
       en: ". The AI can automate ordering, but receiving constraints — temperature, identity, no-unattended-drop — stop it dead. Pick a parcel and change where it lands."
+    },
+
+    /* ---- 受取ピン / the pickup pin ---- */
+    pinHere: { ja: "ここで受け取る", en: "Receive here" },
+    pinSet: { ja: "この場所に決定済み", en: "This is the destination" },
+    pinDenied: { ja: "ここでは受け取れない", en: "Cannot receive here" },
+    pinFollow: { ja: "自分に追従", en: "Follow me" },
+    pinFollowOn: { ja: "追従中", en: "Following" },
+    pinMe: { ja: "いまいる場所", en: "Where I am" },
+    pinVan: { ja: "配送車 約", en: "Van ~" },
+    pinVanUnit: { ja: "分", en: " min" },
+    pinFollowingMeta: {
+      ja: "歩いているあいだ、ピンが自分についてくる",
+      en: "the pin keeps following you as you walk"
+    },
+    pinAway: { ja: "自分から", en: "" },
+    pinAwayUnit: { ja: "m", en: " m from you" },
+    pinLive: {
+      ja: "この荷物はいまこのピンに向かっています。ピンを動かせば配送車もその場で向きを変えます。",
+      en: "This parcel is heading to this pin right now — move the pin and the van re-routes on the spot."
     }
   };
 
@@ -153,12 +173,89 @@ window.LM_UI = (function () {
   function tryAssign(parcelId, pointId) {
     var ev = E.assign(parcelId, pointId);
     lastVerdict = { ev: ev, pointId: pointId, parcelId: parcelId };
+    // 一覧から選んだ場合も、地図のピンをその場所へ動かして見た目を一致させる
+    if (ev.verdict !== "deny") {
+      var pt = D.pointById(pointId);
+      if (pt && !pt.dynamic && M.resolvePin() !== pointId) M.setPinToPoint(pointId);
+    }
     renderAll();
     if (ev.verdict === "deny" || ev.needsApproval) {
       var box = $("verdictBox");
       if (box && box.scrollIntoView) box.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     return ev;
+  }
+
+  /* ---------- 受取ピンのカード ----------
+     配車アプリの「ここで乗る」に相当する確定操作。ドラッグ中もポリシー判定を
+     出し続けるので、「その場所では受け取れない」理由がその場でわかる。       */
+  var pinCardScheduled = false;
+  function schedulePinCard() {
+    if (pinCardScheduled) return;
+    pinCardScheduled = true;
+    requestAnimationFrame(function () {
+      pinCardScheduled = false;
+      renderPinCard();
+    });
+  }
+
+  function renderPinCard() {
+    var box = $("pinCard");
+    if (!box) return;
+    var pin = M.pin();
+    var parcel = D.parcelById(focus);
+    var pointId = M.resolvePin();
+    var pt = D.pointById(pointId);
+    var ev = E.evaluate(parcel, pt);
+    var tr = E.tracking(focus);
+    var isSet = tr.pointId === pointId;
+
+    M.setPinVerdict(ev.verdict);
+    M.markCommitted(isSet);
+
+    var where = pin.kind === "me" ? t(S.pinMe) : t(pin.label);
+    var meta = t(S.pinVan) + pin.etaMin + t(S.pinVanUnit) + " · " +
+      (pin.mode === "follow"
+        ? t(S.pinFollowingMeta)
+        : t(S.pinAway) + pin.walkM + t(S.pinAwayUnit));
+
+    var why = "";
+    if (ev.verdict === "deny") {
+      var deny = null;
+      ev.findings.forEach(function (f) { if (!deny && f.verdict === "deny") deny = f; });
+      why = "⛔ " + esc(t(deny.reason));
+    } else if (isSet && pt.dynamic) {
+      why = "🛰 " + t(S.pinLive);
+    } else if (ev.conditions.length) {
+      why = "⚠️ " + ev.conditions.map(function (c) { return esc(t(E.conditionLabel(c))); }).join(" · ");
+    }
+
+    box.className = "pin-card" + (ev.verdict === "deny" ? " is-deny" : isSet ? " is-set" : "");
+    box.innerHTML =
+      '<span class="pc-ico">' + (pin.mode === "follow" ? "🛰" : "📍") + "</span>" +
+      '<span class="pc-main">' +
+      '<span class="pc-where">' + esc(where) + "</span>" +
+      '<span class="pc-meta">' + esc(meta) + "</span></span>" +
+      '<span class="pc-actions">' +
+      '<button class="btn btn-sm ' + (isSet || ev.verdict === "deny" ? "" : "btn-primary") +
+      '" type="button" data-pin="set"' +
+      (ev.verdict === "deny" || isSet ? " disabled" : "") + ">" +
+      (ev.verdict === "deny" ? t(S.pinDenied) : isSet ? "✓ " + t(S.pinSet) : t(S.pinHere)) + "</button>" +
+      '<button class="btn btn-sm btn-follow' + (pin.mode === "follow" ? " is-on" : "") +
+      '" type="button" data-pin="follow" aria-pressed="' + (pin.mode === "follow") + '">⌖ ' +
+      t(pin.mode === "follow" ? S.pinFollowOn : S.pinFollow) + "</button></span>" +
+      (why ? '<p class="pc-why">' + why + "</p>" : "");
+
+    box.querySelectorAll("[data-pin]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (b.getAttribute("data-pin") === "follow") {
+          M.followMe(pin.mode !== "follow");
+          schedulePinCard();
+        } else {
+          tryAssign(focus, M.resolvePin());
+        }
+      });
+    });
   }
 
   /* ---------- flow view ---------- */
@@ -515,6 +612,7 @@ window.LM_UI = (function () {
     renderScheduled = true;
     requestAnimationFrame(function () {
       renderScheduled = false;
+      renderPinCard();
       renderBlockedBanner();
       renderParcels();
       renderFocusPanel();
@@ -545,7 +643,7 @@ window.LM_UI = (function () {
 
   /* ---------- init ---------- */
   function init() {
-    M.mount($("map"), function (pointId) { tryAssign(focus, pointId); });
+    M.mount($("map"), { onPin: schedulePinCard });
     M.setFocus(focus);
     E.subscribe(function () { renderAll(); });
     E.init();
@@ -561,6 +659,7 @@ window.LM_UI = (function () {
     if (resetBtn) resetBtn.addEventListener("click", function () {
       E.reset();
       M.resetWalk();
+      M.followMe(true);
       lastVerdict = null;
       renderAll();
     });
@@ -579,7 +678,7 @@ window.LM_UI = (function () {
     if (I18N) {
       I18N.mountToggle("#langBtn");
       I18N.onChange(function () {
-        M.mount($("map"), function (pointId) { tryAssign(focus, pointId); });
+        M.mount($("map"), { onPin: schedulePinCard });
         closeSheet();
         renderAll();
         if (window.LM_SURVEY) window.LM_SURVEY.relang();

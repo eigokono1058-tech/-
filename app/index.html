@@ -42,8 +42,8 @@
 
     <div class="stack" style="margin:18px 0 20px">
       <div class="row"><span class="step-num">1</span><span class="small">
-        <span data-l="ja">配送中の荷物を選び、地図で受取先を差し替える</span>
-        <span data-l="en">Pick a parcel in transit and change where it lands on the map</span>
+        <span data-l="ja">配送中の荷物を選び、地図にピンを差して「ここで受け取る」</span>
+        <span data-l="en">Pick a parcel in transit, drop a pin on the map and say “receive here”</span>
       </span></div>
       <div class="row"><span class="step-num">2</span><span class="small">
         <span data-l="ja">ポリシーエンジンが可否を判定し、受取グラントを発行する</span>
@@ -87,16 +87,18 @@
   <!-- ================= FLOW ================= -->
   <section class="view is-active" id="view-flow">
     <div class="map-wrap">
-      <svg id="map" role="img" aria-label="Neighbourhood map showing pickup points and delivery vehicles"></svg>
+      <svg id="map" role="group" aria-label="Neighbourhood map. Tap anywhere to drop the pickup pin, or drag the pin itself."></svg>
       <div class="map-legend">
+        <span data-l="ja">📍 受取ピン</span><span data-l="en">📍 Pickup pin</span>
+        <span data-l="ja">🧑 移動中の自分</span><span data-l="en">🧑 Me, walking</span>
         <span data-l="ja">🏭 物流Hub</span><span data-l="en">🏭 Depot</span>
-        <span data-l="ja">🧑 移動中の自分</span><span data-l="en">🧑 Me, in transit</span>
         <span data-l="ja">点線 = 徒歩ルート</span><span data-l="en">Dotted = walking route</span>
       </div>
     </div>
+    <div class="pin-card" id="pinCard"></div>
     <p class="tiny faint" style="margin:8px 0 18px">
-      <span data-l="ja">地図の受取地点をタップすると、選択中の荷物の受取先をその場で差し替えます（シェア自転車の返却ピンを差す感覚）。</span>
-      <span data-l="en">Tap a pickup point to move the selected parcel there — like dropping the return pin for a shared bike.</span>
+      <span data-l="ja">地図をタップするか、ピンをドラッグすると受取ピンが動きます（配車アプリで「ここで乗る」を指定するのと同じ操作）。ピンは道路と受取地点にスナップし、動かすたびにポリシーエンジンが可否を判定します。<b>「ここで受け取る」</b>で選択中の荷物の受取先が確定します。<b>⌖ 自分に追従</b>にすると、歩いている自分にピンがついてきます。</span>
+      <span data-l="en">Tap the map or drag the pin to move it — the same gesture as setting a pickup point in a ride-hailing app. The pin snaps to streets and pickup points, and the policy engine rules on every position as you move it. <b>Receive here</b> commits the selected parcel to that spot; <b>⌖ Follow me</b> lets the pin travel with you as you walk.</span>
     </p>
 
     <div id="blockedBanner"></div>

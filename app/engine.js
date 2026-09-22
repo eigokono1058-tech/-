@@ -159,7 +159,13 @@ window.LM_ENGINE = (function () {
       scope.push("open:bay_" + hash8(point.id).slice(0, 2).toUpperCase());
     }
     if (point.caps.indexOf("indoor") !== -1) scope.push("unlock:entrance", "traverse:entrance→fridge");
-    if (point.dynamic) scope.push("locate:subject_while_active");
+    if (point.dynamic) {
+      /* 追従ピンだけが現在地の継続共有を必要とする。
+         路上に差した固定ピンは、その座標で落ち合うだけで足りる。 */
+      scope.push(D.PIN.mode === "follow"
+        ? "locate:subject_while_active"
+        : "meet:pin(" + Math.round(D.PIN.x) + "," + Math.round(D.PIN.y) + ")");
+    }
     if (!scope.length) scope.push("place:doorstep");
 
     return {
@@ -179,17 +185,23 @@ window.LM_ENGINE = (function () {
         value_jpy: parcel.value,
         ordered_by: parcel.orderedBy === "agent" ? "ai_agent(delegated)" : "human"
       },
-      place: {
-        type: point.dynamic ? "rendezvous" : point.id,
-        id: point.id,
-        radius_m: point.dynamic ? 30 : 8
-      },
+      place: point.dynamic
+        ? {
+          type: D.PIN.mode === "follow" ? "rendezvous:following" : "rendezvous:pin",
+          id: point.id,
+          pin: { label: tl(D.PIN.label, "en"), snapped_to: D.PIN.kind },
+          radius_m: 30
+        }
+        : { type: point.id, id: point.id, radius_m: 8 },
       window: { from: clock(from).slice(0, 5), to: clock(to).slice(0, 5) },
       conditions: evalResult.conditions.slice(),
       scope: scope,
-      not_granted: ["unlock:entrance", "read:order_history", "locate:subject_after_handover"].filter(function (x) {
-        return scope.indexOf(x) === -1;
-      }),
+      not_granted: [
+        "unlock:entrance",
+        "read:order_history",
+        "locate:subject_while_active",
+        "locate:subject_after_handover"
+      ].filter(function (x) { return scope.indexOf(x) === -1; }),
       revocable: true,
       audit_sink: "chain_of_custody@lastmeters"
     };
@@ -340,8 +352,16 @@ window.LM_ENGINE = (function () {
       steps.push({
         k: "RENDEZVOUS",
         m: {
-          ja: "ランデブー確立：受取人の位置を10分間だけ開示",
-          en: "Rendezvous established: recipient location exposed for ten minutes only"
+          ja: "追従ピンで合流：受取人の現在地を10分間だけ開示",
+          en: "Met at the following pin: recipient's live location exposed for ten minutes only"
+        }
+      });
+    } else if (point.dynamic) {
+      steps.push({
+        k: "RENDEZVOUS",
+        m: {
+          ja: "ピン地点で合流：開示したのはピンの座標のみ（現在地は渡していない）",
+          en: "Met at the pin: only the pin's coordinates were shared, never the live location"
         }
       });
     }
