@@ -11,11 +11,13 @@ Launchpad セッション: **Product design and UXR**（OpenAIのメンターと
 3. プロジェクト **LAST METERS** — 日本の不在配送・再配達を減らす物流の受取体験
    （動くプロトタイプ・ピッチ・事業計画）
 
-すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・外部ライブラリ依存なしで動く。
+すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・JSライブラリ依存なしで動く。
+画面は**デジタル庁デザインシステム（DADS v2）**に準拠している（公式CSSを `assets/css/dads/` に同梱）。
 
 ### 言語は3モード
 
-右上のボタンで **EN → 日本語 → EN+日本語（併記）** の順に切り替わる（選択は端末に記憶される）。
+ヘッダー右の言語セレクタ（DADSのLanguage Selector）で **EN / 日本語 / EN+日本語（併記）** を選ぶ
+（選択は端末に記憶される）。
 
 | モード | 用途 |
 |---|---|
@@ -131,7 +133,7 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 
 ## 🧭 デモの操作ガイド（人に説明するとき用）
 
-英語で話す相手には、渡す前に**右上のボタンで EN にしてから**渡す
+英語で話す相手には、渡す前に**ヘッダー右の言語セレクタで EN にしてから**渡す
 （相手のブラウザではなく自分の端末を渡す運用なので、言語は自分で切り替える必要がある）。
 
 30秒で見せる順番:
@@ -159,6 +161,46 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 - 地図は外部タイルを使わない自前SVG。オフラインでも動く（会場のWi-Fiが死んでも大丈夫）
 - ピンは道路と受取地点にスナップし、動かすたびにポリシーエンジンが再判定する
   （受け取れない場所では赤くなって確定ボタンが押せない）
+- 画面は**デジタル庁デザインシステム（DADS v2）準拠**。ボタン・フォーム・通知バナー・表・タブは
+  公式CSSをそのまま使っている（`assets/css/dads/`）
+
+---
+
+## 🏛 デジタル庁デザインシステム（DADS v2）準拠
+
+サイト全体をデジタル庁デザインシステムに合わせている。独自のデザインを足すのではなく、
+**公式のトークンとコンポーネントを先に使い、足りないレイアウトだけ自前で書く**方針。
+
+| 層 | ファイル | 方針 |
+| --- | --- | --- |
+| トークン・ベース | `assets/css/dads/global.css` | 公式のまま。**編集しない** |
+| コンポーネント | `assets/css/dads/components.css` | 公式のまま。**編集しない** |
+| ページレイアウト | `assets/css/site.css` | DADSのトークンだけで組む（`--color-*` `--font-family-*` `--elevation-*`） |
+| デモ固有 | `app/app.css` | 地図など、DADSに該当コンポーネントがない部分のみ |
+
+使っている公式コンポーネント: Heading / Button / Link / Utility Link / Breadcrumb / Table /
+List / Description List / Blockquote / Divider / Chip Label / Notification Banner / Accordion /
+Resource List / Tab / TOC / Form Control Label / Input Text / Textarea / Radio / Checkbox /
+Select / Language Selector（Menu List Box + Menu List）。
+
+**決めたこと:**
+
+- **ダークテーマは持たない。** DADSはライトテーマのみを規定しているので、独自のダークテーマを
+  作るのは「独自デザインを優先する」ことになる。テーマ切り替えボタンは廃止した。
+- **書体は Noto Sans JP / Noto Sans Mono**（Google Fonts）。読み込めない環境では
+  DADS既定のフォールバック（`-apple-system, BlinkMacSystemFont, sans-serif`）に落ちる。
+- **色だけに意味を持たせない。** 判定結果・重大度・進捗はすべて文言かチップのラベルを併記する。
+- **デジタル庁のロゴやブランド要素は使わない。** フッターに「デジタル庁とは関係のない個人のサイト」
+  と明記している。
+
+**アクセシビリティ（実機確認済み）:**
+
+- スキップリンクが最初のタブ位置。フォーカスリングは公式の「黒4px + 黄2px」
+- 見出し階層に飛びがなく、各ページに `<h1>` が1つ
+- 画像のalt、ボタン・リンクのアクセシブルネーム、フォームのラベル紐付けをすべて確認
+- テキストのコントラスト比は全ページでWCAG AA（4.5:1 / 大きい文字3:1）を満たす
+- 320 / 375 / 768 / 1280px で横スクロールが出ない
+- タブは ← → Home End、言語切替は ↑ ↓ Home End Esc、地図のピンは矢印キー（Shiftで大きく）で操作できる
 
 ---
 
@@ -169,11 +211,11 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 ├── index.html                  プロフィールハブ（QRの着地先）
 ├── .nojekyll                   GitHub PagesでJekyllを無効化（.md をそのまま配信）
 ├── assets/
-│   ├── css/site.css            共通デザイントークン（ライト/ダーク両対応）
+│   ├── css/dads/               デジタル庁デザインシステム公式CSS（MIT・編集しない）
+│   ├── css/site.css            ページレイアウト（DADSのトークンだけで組む）
 │   ├── js/profile-config.js    ★ここだけ書き換えれば完成
 │   ├── js/profile.js           プロフィールの描画・vCard書き出し・QR表示
 │   ├── js/icons.js             インラインSVGアイコン
-│   ├── js/theme.js             配色切り替え
 │   ├── js/i18n.js              言語切り替え（EN / 日本語 / 併記の3モード・?lang=）
 │   ├── qr/                     生成済みQR素材（6種：日英 × 名刺/ポスター + 汎用2種）
 │   ├── video/                  コンセプト動画2本
