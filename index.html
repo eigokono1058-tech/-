@@ -1,337 +1,496 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Eigo Kono (Ayden)</title>
 <meta name="description" content="Exploring a new delivery experience in Japan: receiving parcels based on when and where you can actually be, instead of one fixed address. / 日本の不在配送・再配達を減らす、物流の受取体験を検討しています。">
-<meta name="theme-color" content="#0a0c12">
+<meta name="theme-color" content="#0017c1">
 <meta property="og:title" content="Eigo (Ayden) Kono — LAST METERS">
 <meta property="og:description" content="Reducing failed deliveries in Japan by letting people receive packages based on when and where they can actually be available.">
 <meta property="og:type" content="profile">
 <link rel="icon" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/css/dads/global.css">
+<link rel="stylesheet" href="assets/css/dads/components.css">
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/i18n.js"></script>
 <style>
-  /* ---------- hero ---------- */
-  .hero { padding: 34px 0 6px; text-align: center; }
-  .avatar {
-    width: 74px; height: 74px; margin: 0 auto 12px;
-    border-radius: 50%; display: grid; place-items: center;
-    font-size: 26px; font-weight: 700; letter-spacing: 0.02em;
-    color: #06121f;
-    background: linear-gradient(135deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-1) 12%, transparent), var(--shadow);
-    object-fit: cover; overflow: hidden;
-  }
-  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .hero h1 { font-size: 27px; margin-bottom: 2px; }
-  .hero .roman { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
-  .nick-chip {
-    display: inline-block; margin: 0 0 10px;
-    padding: 3px 12px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 700;
-    color: var(--brand-2);
-    background: color-mix(in srgb, var(--brand-2) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, transparent);
-  }
-  .hero .role { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; text-wrap: balance; }
-  .hero .loc { font-size: 13px; color: var(--text-faint); margin-bottom: 12px; }
-  .hero .headline {
-    font-size: 14.5px; color: var(--text-dim); max-width: 430px; margin: 0 auto 16px;
-    text-align: left; text-wrap: pretty;
-  }
-  .tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin: 0 0 22px; }
+  /* ----------------------------------------------------------------------
+     このページ固有のレイアウトのみ。色・文字・角丸はDADSトークンから取る。
+     ---------------------------------------------------------------------- */
 
-  /* ---------- hero film ---------- */
-  .film { margin: 2px 0 22px; }
-  .film-frame {
-    position: relative;
-    width: min(72vw, 272px);
-    aspect-ratio: 9 / 16;
-    margin: 0 auto;
-    border-radius: var(--radius-lg);
+  /* ---------- プロフィールの見出し ---------- */
+  .p-profile {
+    display: grid;
+    grid-template-columns: calc(72 / 16 * 1rem) 1fr;
+    align-items: center;
+    gap: calc(16 / 16 * 1rem);
+  }
+  .p-profile__avatar {
+    grid-row: span 2;
+    width: calc(72 / 16 * 1rem);
+    height: calc(72 / 16 * 1rem);
+    border-radius: 50%;
     overflow: hidden;
-    background: #05070c;
-    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, var(--border));
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-2) 8%, transparent), var(--shadow);
+    display: grid;
+    place-items: center;
+    background-color: var(--color-key-900);
+    color: var(--color-neutral-white);
+    font-weight: bold;
+    font-size: calc(26 / 16 * 1rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
   }
-  .film-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #05070c; }
+  .p-profile__avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .p-profile__names { min-width: 0; }
+  .p-profile__name {
+    margin: 0;
+    /* DADS std-28B-150 */
+    font-weight: bold;
+    font-size: calc(28 / 16 * 1rem);
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--color-neutral-solid-gray-900);
+  }
+  .p-profile__roman {
+    margin: 0;
+    color: var(--color-neutral-solid-gray-700);
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .p-profile__meta {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .p-profile__role {
+    margin: 0;
+    color: var(--color-neutral-solid-gray-800);
+    font-weight: bold;
+    font-size: calc(17 / 16 * 1rem);
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    text-wrap: pretty;
+  }
+  .p-profile__loc {
+    margin: 0;
+    color: var(--color-neutral-solid-gray-700);
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
+  }
+  @media (min-width: 48em) {
+    .p-profile { grid-template-columns: calc(96 / 16 * 1rem) 1fr; }
+    .p-profile__avatar { width: calc(96 / 16 * 1rem); height: calc(96 / 16 * 1rem); font-size: calc(34 / 16 * 1rem); }
+    .p-profile__meta { grid-column: 2; }
+    .p-profile__avatar { grid-row: span 3; }
+  }
+  .p-tags { display: flex; flex-wrap: wrap; gap: calc(8 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
 
+  /* ---------- コンセプト動画（このサイトの主役） ---------- */
+  .p-film {
+    display: grid;
+    gap: calc(16 / 16 * 1rem);
+    justify-items: center;
+  }
+  .p-film__frame {
+    position: relative;
+    width: min(72vw, calc(288 / 16 * 1rem));
+    aspect-ratio: 9 / 16;
+    border-radius: calc(16 / 16 * 1rem);
+    overflow: hidden;
+    background-color: var(--color-neutral-black);
+    box-shadow: var(--elevation-3);
+  }
+  .p-film__video { width: 100%; height: 100%; display: block; object-fit: contain; background-color: var(--color-neutral-black); }
   /* 動画の表紙。コーデックの都合でフレームを抜き出せないので自前で描く */
-  .film-cover {
-    position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 18px 16px;
-    border: 0; cursor: pointer; text-align: left; font: inherit; color: var(--text);
-    background:
-      radial-gradient(85% 55% at 22% 8%, color-mix(in srgb, var(--brand-1) 52%, transparent), transparent 70%),
-      radial-gradient(75% 50% at 88% 96%, color-mix(in srgb, var(--brand-2) 46%, transparent), transparent 72%),
-      linear-gradient(160deg, #10162a 0%, #070a12 60%, #05070c 100%);
+  .p-film__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(20 / 16 * 1rem) calc(16 / 16 * 1rem);
+    border: 0;
+    cursor: pointer;
+    text-align: start;
+    font-family: var(--font-family-sans);
+    color: var(--color-neutral-white);
+    background-color: var(--color-key-1100);
+    background-image: linear-gradient(160deg, var(--color-key-900) 0%, var(--color-key-1100) 58%, var(--color-primitive-blue-1200) 100%);
     transition: opacity 0.25s ease;
   }
-  .film-cover.is-hidden { opacity: 0; pointer-events: none; }
-  .fc-eyebrow {
-    font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
-    color: var(--brand-2); display: block;
+  .p-film__cover[hidden] { display: none; }
+  .p-film__eyebrow {
+    display: block;
+    font-family: var(--font-family-mono);
+    font-weight: bold;
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
+    letter-spacing: 0.18em;
+    color: var(--color-primitive-blue-200);
   }
-  .fc-title {
-    display: block; margin-top: 7px;
-    font-size: 21px; font-weight: 700; line-height: 1.18; letter-spacing: -0.015em;
-    color: #fff; text-wrap: balance;
+  .p-film__title {
+    display: block;
+    margin-block-start: calc(8 / 16 * 1rem);
+    font-weight: bold;
+    font-size: calc(24 / 16 * 1rem);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
   }
-  .fc-mid { display: grid; place-items: center; }
-  .fc-play {
-    width: 62px; height: 62px; border-radius: 50%;
-    display: grid; place-items: center;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7);
+  .p-film__play {
+    align-self: center;
+    width: calc(64 / 16 * 1rem);
+    height: calc(64 / 16 * 1rem);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background-color: var(--color-neutral-white);
+    color: var(--color-key-900);
+    box-shadow: var(--elevation-4);
   }
-  .fc-play svg { margin-left: 3px; }
-  .film-cover:hover .fc-play { transform: scale(1.06); }
-  .fc-play { transition: transform 0.18s ease; }
-  .fc-bottom { font-size: 11.5px; color: rgba(255, 255, 255, 0.72); font-weight: 600; }
-  .film-cap { font-size: 12.5px; color: var(--text-faint); text-align: center; margin: 12px auto 0; max-width: 340px; }
-
-  /* ---------- link list ---------- */
-  .links { display: grid; gap: 10px; }
-  .link-row {
-    display: flex; align-items: center; gap: 14px;
-    padding: 15px 16px;
-    background: color-mix(in srgb, var(--surface) 86%, transparent);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text); text-decoration: none;
-    box-shadow: var(--shadow-soft);
-    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
-    min-height: 66px;
+  .p-film__foot {
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
+    color: var(--color-primitive-blue-100);
   }
-  .link-row:hover { text-decoration: none; transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border)); }
-  .link-row:active { transform: scale(0.99); }
-  .link-ico {
-    width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px;
-    display: grid; place-items: center;
-    background: color-mix(in srgb, var(--accent, var(--brand-1)) 15%, transparent);
-    color: var(--accent, var(--brand-1));
-    border: 1px solid color-mix(in srgb, var(--accent, var(--brand-1)) 28%, transparent);
-  }
-  .link-txt { flex: 1 1 auto; min-width: 0; }
-  .link-txt b { display: block; font-size: 15.5px; font-weight: 650; }
-  .link-txt span { display: block; font-size: 12.5px; color: var(--text-faint); }
-  .link-row .chev { color: var(--text-faint); flex: 0 0 auto; }
-  .link-row.featured {
-    background:
-      linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
-      color-mix(in srgb, var(--surface) 92%, transparent);
-    border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  .p-film__caption {
+    max-width: calc(420 / 16 * 1rem);
+    margin: 0;
+    color: var(--color-neutral-solid-gray-700);
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.7;
+    text-align: center;
   }
 
-  /* ---------- projects ---------- */
-  .project {
-    margin-top: 16px; padding: 20px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    box-shadow: var(--shadow-soft);
+  /* ---------- リンク一覧（DADS Resource List を使う） ---------- */
+  .p-links { display: grid; row-gap: calc(12 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
+
+  /* ---------- プロジェクト ---------- */
+  .p-project__codename {
+    display: inline-block;
+    margin: 0 0 calc(8 / 16 * 1rem);
+    font-family: var(--font-family-mono);
+    font-weight: bold;
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
+    letter-spacing: 0.16em;
+    color: var(--color-key-900);
   }
-  /* 主役のプロジェクト（DevDayの応募軸）だけ強調する */
-  .project.is-lead {
-    margin-top: 28px;
-    border-color: color-mix(in srgb, var(--brand-2) 34%, var(--border));
-    background:
-      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 13%, transparent), transparent 62%),
-      color-mix(in srgb, var(--surface) 90%, transparent);
-    box-shadow: var(--shadow);
+  .p-project__links { display: grid; row-gap: calc(8 / 16 * 1rem); margin-block-start: calc(16 / 16 * 1rem); padding: 0; list-style: none; }
+  .p-project__link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(4 / 16 * 1rem) calc(12 / 16 * 1rem);
+    min-height: calc(48 / 16 * 1rem);
+    padding: calc(12 / 16 * 1rem) calc(16 / 16 * 1rem);
+    border: 1px solid var(--color-neutral-solid-gray-420);
+    border-radius: calc(8 / 16 * 1rem);
+    background-color: var(--color-neutral-white);
+    color: var(--color-key-900);
+    font-weight: bold;
+    font-size: calc(16 / 16 * 1rem);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    text-decoration: none;
   }
-  .codename {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 11.5px; font-weight: 700;
-    letter-spacing: 0.2em; color: var(--brand-2);
+  .p-project__link:any-link { color: var(--color-key-900); text-decoration: none; }
+  .p-project__link:visited { color: var(--color-key-900); }
+  @media (hover: hover) {
+    .p-project__link:hover { background-color: var(--color-key-50); text-decoration: underline; }
   }
-  .codename::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 10px var(--brand-2); }
-  .project h2 { font-size: 20px; margin: 10px 0 8px; }
-  .project p { font-size: 14px; color: var(--text-dim); margin-bottom: 16px; }
-  .project-links { display: grid; gap: 8px; }
-  .plink {
-    display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: 4px 10px;
-    padding: 12px 14px;
-    border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 600;
-    min-height: 48px;
+  .p-project__link:focus-visible {
+    outline: calc(4 / 16 * 1rem) solid var(--color-neutral-black);
+    outline-offset: calc(2 / 16 * 1rem);
+    box-shadow: 0 0 0 calc(2 / 16 * 1rem) var(--color-primitive-yellow-300);
   }
-  .plink svg { grid-row: 1; }
-  .plink:hover { text-decoration: none; border-color: var(--brand-2); }
-  .plink.cta { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); color: #06121f; border-color: transparent; }
-  .plink .pnote { grid-column: 2; font-weight: 400; font-size: 11.5px; opacity: 0.8; }
-  @media (min-width: 480px) {
-    .plink { grid-template-columns: 18px auto 1fr; }
-    .plink .pnote { grid-column: 3; grid-row: 1; text-align: right; }
+  .p-project__link[data-cta] {
+    border-color: transparent;
+    background-color: var(--color-key-900);
+    color: var(--color-neutral-white);
+  }
+  .p-project__link[data-cta]:any-link,
+  .p-project__link[data-cta]:visited { color: var(--color-neutral-white); }
+  @media (hover: hover) {
+    .p-project__link[data-cta]:hover { background-color: var(--color-key-1000); }
+  }
+  .p-project__link-note {
+    margin-inline-start: auto;
+    color: inherit;
+    font-weight: normal;
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
   }
 
-  /* ---------- actions ---------- */
-  .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 26px; }
+  /* ---------- QRダイアログ ---------- */
+  .p-qr-dialog {
+    width: min(calc(360 / 16 * 1rem), calc(100vw - 32px));
+    border: 1px solid var(--color-neutral-solid-gray-420);
+    border-radius: calc(8 / 16 * 1rem);
+    padding: calc(24 / 16 * 1rem);
+    background-color: var(--color-neutral-white);
+    color: var(--color-neutral-solid-gray-800);
+    box-shadow: var(--elevation-4);
+  }
+  .p-qr-dialog::backdrop { background-color: rgba(0, 0, 0, 0.6); }
+  .p-qr-dialog__frame {
+    display: block;
+    width: calc(232 / 16 * 1rem);
+    max-width: 100%;
+    margin: 0 auto calc(16 / 16 * 1rem);
+    border: 1px solid var(--color-neutral-solid-gray-200);
+    border-radius: calc(8 / 16 * 1rem);
+    padding: calc(12 / 16 * 1rem);
+    background-color: var(--color-neutral-white);
+  }
+  .p-qr-dialog__url {
+    margin: 0 0 calc(16 / 16 * 1rem);
+    font-family: var(--font-family-mono);
+    font-size: calc(14 / 16 * 1rem);
+    line-height: 1.5;
+    color: var(--color-neutral-solid-gray-700);
+    word-break: break-all;
+  }
 
-  /* ---------- QR sheet ---------- */
-  .sheet {
-    position: fixed; inset: 0; z-index: 100; display: none;
-    align-items: center; justify-content: center; padding: 20px;
-    background: rgba(4, 6, 12, 0.72); backdrop-filter: blur(6px);
+  /* ---------- トースト ---------- */
+  .p-toast {
+    position: fixed;
+    inset-inline: calc(16 / 16 * 1rem);
+    inset-block-end: calc(24 / 16 * 1rem);
+    z-index: 200;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    margin-inline: auto;
+    border-radius: calc(8 / 16 * 1rem);
+    padding: calc(12 / 16 * 1rem) calc(20 / 16 * 1rem);
+    background-color: var(--color-neutral-solid-gray-900);
+    color: var(--color-neutral-white);
+    font-size: calc(16 / 16 * 1rem);
+    line-height: 1.3;
+    box-shadow: var(--elevation-4);
+    opacity: 0;
+    transform: translateY(calc(12 / 16 * 1rem));
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
   }
-  .sheet[data-open="true"] { display: flex; }
-  .sheet-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 22px; max-width: 360px; width: 100%; text-align: center; box-shadow: var(--shadow);
-  }
-  .qr-frame { background: #fff; border-radius: 14px; padding: 14px; display: block; margin: 0 auto 14px; width: 232px; height: 232px; }
-  .qr-frame img { width: 100%; height: 100%; display: block; }
-
-  /* ---------- setup banner ---------- */
-  .setup {
-    margin: 0 auto 18px; max-width: var(--maxw);
-    border: 1px dashed color-mix(in srgb, var(--warn) 55%, transparent);
-    background: color-mix(in srgb, var(--warn) 10%, transparent);
-    color: var(--text); border-radius: var(--radius-sm);
-    padding: 12px 14px; font-size: 13px; margin-top: 56px;
-  }
-  .setup code { background: color-mix(in srgb, var(--warn) 16%, transparent); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
-
-  .toast {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
-    background: var(--surface-3); color: var(--text); border: 1px solid var(--border);
-    padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
-    opacity: 0; pointer-events: none; transition: all 0.22s ease; z-index: 200;
-  }
-  .toast[data-show="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  @media (min-width: 560px) {
-    .hero { padding-top: 48px; }
-    .hero h1 { font-size: 31px; }
-  }
+  .p-toast[data-show="true"] { opacity: 1; transform: none; }
 </style>
 </head>
 <body>
-<div class="aurora"></div>
-<div class="grid-lines"></div>
 
-<div class="top-controls">
-  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
-  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
-</div>
+<a class="p-skip-link dads-link" href="#main">
+  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
+</a>
 
-<main class="wrap">
-  <div id="setupBanner"></div>
-
-  <header class="hero">
-    <div class="avatar" id="avatar" aria-hidden="true"></div>
-    <h1 id="nameJa"></h1>
-    <div class="roman" id="nameRoman"></div>
-    <div id="nick"></div>
-    <div class="role" id="role"></div>
-    <div class="loc" id="loc"></div>
-    <p class="headline" id="headline"></p>
-  </header>
-
-  <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い -->
-  <section class="film" aria-label="Concept film">
-    <div class="film-frame">
-      <video id="film" playsinline preload="metadata" controlslist="nodownload">
-        <source src="assets/video/last-meters-en.mp4" type="video/mp4">
-      </video>
-      <button class="film-cover" id="filmPlay" type="button"
-              aria-label="Play the concept film, 2 minutes 24 seconds, English narration">
-        <span>
-          <span class="fc-eyebrow">LAST METERS</span>
-          <span class="fc-title">AI-first<br>Last Meters</span>
+<header class="p-header">
+  <div class="l-container p-header__inner">
+    <p class="p-header__brand">
+      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
+        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
+      </svg>
+      <span>
+        LAST METERS
+        <span class="p-header__sub">
+          <span data-l="ja">受け取りの実験</span><span data-l="en">An experiment in receiving</span>
         </span>
-        <span class="fc-mid">
-          <span class="fc-play">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="#06121f" aria-hidden="true">
-              <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2z"/>
-            </svg>
-          </span>
-        </span>
-        <span class="fc-bottom">
-          <span data-l="en">2:24 · English narration · tap to play</span>
-          <span data-l="ja">2分24秒 · 英語ナレーション · タップで再生</span>
-        </span>
-      </button>
-    </div>
-    <p class="film-cap">
-      <span data-l="en">The idea in two minutes — what breaks in delivery today, and what it looks like when
-        a parcel meets you instead of your address.</span>
-      <span data-l="ja">2分でわかる構想。いまの配送で何が壊れているのか、そして荷物が住所ではなく「人」に届くとどうなるのか。</span>
+      </span>
     </p>
-  </section>
-
-  <div class="wrap" style="padding:0"><div class="tags" id="tags"></div></div>
-
-
-  <nav class="links" id="links" aria-label="リンク一覧"></nav>
-
-  <div id="projects"></div>
-
-  <div class="actions">
-    <button class="btn btn-sm" id="qrBtn" type="button">
-      <span data-l="ja">QRを表示</span><span data-l="en">Show QR</span>
-    </button>
-    <button class="btn btn-sm" id="copyBtn" type="button">
-      <span data-l="ja">URLをコピー</span><span data-l="en">Copy link</span>
-    </button>
-    <button class="btn btn-sm hidden" id="shareBtn" type="button">
-      <span data-l="ja">共有</span><span data-l="en">Share</span>
-    </button>
-    <button class="btn btn-sm hidden" id="vcardBtn" type="button">
-      <span data-l="ja">連絡先を保存</span><span data-l="en">Save contact</span>
-    </button>
+    <div class="p-header__tools">
+      <span id="langBtn"></span>
+    </div>
   </div>
+</header>
 
-  <p class="footer">
-    <span id="footName"></span>
-    · <a href="./qr/"><span data-l="ja">QRを作り直す</span><span data-l="en">QR kit</span></a>
-    · <a href="./plan/"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></a>
-  </p>
+<main class="l-main" id="main">
+  <div class="l-container">
+
+    <div id="setupBanner" class="u-mb-24"></div>
+
+    <!-- ===== プロフィール ===== -->
+    <section class="l-section" aria-labelledby="profile-heading">
+      <div class="p-profile">
+        <div class="p-profile__avatar" id="avatar" aria-hidden="true"></div>
+        <div class="p-profile__names">
+          <h1 class="p-profile__name" id="nameJa"></h1>
+          <p class="p-profile__roman" id="nameRoman"></p>
+        </div>
+        <div class="p-profile__meta l-stack" data-gap="4">
+          <p class="p-profile__role" id="role"></p>
+          <p class="p-profile__loc"><span id="loc"></span><span id="nick"></span></p>
+        </div>
+      </div>
+      <h2 id="profile-heading" class="dads-u-visually-hidden">
+        <span data-l="ja">プロフィール</span><span data-l="en">Profile</span>
+      </h2>
+      <p class="u-mt-16" id="headline"></p>
+      <ul class="p-tags u-mt-16" id="tags" aria-label="Focus areas"></ul>
+    </section>
+
+    <!-- ===== コンセプト動画（主役） ===== -->
+    <section class="l-section" aria-labelledby="film-heading">
+      <div class="dads-heading" data-size="20" data-chip style="margin-block-end: calc(16 / 16 * 1rem);">
+        <h2 id="film-heading" class="dads-heading__heading">
+          <span data-l="ja">2分で見る構想</span><span data-l="en">The idea in two minutes</span>
+        </h2>
+      </div>
+      <div class="p-film">
+        <div class="p-film__frame">
+          <video class="p-film__video" id="film" playsinline preload="metadata" controlslist="nodownload"></video>
+          <button class="p-film__cover" id="filmPlay" type="button">
+            <span>
+              <span class="p-film__eyebrow">LAST METERS</span>
+              <span class="p-film__title">AI-first<br>Last Meters</span>
+            </span>
+            <span class="p-film__play" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentcolor">
+                <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.6-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2z"/>
+              </svg>
+            </span>
+            <span class="p-film__foot">
+              <span data-l="en">2:24 · English narration · tap to play</span>
+              <span data-l="ja">2分24秒 · 英語ナレーション · タップで再生</span>
+            </span>
+          </button>
+        </div>
+        <p class="p-film__caption">
+          <span data-l="en">What breaks in delivery today, and what it looks like when a parcel meets you
+            instead of your address.</span>
+          <span data-l="ja">いまの配送で何が壊れているのか、そして荷物が住所ではなく「人」に届くとどうなるのか。</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== プロジェクト ===== -->
+    <section class="l-section" aria-labelledby="project-heading" id="projects"></section>
+
+    <!-- ===== リンク ===== -->
+    <section class="l-section" aria-labelledby="links-heading">
+      <div class="dads-heading" data-size="20" data-chip style="margin-block-end: calc(16 / 16 * 1rem);">
+        <h2 id="links-heading" class="dads-heading__heading">
+          <span data-l="ja">リンク</span><span data-l="en">Find me here</span>
+        </h2>
+      </div>
+      <ul class="p-links" id="links"></ul>
+    </section>
+
+    <!-- ===== 操作 ===== -->
+    <section class="l-section" aria-labelledby="actions-heading">
+      <h2 id="actions-heading" class="dads-u-visually-hidden">
+        <span data-l="ja">このページの操作</span><span data-l="en">Page actions</span>
+      </h2>
+      <div class="l-cluster">
+        <button class="dads-button" data-type="outline" data-size="md" id="qrBtn" type="button">
+          <span data-l="ja">QRを表示</span><span data-l="en">Show QR</span>
+        </button>
+        <button class="dads-button" data-type="outline" data-size="md" id="copyBtn" type="button">
+          <span data-l="ja">URLをコピー</span><span data-l="en">Copy link</span>
+        </button>
+        <button class="dads-button u-hidden" data-type="outline" data-size="md" id="shareBtn" type="button">
+          <span data-l="ja">共有</span><span data-l="en">Share</span>
+        </button>
+        <button class="dads-button u-hidden" data-type="outline" data-size="md" id="vcardBtn" type="button">
+          <span data-l="ja">連絡先を保存</span><span data-l="en">Save contact</span>
+        </button>
+      </div>
+    </section>
+
+  </div>
 </main>
 
-<div class="sheet" id="qrSheet" role="dialog" aria-modal="true" aria-label="このページのQRコード">
-  <div class="sheet-card">
-    <div class="eyebrow" style="margin-bottom:12px">SCAN ME</div>
-    <span class="qr-frame"><img src="assets/qr/profile-qr.svg" alt="このページへのQRコード" id="qrImg"></span>
-    <div class="small mono" id="qrUrl" style="word-break:break-all;color:var(--text-faint);margin-bottom:14px"></div>
-    <button class="btn btn-sm" id="qrClose" type="button">
-      <span data-l="ja">閉じる</span><span data-l="en">Close</span>
-    </button>
+<footer class="p-footer">
+  <div class="l-container">
+    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
+    <ul class="p-footer__links">
+      <li><a class="dads-utility-link" href="./app/"><span class="dads-utility-link__label"><span data-l="ja">デモ</span><span data-l="en">Demo</span></span></a></li>
+      <li><a class="dads-utility-link" href="./pitch/"><span class="dads-utility-link__label"><span data-l="ja">構想</span><span data-l="en">Pitch</span></span></a></li>
+      <li><a class="dads-utility-link" href="./plan/"><span class="dads-utility-link__label"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></span></a></li>
+      <li><a class="dads-utility-link" href="./launchpad/"><span class="dads-utility-link__label">Launchpad</span></a></li>
+      <li><a class="dads-utility-link" href="./qr/"><span class="dads-utility-link__label"><span data-l="ja">QRキット</span><span data-l="en">QR kit</span></span></a></li>
+    </ul>
+    <p class="p-footer__note" id="footName"></p>
+    <p class="p-footer__note">
+      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
+      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
+    </p>
   </div>
-</div>
+</footer>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog class="p-qr-dialog" id="qrDialog" aria-labelledby="qr-dialog-heading">
+  <h2 id="qr-dialog-heading" class="dads-u-std-18B-160 u-no-margin u-mb-16" style="text-align:center">
+    <span data-l="ja">このページのQRコード</span><span data-l="en">QR code for this page</span>
+  </h2>
+  <span class="p-qr-dialog__frame"><img src="assets/qr/profile-qr.svg" alt="" id="qrImg" width="208" height="208"></span>
+  <p class="p-qr-dialog__url" id="qrUrl"></p>
+  <button class="dads-button" data-type="outline" data-size="md" id="qrClose" type="button" style="margin-inline:auto">
+    <span data-l="ja">閉じる</span><span data-l="en">Close</span>
+  </button>
+</dialog>
+
+<p class="p-toast" id="toast" role="status" aria-live="polite"></p>
 
 <noscript>
-  <div class="wrap" style="padding:40px 16px">
-    <p>このページはJavaScriptでリンクを描画しています。JavaScriptを有効にしてください。</p>
-    <p><a href="https://github.com/eigokono1058-tech">GitHub</a></p>
+  <div class="l-container" style="padding-block:calc(40 / 16 * 1rem)">
+    <div class="dads-notification-banner" data-style="standard" data-type="warning">
+      <h2 class="dads-notification-banner__heading">
+        <svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="警告">
+          <path d="M12 2 1.5 20.5h21L12 2Zm0 5 7 12.5H5L12 7Zm-1 3.5v4h2v-4h-2Zm0 5.5v2h2v-2h-2Z" fill="currentcolor"/>
+        </svg>
+        <span class="dads-notification-banner__heading-text">JavaScriptを有効にしてください / Please enable JavaScript</span>
+      </h2>
+      <div class="dads-notification-banner__body">
+        <p>このページはJavaScriptでリンクを描画しています。/ This page renders its links with JavaScript.</p>
+        <p><a class="dads-link" href="https://github.com/eigokono1058-tech">GitHub</a></p>
+      </div>
+    </div>
   </div>
 </noscript>
 
-<script src="assets/js/theme.js"></script>
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/profile-config.js"></script>
 <script src="assets/js/profile.js"></script>
 <script>
-  /* 表紙をタップしたら再生する。終わったら表紙に戻す */
+  /* 表紙をタップしたら再生する。終わったら表紙に戻す。
+     動画は表紙を押すまで読み込まない（会場の回線を無駄に使わないため）。 */
   (function () {
     var film = document.getElementById("film");
     var cover = document.getElementById("filmPlay");
     if (!film || !cover) return;
+
+    var SRC = "assets/video/last-meters-en.mp4";
+    var loaded = false;
+
+    function label() {
+      var ja = "コンセプト動画を再生（2分24秒・英語ナレーション）";
+      var en = "Play the concept film, 2 minutes 24 seconds, English narration";
+      cover.setAttribute("aria-label",
+        window.LM_I18N && window.LM_I18N.lang === "ja" ? ja : en);
+    }
+    label();
+    if (window.LM_I18N) window.LM_I18N.onChange(label);
+
     cover.addEventListener("click", function () {
-      cover.classList.add("is-hidden");
+      if (!loaded) {
+        var s = document.createElement("source");
+        s.src = SRC;
+        s.type = "video/mp4";
+        film.appendChild(s);
+        film.load();
+        loaded = true;
+      }
+      cover.hidden = true;
       film.setAttribute("controls", "");
+      film.focus();
       var played = film.play();
-      // 自動再生がブロックされた場合はコントロールから再生してもらう
-      if (played && played.catch) played.catch(function () {});
+      if (played && played.catch) played.catch(function () { /* controls から再生してもらう */ });
     });
     film.addEventListener("ended", function () {
-      cover.classList.remove("is-hidden");
+      cover.hidden = false;
       film.removeAttribute("controls");
     });
   })();

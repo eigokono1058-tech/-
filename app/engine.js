@@ -489,19 +489,23 @@ window.LM_ENGINE = (function () {
     if (exc.id === "locker_full" && canAuto) {
       var alt = pickAlternative(parcel, t.pointId);
       if (alt) {
-        t.exception.resolvedBy = "auto";
-        t.exception.note = {
+        /* assign() は受取先の変更にあたって例外をクリアするので、
+           自動復旧の表示はいったん手元に持っておき、あとで入れ直す。 */
+        var recovered = t.exception;
+        recovered.resolvedBy = "auto";
+        recovered.note = {
           ja: "自動再ルート → " + tl(alt.name, "ja"),
           en: "Auto rerouted → " + tl(alt.name, "en")
         };
-        log("AUTO_REMEDIATION", parcelId, exc.autoAction, { level: "ok", holder: t.holder });
-        assign(parcelId, alt.id, { approved: true });
-        t.exception.label = {
+        recovered.label = {
           ja: tl(exc.label, "ja") + "（自動復旧済み）",
           en: tl(exc.label, "en") + " (auto-recovered)"
         };
+        log("AUTO_REMEDIATION", parcelId, exc.autoAction, { level: "ok", holder: t.holder });
+        assign(parcelId, alt.id, { approved: true });
+        t.exception = recovered;
         emit();
-        return t.exception;
+        return recovered;
       }
     }
     if (canAuto && exc.id !== "locker_full") {
