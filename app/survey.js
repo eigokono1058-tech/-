@@ -1,7 +1,10 @@
 /* ==========================================================================
    LAST METERS — 需要検証フォーム / demand validation survey (ja + en)
-   保存先はブラウザのlocalStorage。集計・CSV/JSON書き出しに対応。
-   window.LM_SURVEY_ENDPOINT を設定すると、そのURLへPOSTも試行する。
+   回答はまずサーバー（Cloudflare Workers + D1）へ送り、同時にこの端末の
+   localStorage にも残す。サーバーが無い／落ちている／オフラインでも、
+   回答は端末に残るので取りこぼさない。集計は、サーバーがあればサーバーの
+   全件集計を、無ければこの端末に溜まった分を表示する。
+   送信先は window.LM_SURVEY_API（既定 "/api/survey"）。
 
    フォームはデジタル庁デザインシステムの Form Control Label / Radio /
    Checkbox / Textarea / Button / Error Text に準拠している。
@@ -114,6 +117,26 @@ window.LM_SURVEY = (function () {
       ja: "まだ回答がありません。イベントで人に触ってもらって、このページに数字が溜まっていく状態をつくってください。",
       en: "No responses yet. Hand the demo to people at the event and let the numbers pile up here."
     },
+    fromServer: {
+      ja: "全端末の合計を表示しています（サーバー集計）。",
+      en: "Showing the combined total from every device (server-side)."
+    },
+    alsoLocal: {
+      ja: "うち、この端末からの回答は{n}件です。",
+      en: "{n} of them were answered on this device."
+    },
+    fromLocal: {
+      ja: "この端末に保存された回答だけを表示しています。",
+      en: "Showing only the responses stored on this device."
+    },
+    fromLocalOffline: {
+      ja: "サーバーに接続できないため、この端末に保存された回答だけを表示しています。",
+      en: "Could not reach the server, so this shows only the responses stored on this device."
+    },
+    exportNote: {
+      ja: "※「書き出し」はこの端末に保存された分だけです。全端末ぶんは /api/survey/export から取得してください。",
+      en: "Export covers this device only. For every device, use /api/survey/export."
+    },
     nResp: { ja: "回答数", en: "Responses" },
     avgIntent: { ja: "利用意向 平均（5点満点）", en: "Mean intent (out of 5)" },
     top2: { ja: "「使いたい」以上", en: "Rated 4 or 5" },
@@ -135,6 +158,24 @@ window.LM_SURVEY = (function () {
 
   var answers = { role: null, intent: null, freq: null, scenes: [], wtp: null, fears: [], note: "" };
   var showErrors = false;
+
+  /* 送信先。同じドメインのWorkerが受ける。null にすると端末保存のみになる。 */
+  var API = window.LM_SURVEY_API !== undefined ? window.LM_SURVEY_API : "/api/survey";
+  var serverStats = null;   // サーバーから取れた集計（取れなければ null）
+  var serverDown = false;   // 一度でも失敗したら、以降は端末の集計を出す
+
+  /* 端末を区別するだけのランダム値。個人とは結びつかない。 */
+  function clientId() {
+    var KEY = "lm-client-id";
+    try {
+      var v = localStorage.getItem(KEY);
+      if (!v) {
+        v = "c_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+        localStorage.setItem(KEY, v);
+      }
+      return v;
+    } catch (e) { return null; }
+  }
 
   /* ---------- storage ---------- */
   function load() {
@@ -312,18 +353,37 @@ window.LM_SURVEY = (function () {
       note: answers.note,
       autonomyAtAnswer: window.LM_ENGINE ? window.LM_ENGINE.state.autonomy : null
     };
+    // 端末には必ず残す（サーバーが落ちていても回答を失わないため）
     var list = load();
     list.push(rec);
     var ok = save(list);
 
-    if (window.LM_SURVEY_ENDPOINT) {
+    // サーバーにも送る。失敗しても端末の分が残るので、ここでは止めない。
+    if (API) {
       try {
-        fetch(window.LM_SURVEY_ENDPOINT, {
+        fetch(API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(rec)
-        }).catch(function () { /* オフラインでも回答は残る */ });
-      } catch (e) { /* ignore */ }
+          body: JSON.stringify({
+            id: rec.id,
+            at: rec.at,
+            clientId: clientId(),
+            lang: rec.lang,
+            role: rec.role,
+            intent: rec.intent,
+            freq: rec.freq,
+            scenes: rec.scenes,
+            wtp: rec.wtp,
+            fears: rec.fears,
+            note: rec.note,
+            autonomy: rec.autonomyAtAnswer,
+            source: location.pathname
+          }),
+          keepalive: true
+        }).then(function () {
+          fetchStats().then(renderStats);
+        }).catch(function () { serverDown = true; });
+      } catch (e) { serverDown = true; }
     }
 
     answers = { role: null, intent: null, freq: null, scenes: [], wtp: null, fears: [], note: "" };
@@ -351,52 +411,114 @@ window.LM_SURVEY = (function () {
   }
 
   /* ---------- 集計 ---------- */
+  /** サーバー側の全件集計を取りに行く。取れなければ端末の集計にフォールバックする。 */
+  function fetchStats() {
+    if (!API || serverDown) return Promise.resolve(null);
+    return fetch(API + "/stats", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        serverStats = j && j.ok ? j : null;
+        if (!serverStats) serverDown = true;
+        return serverStats;
+      })
+      .catch(function () { serverDown = true; serverStats = null; return null; });
+  }
+
+  /** サーバーの集計を、この画面が使う形に揃える */
+  function fromServer(j) {
+    var byRole = {};
+    (j.byRole || []).forEach(function (r) { byRole[r.role] = r; });
+    var byWtp = {};
+    (j.byWtp || []).forEach(function (r) { byWtp[String(r.wtp)] = r.n; });
+    return {
+      total: j.total,
+      avg: j.avgIntent || 0,
+      top2: j.total ? (j.top2 / j.total) * 100 : 0,
+      payers: j.total ? (j.payers / j.total) * 100 : 0,
+      roleAvg: function (v) { return byRole[v] ? { n: byRole[v].n, avg: byRole[v].avg_intent } : { n: 0, avg: 0 }; },
+      sceneCount: function (v) { return (j.scenes || {})[v] || 0; },
+      fearCount: function (v) { return (j.fears || {})[v] || 0; },
+      wtpCount: function (v) { return byWtp[String(v)] || 0; },
+      notes: (j.recent || []).map(function (r) { return { role: r.role, intent: r.intent, note: r.note }; })
+    };
+  }
+
+  /** この端末に溜まった回答を、同じ形に揃える */
+  function fromLocal(list) {
+    var intents = list.map(function (r) { return r.intent; });
+    return {
+      total: list.length,
+      avg: intents.reduce(function (a, b) { return a + b; }, 0) / list.length,
+      top2: intents.filter(function (v) { return v >= 4; }).length / list.length * 100,
+      payers: list.filter(function (r) { return r.wtp > 0; }).length / list.length * 100,
+      roleAvg: function (v) {
+        var sub = list.filter(function (x) { return x.role === v; });
+        return {
+          n: sub.length,
+          avg: sub.length ? sub.reduce(function (a, b) { return a + b.intent; }, 0) / sub.length : 0
+        };
+      },
+      sceneCount: function (v) {
+        return list.filter(function (x) { return (x.scenes || []).indexOf(v) !== -1; }).length;
+      },
+      fearCount: function (v) {
+        return list.filter(function (x) { return (x.fears || []).indexOf(v) !== -1; }).length;
+      },
+      wtpCount: function (v) { return list.filter(function (x) { return x.wtp === v; }).length; },
+      notes: list.filter(function (r) { return r.note && r.note.trim(); }).slice(-8).reverse()
+        .map(function (r) { return { role: r.role, intent: r.intent, note: r.note }; })
+    };
+  }
+
   function renderStats() {
     var box = $("surveyStats");
     if (!box) return;
     var list = load();
-    if (!list.length) {
+    var useServer = !!(serverStats && serverStats.total);
+    if (!useServer && !list.length) {
       box.innerHTML = '<p class="u-text-support">' + esc(t(Q.empty)) + "</p>";
       return;
     }
-    var intents = list.map(function (r) { return r.intent; });
-    var avg = intents.reduce(function (a, b) { return a + b; }, 0) / intents.length;
-    var top2 = intents.filter(function (v) { return v >= 4; }).length / intents.length * 100;
-    var payers = list.filter(function (r) { return r.wtp > 0; }).length / list.length * 100;
+    var d = useServer ? fromServer(serverStats) : fromLocal(list);
+    var avg = d.avg, top2 = d.top2, payers = d.payers;
 
-    var h = '<ul class="s-stats">' +
-      stat(list.length, t(Q.nResp)) +
+    var h = '<p class="u-text-note u-mb-16">' +
+      (useServer
+        ? esc(t(Q.fromServer)) + (list.length ? " " + esc(t(Q.alsoLocal)).replace("{n}", list.length) : "")
+        : esc(t(API && serverDown ? Q.fromLocalOffline : Q.fromLocal))) + "</p>";
+
+    h += '<ul class="s-stats">' +
+      stat(d.total, t(Q.nResp)) +
       stat(avg.toFixed(2), t(Q.avgIntent)) +
       stat(Math.round(top2) + "%", t(Q.top2)) +
       stat(Math.round(payers) + "%", t(Q.payers)) +
       "</ul>";
 
     h += barGroup(t(Q.byRole), ROLES.map(function (r) {
-      var sub = list.filter(function (x) { return x.role === r.v; });
-      var v = sub.length ? sub.reduce(function (a, b) { return a + b.intent; }, 0) / sub.length : 0;
+      var g = d.roleAvg(r.v);
       return {
         label: t(r.l).replace(/（.*/, ""),
-        value: v, max: 5,
-        display: sub.length ? v.toFixed(1) + " (n=" + sub.length + ")" : "—"
+        value: g.avg, max: 5,
+        display: g.n ? g.avg.toFixed(1) + " (n=" + g.n + ")" : "—"
       };
     }));
 
     h += barGroup(t(Q.byScene), SCENES.map(function (s) {
-      var c = list.filter(function (x) { return (x.scenes || []).indexOf(s.v) !== -1; }).length;
-      return { label: t(s.l), value: c, max: list.length, display: String(c) };
+      var c = d.sceneCount(s.v);
+      return { label: t(s.l), value: c, max: d.total, display: String(c) };
     }).sort(function (a, b) { return b.value - a.value; }));
 
     h += barGroup(t(Q.byWtp), WTP.map(function (w) {
-      var c = list.filter(function (x) { return x.wtp === w.v; }).length;
-      return { label: t(w.l), value: c, max: list.length, display: String(c) };
+      var c = d.wtpCount(w.v);
+      return { label: t(w.l), value: c, max: d.total, display: String(c) };
     }));
 
     h += barGroup(t(Q.byFear), FEARS.map(function (f) {
-      var c = list.filter(function (x) { return (x.fears || []).indexOf(f.v) !== -1; }).length;
-      return { label: t(f.l), value: c, max: list.length, display: String(c) };
+      var c = d.fearCount(f.v);
+      return { label: t(f.l), value: c, max: d.total, display: String(c) };
     }).sort(function (a, b) { return b.value - a.value; }));
 
-    var notes = list.filter(function (r) { return r.note && r.note.trim(); }).slice(-6).reverse();
+    var notes = d.notes;
     if (notes.length) {
       h += '<h3 class="dads-u-std-17B-170 u-mt-24 u-mb-8">' + esc(t(Q.recent)) + "</h3>" +
         '<ul class="s-notes">' + notes.map(function (r) {
@@ -411,7 +533,8 @@ window.LM_SURVEY = (function () {
     h += '<div class="l-cluster u-mt-24">' +
       '<button class="dads-button" data-type="outline" data-size="md" id="expCsv" type="button">' + esc(t(Q.expCsv)) + "</button>" +
       '<button class="dads-button" data-type="outline" data-size="md" id="expJson" type="button">' + esc(t(Q.expJson)) + "</button>" +
-      '<button class="dads-button" data-type="text" data-size="md" id="clearAll" type="button">' + esc(t(Q.clear)) + "</button></div>";
+      '<button class="dads-button" data-type="text" data-size="md" id="clearAll" type="button">' + esc(t(Q.clear)) + "</button></div>" +
+      '<p class="u-text-note u-mt-8">' + esc(t(Q.exportNote)) + "</p>";
 
     box.innerHTML = h;
     $("expCsv").addEventListener("click", exportCsv);
@@ -472,8 +595,12 @@ window.LM_SURVEY = (function () {
   }
 
   return {
-    init: function () { renderForm(); renderStats(); },
-    refresh: function () { renderStats(); },
+    init: function () {
+      renderForm();
+      renderStats();
+      fetchStats().then(renderStats);
+    },
+    refresh: function () { renderStats(); fetchStats().then(renderStats); },
     relang: function () { renderForm(); renderStats(); },
     count: function () { return load().length; }
   };

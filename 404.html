@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ページが見つかりません — LAST METERS</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0017c1">
+<link rel="icon" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="/assets/css/dads/global.css">
+<link rel="stylesheet" href="/assets/css/dads/components.css">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script src="/assets/js/i18n.js"></script>
+</head>
+<body>
+
+<a class="p-skip-link dads-link" href="#main">
+  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
+</a>
+
+<header class="p-header">
+  <div class="l-container p-header__inner">
+    <a class="p-header__brand" href="/">
+      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
+        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
+      </svg>
+      <span>LAST METERS</span>
+    </a>
+    <div class="p-header__tools"><span id="langBtn"></span></div>
+  </div>
+</header>
+
+<main class="l-main" id="main">
+  <div class="l-container">
+
+    <div class="dads-notification-banner" data-style="standard" data-type="warning">
+      <h1 class="dads-notification-banner__heading">
+        <svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="警告">
+          <path d="M12 2 1.5 20.5h21L12 2Zm0 5 7 12.5H5L12 7Zm-1 3.5v4h2v-4h-2Zm0 5.5v2h2v-2h-2Z" fill="currentcolor"/>
+        </svg>
+        <span class="dads-notification-banner__heading-text">
+          <span data-l="ja">ページが見つかりません（404）</span>
+          <span data-l="en">Page not found (404)</span>
+        </span>
+      </h1>
+      <div class="dads-notification-banner__body">
+        <p>
+          <span data-l="ja">URLが変わったか、入力に誤りがあるようです。下のリンクから探してみてください。</span>
+          <span data-l="en">The address may have changed, or there is a typo. Try one of the links below.</span>
+        </p>
+      </div>
+    </div>
+
+    <nav class="dads-toc u-mt-32" data-border="solid" aria-labelledby="sitemap-heading">
+      <h2 id="sitemap-heading" class="dads-toc__heading">
+        <span data-l="ja">このサイトのページ</span><span data-l="en">Pages on this site</span>
+      </h2>
+      <ul class="dads-list" data-spacing="8">
+        <li><a class="dads-link" href="/"><span data-l="ja">プロフィール（トップ）</span><span data-l="en">Profile (home)</span></a></li>
+        <li><a class="dads-link" href="/app/"><span data-l="ja">動くデモ</span><span data-l="en">Live demo</span></a></li>
+        <li><a class="dads-link" href="/pitch/"><span data-l="ja">構想（ピッチ）</span><span data-l="en">Pitch</span></a></li>
+        <li><a class="dads-link" href="/plan/"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></a></li>
+        <li><a class="dads-link" href="/launchpad/">Launchpad</a></li>
+        <li><a class="dads-link" href="/qr/"><span data-l="ja">QRキット</span><span data-l="en">QR kit</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="l-cluster u-mt-32">
+      <a class="dads-button" data-type="solid-fill" data-size="lg" href="/">
+        <span data-l="ja">トップへ戻る</span><span data-l="en">Back to home</span>
+      </a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="p-footer">
+  <div class="l-container">
+    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
+    <p class="p-footer__note">
+      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
+      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
+    </p>
+  </div>
+</footer>
+
+<script>
+  if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
+</script>
+</body>
+</html>

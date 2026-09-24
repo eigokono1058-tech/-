@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // ------------------------------------------------------------------
+  // LAST METERS — Cloudflare Workers（静的アセット + アンケートAPI）
+  //
+  // サイト本体はリポジトリのルートをそのまま配信する（ファイルは移動しない）。
+  // 配信したくないファイルは .assetsignore に書く。
+  // GitHub Pages も並行して動くので、どちらからでも同じサイトが開く。
+  //
+  //   npx wrangler dev      ローカルで確認（http://localhost:8787）
+  //   npx wrangler deploy   公開
+  // ------------------------------------------------------------------
+  "name": "last-meters",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-24",
+
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    // 実在しないパスは 404.html を返す（SPAではないので single-page-application にしない）
+    "not_found_handling": "404-page"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lastmeters-survey",
+      "database_id": "70f63274-169c-4f61-9f2e-7e329e08bebf"
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+
+  // 独自ドメインを取ったら、ここを外して自分のドメインに書き換える。
+  // （Cloudflare Registrar で取得＝そのままゾーンが入るので、これだけで繋がる）
+  //
+  // "routes": [
+  //   { "pattern": "lastmeters.com", "custom_domain": true },
+  //   { "pattern": "www.lastmeters.com", "custom_domain": true }
+  // ]
+}

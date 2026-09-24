@@ -1,0 +1,16 @@
+{
+  "name": "last-meters",
+  "private": true,
+  "type": "module",
+  "description": "LAST METERS — プロフィール／デモ／事業計画。Cloudflare Workers（静的アセット + アンケートAPI）で配信する。",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute lastmeters-survey --remote --file=./worker/schema.sql",
+    "db:count": "wrangler d1 execute lastmeters-survey --remote --command \"SELECT COUNT(*) AS n FROM responses\"",
+    "qr": "python3 tools/gen_qr.py"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
