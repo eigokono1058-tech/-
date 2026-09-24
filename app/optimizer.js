@@ -142,14 +142,14 @@ window.LM_OPT = (function () {
      受取人の「受け取れる場所の集合」と、車両とロッカーの制約を持つ。
      ====================================================================== */
   var NET_HUBS = {
-    shibuya:   { id: "shibuya",   name: { ja: "渋谷ロッカー", en: "Shibuya locker" },   free: 2,  vehicle: "v1" },
-    shinjuku:  { id: "shinjuku",  name: { ja: "新宿ロッカー", en: "Shinjuku locker" },  free: 10, vehicle: "v1" },
-    shinagawa: { id: "shinagawa", name: { ja: "品川ロッカー", en: "Shinagawa locker" }, free: 10, vehicle: "v2" }
+    mission:   { id: "mission",   name: { ja: "ミッションのロッカー", en: "Mission locker" },   free: 2,  vehicle: "v1" },
+    soma:      { id: "soma",      name: { ja: "SoMaのロッカー", en: "SoMa locker" },  free: 10, vehicle: "v1" },
+    downtown:  { id: "downtown",  name: { ja: "ダウンタウンのロッカー", en: "Downtown locker" }, free: 10, vehicle: "v2" }
   };
 
   var NET_VEHICLES = {
-    v1: { id: "v1", name: { ja: "配送車1（渋谷方面）", en: "Vehicle 1 (towards Shibuya)" }, baseKm: 6.0 },
-    v2: { id: "v2", name: { ja: "配送車2（品川方面）", en: "Vehicle 2 (towards Shinagawa)" }, baseKm: 5.4 }
+    v1: { id: "v1", name: { ja: "配送車1（ミッション方面）", en: "Vehicle 1 (towards the Mission)" }, baseKm: 6.0 },
+    v2: { id: "v2", name: { ja: "配送車2（ダウンタウン方面）", en: "Vehicle 2 (towards Downtown)" }, baseKm: 5.4 }
   };
 
   /* pref は受取人にとっての望ましさ（大きいほど良い）。km は配送側の追加走行。 */
@@ -157,21 +157,21 @@ window.LM_OPT = (function () {
     {
       id: "A", name: { ja: "利用者A", en: "User A" },
       can: [
-        { hub: "shibuya",  pref: 10, km: 1.2 },
-        { hub: "shinjuku", pref: 9,  km: 1.6 }
+        { hub: "mission",  pref: 10, km: 1.2 },
+        { hub: "soma", pref: 9,  km: 1.6 }
       ]
     },
     {
       id: "B", name: { ja: "利用者B", en: "User B" },
       can: [
-        { hub: "shibuya",  pref: 10, km: 1.0 }
+        { hub: "mission",  pref: 10, km: 1.0 }
       ]
     },
     {
       id: "C", name: { ja: "利用者C", en: "User C" },
       can: [
-        { hub: "shibuya",   pref: 9, km: 3.4 },
-        { hub: "shinagawa", pref: 8, km: 1.1 }
+        { hub: "mission",   pref: 9, km: 3.4 },
+        { hub: "downtown", pref: 8, km: 1.1 }
       ]
     }
   ];
