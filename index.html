@@ -226,8 +226,12 @@
     <p class="headline" id="headline"></p>
   </header>
 
-  <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い -->
-  <section class="film" aria-label="Concept film">
+  <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い。
+
+       いまは hidden で伏せてある。本人が作り直した動画を差し込むまでの措置。
+       差し替えるときは assets/video/delivery-os.mp4 を置き換えて、
+       この hidden を外し、下の秒数の表記を直すだけでよい。 -->
+  <section class="film" aria-label="Concept film" hidden>
     <div class="film-frame">
       <video id="film" playsinline preload="metadata" controlslist="nodownload"
              poster="assets/video/delivery-os-poster.jpg?v=2" crossorigin="anonymous">
@@ -273,9 +277,6 @@
     </button>
     <button class="btn btn-sm hidden" id="shareBtn" type="button">
       <span data-l="ja">共有</span><span data-l="en">Share</span>
-    </button>
-    <button class="btn btn-sm hidden" id="vcardBtn" type="button">
-      <span data-l="ja">連絡先を保存</span><span data-l="en">Save contact</span>
     </button>
   </div>
 

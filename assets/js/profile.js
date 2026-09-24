@@ -24,7 +24,6 @@
     email: { ja: "Email", en: "Email" },
     copied: { ja: "URLをコピーしました", en: "URL copied" },
     copyFail: { ja: "コピーできませんでした", en: "Could not copy" },
-    vcardDone: { ja: "連絡先カードを書き出しました", en: "Contact card downloaded" },
     linksLabel: { ja: "リンク一覧", en: "Links" }
   };
 
@@ -246,43 +245,6 @@
         text: t(P.headline),
         url: shareUrl
       }).catch(function () { /* cancelled */ });
-    });
-  }
-
-  /* ---------- vCard ---------- */
-  var vcardBtn = $("vcardBtn");
-  if (vcardBtn && P.enableVCard && !isUnset(P.name)) {
-    vcardBtn.classList.remove("hidden");
-    vcardBtn.addEventListener("click", function () {
-      var roleParts = isUnset(P.role) ? [] : String(t(P.role)).split(/\s*\/\s*/);
-      var title = roleParts[0] || "";
-      var org = roleParts[1] || "";
-      var lines = [
-        "BEGIN:VCARD",
-        "VERSION:3.0",
-        "FN:" + P.name,
-        P.nickname && !isUnset(P.nickname) ? "NICKNAME:" + P.nickname : null,
-        "N:" + P.name.split(/\s+/).reverse().join(";") + ";;;",
-        isUnset(P.nameJa) ? null : "NOTE:" + P.nameJa + " / " + t(P.headline),
-        title ? "TITLE:" + title : null,
-        org ? "ORG:" + org : null,
-        P.email ? "EMAIL;TYPE=INTERNET:" + P.email : null,
-        "URL:" + shareUrl
-      ];
-      visible.forEach(function (l) {
-        var href = t(l.url);
-        if (/^https?:/.test(href)) lines.push("URL;TYPE=" + l.id + ":" + href);
-      });
-      lines.push("END:VCARD");
-      var blob = new Blob([lines.filter(Boolean).join("\r\n") + "\r\n"], { type: "text/vcard;charset=utf-8" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = (isUnset(P.name) ? "contact" : P.name.replace(/\s+/g, "-").toLowerCase()) + ".vcf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      showToast(t(UI.vcardDone));
     });
   }
 

@@ -56,9 +56,6 @@ window.PROFILE = {
   email: "",
   // email: "eigo.kono.pa@hitachi.com",
 
-  // 連絡先カード(.vcf)のダウンロードボタンを出すか
-  enableVCard: true,
-
   /* ---- リンク / links -------------------------------------------------
      order 順に表示。url に "REPLACE_ME" が含まれる項目は非表示になります。  */
   links: [

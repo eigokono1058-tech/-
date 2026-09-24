@@ -85,20 +85,6 @@
   .rung.no { border-color: color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
   .rung.no .rl { color: var(--danger); }
 
-  /* ---- table ---- */
-  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .tbl th, .tbl td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
-  .tbl th { font-size: 11px; color: var(--text-faint); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-  .tbl-wrap { overflow-x: auto; }
-  .tbl-wrap .tbl { min-width: 480px; }
-
-  /* ---- video ---- */
-  .vids { display: grid; gap: 14px; }
-  @media (min-width: 620px) { .vids { grid-template-columns: 1fr 1fr; } }
-  .vid { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #000; }
-  .vid video { display: block; width: 100%; max-height: 62vh; background: #000; }
-  .vid figcaption { padding: 10px 12px; font-size: 12px; color: var(--text-faint); background: var(--surface); }
-
   /* ---- honest section ---- */
   .gap-list { display: grid; gap: 8px; }
   .gap-item {
@@ -314,117 +300,6 @@
         Overpower or spoof the robot and you have trespass, for free. So this project goes the other way:
         <b>remove the assumption that receiving has to happen at home at all.</b></span>
     </p>
-  </section>
-
-  <!-- ===== WHO PAYS ===== -->
-  <section>
-    <h2 class="sec">
-      <span data-l="ja">3. 困っている人と、払う人は違う</span>
-      <span data-l="en">3. Whoever hurts is not whoever pays</span>
-    </h2>
-    <p class="sec-note">
-      <span data-l="ja">「困っている人」「使う人」「設備を入れる人」「金を払う人」は同じではない。ここを間違えると、良い仕組みを作っても売れない。</span>
-      <span data-l="en">The person in pain, the person using it, the person installing hardware and the person paying are four different people. Get this wrong and a good system still does not sell.</span>
-    </p>
-
-    <div class="tbl-wrap" data-l="ja">
-      <table class="tbl">
-        <thead><tr><th>立場</th><th>ペイン</th><th>経済インパクト</th><th>課金</th></tr></thead>
-        <tbody>
-          <tr><td><b>生活者</b></td><td>不在で受け取れない／冷蔵冷凍の時間制約／置き配の盗難不安</td><td>時間と手間（金額化しにくい）</td><td>無料</td></tr>
-          <tr><td><b>配送事業者</b></td><td>再配達の人的負荷／ドライバー不足／小口化</td><td><b>直接コスト</b></td><td><b>成功報酬（一次）</b></td></tr>
-          <tr><td><b>マンション・不動産</b></td><td>宅配BOX不足／建物内アクセス管理／住民向け差別化</td><td>設備投資と資産価値</td><td>SaaS（二次）</td></tr>
-          <tr><td><b>EC・小売</b></td><td>配送コスト／配送品質がCVRに影響</td><td>売上への間接影響</td><td>API従量（三次）</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="tbl-wrap" data-l="en">
-      <table class="tbl">
-        <thead><tr><th>Who</th><th>Pain</th><th>Economic impact</th><th>Billing</th></tr></thead>
-        <tbody>
-          <tr><td><b>Residents</b></td><td>Never home; cold-chain time windows; fear of theft at the door</td><td>Time and hassle (hard to price)</td><td>Free</td></tr>
-          <tr><td><b>Carriers</b></td><td>Redelivery labour, driver shortage, ever smaller parcels</td><td><b>Direct cost</b></td><td><b>Success fee (primary)</b></td></tr>
-          <tr><td><b>Buildings / real estate</b></td><td>Too few parcel boxes; controlling access inside the building; differentiation</td><td>Capex and asset value</td><td>SaaS (secondary)</td></tr>
-          <tr><td><b>Retail / e-commerce</b></td><td>Delivery cost; delivery quality moves conversion</td><td>Indirect revenue effect</td><td>Per-API (tertiary)</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="small muted" style="margin-top:14px">
-      <span data-l="ja">だから<b>最初の課金者は生活者ではない</b>。生活者は「支払者」ではなく「受取成功率を上げる参加者」として無料で参加してもらう。</span>
-      <span data-l="en">So <b>the first paying customer is not the resident</b>. Residents join for free, not as payers but as the participants who make the delivery succeed.</span>
-    </p>
-
-    <div class="tbl-wrap" style="margin-top:20px" data-l="ja">
-      <table class="tbl">
-        <thead><tr><th>Phase</th><th>やること</th><th>設備投資</th><th>検証する仮説</th></tr></thead>
-        <tbody>
-          <tr><td><b>0</b></td><td>既存のコンビニ・駅ロッカー・宅配BOXを束ね、配送中の受取先変更を可能にする</td><td><b>ゼロ</b></td><td>動的に変えるだけで再配達は減るか</td></tr>
-          <tr><td><b>1</b></td><td>動的ランデブー（移動中の本人・委任先への配送）</td><td>ゼロ〜小</td><td>「人に届ける」需要は実在するか</td></tr>
-          <tr><td><b>2</b></td><td>配送ロボットとのM2M受渡し（グラントによる庫室解錠）</td><td>中</td><td>機械同士の受渡しはコストを下げるか</td></tr>
-          <tr><td>3</td><td>屋内搬入</td><td>大</td><td><b>やらない</b>（権限リスクが利得を上回る）</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="tbl-wrap" style="margin-top:20px" data-l="en">
-      <table class="tbl">
-        <thead><tr><th>Phase</th><th>What ships</th><th>Capex</th><th>Hypothesis under test</th></tr></thead>
-        <tbody>
-          <tr><td><b>0</b></td><td>Orchestrate existing konbini, station lockers and building boxes; allow the destination to change mid-delivery</td><td><b>Zero</b></td><td>Does dynamic switching alone cut redelivery?</td></tr>
-          <tr><td><b>1</b></td><td>Dynamic rendezvous — delivery to a moving person or a delegate</td><td>Zero to low</td><td>Is there real demand to "deliver to a person"?</td></tr>
-          <tr><td><b>2</b></td><td>Machine-to-machine handover with delivery robots (grant unlocks the compartment)</td><td>Medium</td><td>Does M2M handover actually lower cost?</td></tr>
-          <tr><td>3</td><td>Carrying goods indoors</td><td>High</td><td><b>Not doing it</b> — the permission risk outweighs the gain</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="small muted" style="margin-top:12px">
-      <span data-l="ja">個人が「荷物を自動で受け取るため」に設備投資をすることはほぼ無い。だから<b>設備投資ゼロのPhase 0から始める</b>。ここで収益が立たないなら、Phase 2以降に進む意味はない。</span>
-      <span data-l="en">Almost nobody buys hardware just to receive parcels automatically. So this starts at <b>Phase 0, with zero capex</b>. If revenue does not appear there, moving to Phase 2 is pointless.</span>
-    </p>
-  </section>
-
-  <!-- ===== WHY NOW ===== -->
-  <section>
-    <h2 class="sec"><span data-l="ja">4. なぜ今か</span><span data-l="en">4. Why now</span></h2>
-    <div class="tbl-wrap" data-l="ja">
-      <table class="tbl">
-        <tbody>
-          <tr><td><b>労働供給の崖</b></td><td>2030年度に輸送能力が約34%不足する試算。再配達削減が「コスト削減」から「事業継続」の問題になった</td></tr>
-          <tr><td><b>置き配の標準化</b></td><td>置き配が制度として前提化し、その副作用（盗難・プライバシー）が顕在化した</td></tr>
-          <tr><td><b>法制度</b></td><td>2023年4月の改正道路交通法で自動配送ロボットが「遠隔操作型小型車」として届出制で公道走行可能に（長さ120cm×幅70cm×高さ120cm以下・最高速度6km/h）。2025年2月には経産省WGがより配送能力の高いロボットの社会実装を検討</td></tr>
-          <tr><td><b>AIエージェント</b></td><td>発注・決済までAIが実行する設計が現実的になり、<b>受取が相対的にボトルネックになった</b></td></tr>
-          <tr><td><b>世帯構造</b></td><td>単独世帯は34.6%（2024年）、2050年に44.3%の見込み。「家に人がいない」が標準になる</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="tbl-wrap" data-l="en">
-      <table class="tbl">
-        <tbody>
-          <tr><td><b>Labour cliff</b></td><td>Japan's freight capacity is projected to fall ~34% short by FY2030. Cutting redelivery moved from cost saving to business continuity</td></tr>
-          <tr><td><b>Unattended delivery is now standard</b></td><td>Leaving parcels at the door became the institutional default — and its side effects (theft, privacy) surfaced with it</td></tr>
-          <tr><td><b>Regulation</b></td><td>Since April 2023, delivery robots run on public sidewalks under a notification regime as "remote-controlled small vehicles" (≤120×70×120cm, ≤6km/h). In February 2025 METI's working group began examining higher-capacity robots</td></tr>
-          <tr><td><b>AI agents</b></td><td>Systems that order and pay autonomously became realistic, which makes <b>receiving the relative bottleneck</b></td></tr>
-          <tr><td><b>Household structure</b></td><td>Single-person households are 34.6% (2024) and projected at 44.3% by 2050. "Nobody home" becomes the norm</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="src">
-      <span data-l="ja">出典：国土交通省、経済産業省（自動配送ロボットの社会実装検討WG, 2025年2月）、厚生労働省 国民生活基礎調査（2024年）、国立社会保障・人口問題研究所 世帯数将来推計（2024年推計）。</span>
-      <span data-l="en">Sources: MLIT; METI working group on autonomous delivery robots (Feb 2025); MHLW Comprehensive Survey of Living Conditions (2024); NIPSSR household projections (2024).</span>
-    </p>
-
-    <blockquote class="pull" style="margin-top:20px">
-      <span data-l="ja">AI時代に重要なのは、既存プロセスの一部をAIに置換することではなく、
-        <b>AIが自律的に動く前提でプロセス自体を再設計すること</b>。<br>
-        IT運用で起きている「認識 → 推論 → Action → ガードレール → 監督」の設計が、
-        物流では「認識 → 判断 → 発注 → 移動 → アクセス → 受渡 → 保管」として現れる。
-        どちらも、誰が実行し・どこまで自律化し・誰が監督し・誰が責任を持つかの設計問題だ。</span>
-      <span data-l="en">What matters in the AI era is not swapping a step of an existing process for a model, but
-        <b>redesigning the process on the assumption that AI acts autonomously</b>.<br>
-        The pattern IT operations already knows — sense → reason → act → guardrail → supervise —
-        shows up in logistics as sense → decide → order → move → access → hand over → store.
-        Both are the same design problem: who executes, how far autonomy goes, who supervises, and who is liable.</span>
-    </blockquote>
   </section>
 
   <!-- ===== 行き先 ===== -->
