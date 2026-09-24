@@ -72,6 +72,12 @@ window.LM_UI = (function () {
     completed: { ja: "受け取り完了", en: "Delivery completed" },
     pickMode: { ja: "自分で選ぶ", en: "I'll choose" },
     agentMode: { ja: "エージェントに任せる", en: "Let the agent" },
+    pickSub: { ja: "地図のどこでも。道の上でも", en: "Anywhere on the map, even a street" },
+    agentSub: { ja: "決めた方針の内側で選ぶ", en: "Picks inside the rules you set" },
+    lead: {
+      ja: "配送中でも、受け取る場所は変えられます。",
+      en: "You can still change where this meets you."
+    },
     pickHint: { ja: "地図のどこでもいい。道の上でも。", en: "Anywhere on the map — a street will do" },
     cancel: { ja: "やめる", en: "Cancel" },
     receiveHere: { ja: "ここで受け取る", en: "Receive here" },
@@ -174,11 +180,67 @@ window.LM_UI = (function () {
 
   function sheet(html) {
     var el = $("sheet2");
-    el.innerHTML = '<div class="grip" aria-hidden="true"></div>' + html;
+    $("sheetBody").innerHTML = html;
     el.classList.remove("is-in");
     void el.offsetWidth;                 // アニメーションを毎回やり直す
     if (!reduced()) el.classList.add("is-in");
+    if (sheetDown) applySheet(maxHide());  // 下げたままなら、その位置を保つ
     M.fit();                             // シートの高さが変わったので地図の位置を取り直す
+  }
+
+  /* ---------- 下のシートを、つまんで下げる ----------------------------------
+     地図だけを見たいときがある。荷物がどこを走っていて、自分がどこにいるのか。 */
+  var sheetDown = false;
+  var sheetOffset = 0;
+
+  function maxHide() {
+    var el = $("sheet2"), bar = $("gripBar");
+    if (!el || !bar) return 0;
+    return Math.max(0, el.getBoundingClientRect().height - bar.getBoundingClientRect().height);
+  }
+  function applySheet(px) {
+    sheetOffset = px;
+    $("sheet2").style.transform = "translateY(" + px + "px)";
+  }
+  function setSheetDown(down) {
+    sheetDown = !!down;
+    applySheet(sheetDown ? maxHide() : 0);
+    var bar = $("gripBar");
+    if (bar) bar.setAttribute("aria-expanded", sheetDown ? "false" : "true");
+    M.fit();
+  }
+
+  function bindSheetDrag() {
+    var bar = $("gripBar"), el = $("sheet2");
+    if (!bar || !el) return;
+    var drag = null;
+
+    bar.addEventListener("pointerdown", function (e) {
+      drag = { y: e.clientY, from: sheetOffset, max: maxHide(), moved: 0 };
+      el.classList.add("is-dragging");
+      if (bar.setPointerCapture) { try { bar.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } }
+    });
+    bar.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      e.preventDefault();
+      var dy = e.clientY - drag.y;
+      drag.moved = Math.max(drag.moved, Math.abs(dy));
+      applySheet(Math.max(0, Math.min(drag.max, drag.from + dy)));
+      M.fit();
+    });
+    function end() {
+      if (!drag) return;
+      el.classList.remove("is-dragging");
+      if (drag.moved < 6) setSheetDown(!sheetDown);          // 押しただけなら開閉
+      else setSheetDown(sheetOffset > drag.max * 0.4);       // 引いた先で決める
+      drag = null;
+    }
+    bar.addEventListener("pointerup", end);
+    bar.addEventListener("pointercancel", end);
+    bar.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSheetDown(!sheetDown); }
+    });
+    window.addEventListener("resize", function () { applySheet(sheetDown ? maxHide() : 0); });
   }
 
   function fact(v) { return '<span class="fact">' + esc(v) + "</span>"; }
@@ -256,11 +318,14 @@ window.LM_UI = (function () {
     sheet(
       '<div class="prow"><span class="pico">' + p.icon + "</span>" +
       '<span class="pname">' + esc(t(p.title)) + "</span></div>" +
+      '<p class="lead">' + esc(t(S.lead)) + "</p>" +
       '<div class="modes">' +
       '<button class="mode" id="mPick" type="button">' +
-      '<span class="mico" aria-hidden="true">📍</span><b>' + esc(t(S.pickMode)) + "</b></button>" +
+      '<span class="mico" aria-hidden="true">📍</span><b>' + esc(t(S.pickMode)) + "</b>" +
+      '<span class="msub">' + esc(t(S.pickSub)) + "</span></button>" +
       '<button class="mode is-primary" id="mAgent" type="button">' +
-      '<span class="mico" aria-hidden="true">✦</span><b>' + esc(t(S.agentMode)) + "</b></button>" +
+      '<span class="mico" aria-hidden="true">✦</span><b>' + esc(t(S.agentMode)) + "</b>" +
+      '<span class="msub">' + esc(t(S.agentSub)) + "</span></button>" +
       "</div>"
     );
     $("mPick").addEventListener("click", startPicking);
@@ -637,6 +702,7 @@ window.LM_UI = (function () {
     if (ff) ff.addEventListener("click", function () { setFastForward(!fastForward); });
     var re = $("reBtn");
     if (re) re.addEventListener("click", function () { M.recenter(); renderFF(); });
+    bindSheetDrag();
 
     var last = performance.now();
     (function frame(now) {

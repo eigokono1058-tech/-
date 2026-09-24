@@ -289,11 +289,28 @@ body.is-app .grid-lines { display: none; }
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
   max-height: 78%;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 10px 18px calc(22px + env(safe-area-inset-bottom, 0));
+  padding: 0 18px calc(22px + env(safe-area-inset-bottom, 0));
   border-radius: 22px 22px 0 0;
   background: var(--sheet);
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   box-shadow: 0 -14px 40px -18px rgba(0, 0, 0, 0.3);
+  transition: transform 0.42s var(--ease);
+}
+.sheet2.is-dragging { transition: none; }
+
+/* つまむところ。ここを下に引くと地図だけになる */
+.grip-bar {
+  position: sticky; top: 0; z-index: 2;
+  width: calc(100% + 36px); margin: 0 -18px;
+  height: 30px; display: grid; place-items: center;
+  appearance: none; border: 0; background: var(--sheet);
+  border-radius: 22px 22px 0 0;
+  cursor: grab; touch-action: none;
+}
+.grip-bar:active { cursor: grabbing; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
 }
 @media (min-width: 640px) {
   .sheet2 {
@@ -302,15 +319,17 @@ body.is-app .grid-lines { display: none; }
     border-right: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   }
 }
-.sheet2.is-in > *:not(.grip) {
+.sheet2.is-in .sheet-body > * {
   animation: sheetIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 @keyframes sheetIn { from { opacity: 0; transform: translateY(10px); } }
 
 .grip {
-  width: 36px; height: 4px; border-radius: 999px;
-  background: var(--border); margin: 0 auto 14px;
+  width: 40px; height: 5px; border-radius: 999px;
+  background: var(--border);
+  transition: background 0.2s var(--ease);
 }
+.grip-bar:hover .grip { background: var(--text-faint); }
 
 /* 荷物の行 */
 .prow { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -321,20 +340,31 @@ body.is-app .grid-lines { display: none; }
 }
 .pname { font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; }
 
+/* この2つのボタンが何なのか、1行で言う */
+.lead {
+  margin: 0 0 12px; font-size: 13.5px; line-height: 1.55; color: var(--text-dim);
+}
+
 /* モード選択。このアプリの分岐点なので大きく、2つだけ */
 .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mode {
   appearance: none; cursor: pointer;
   display: grid; gap: 8px; place-items: center;
-  padding: 18px 12px;
+  padding: 16px 12px 14px;
   border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text); font: inherit;
   transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), border-color 0.2s ease, background 0.2s ease;
 }
-.mode b { font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; text-align: center; }
+.mode { gap: 6px; }
+.mode b { font-size: 14px; font-weight: 650; letter-spacing: -0.01em; text-align: center; }
 .mode .mico { font-size: 22px; line-height: 1; }
+.mode .msub {
+  font-size: 11px; line-height: 1.35; text-align: center; color: var(--text-faint);
+  text-wrap: balance;
+}
+.mode.is-primary .msub { color: color-mix(in srgb, #06121f 62%, transparent); }
 .mode:hover { border-color: var(--brand-1); }
 .mode:active { transform: scale(0.97); }
 .mode.is-primary {

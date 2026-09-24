@@ -346,12 +346,166 @@ window.LM_SF = (function () {
     grid(-153, 0), grid(-153, 300), grid(-153, 490)
   ];
 
-  /** 配送車のルート：物流拠点 → ハリソン通り → 目的地の通り → 目的地 */
-  function vanRoute(target) {
-    var c = toGrid(target);
-    var corridor = c.cross > 620 ? 1060 : 680;      // 南のほうならブラナン通りを使う
-    return [DEPOT, grid(-1193, corridor), grid(c.along, corridor), target];
+  /* ======================================================================
+     通りの網（グラフ）
+     交差点で通りを切って、点と線のつながりにする。こうしておくと
+     配送車も人も、街区を突っ切らずに道なりに動かせる。
+     ====================================================================== */
+  var GRAPH = null;
+
+  function segIntersect(p, p2, q, q2) {
+    var rx = p2[0] - p[0], ry = p2[1] - p[1];
+    var sx = q2[0] - q[0], sy = q2[1] - q[1];
+    var denom = rx * sy - ry * sx;
+    if (Math.abs(denom) < 1e-9) return null;                 // 平行
+    var t = ((q[0] - p[0]) * sy - (q[1] - p[1]) * sx) / denom;
+    var u = ((q[0] - p[0]) * ry - (q[1] - p[1]) * rx) / denom;
+    if (t < -1e-6 || t > 1 + 1e-6 || u < -1e-6 || u > 1 + 1e-6) return null;
+    return t;
   }
+  function key(x, y) { return Math.round(x * 4) + "," + Math.round(y * 4); }
+  function dist2(a, b) {
+    var dx = a[0] - b[0], dy = a[1] - b[1];
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /** すべての通りを1本ずつ、線分の並びとして集める */
+  function allLines() {
+    var out = buildStreets().map(function (s) { return s.pts; });
+    out.push(embarcadero());
+    return out;
+  }
+
+  function buildGraph() {
+    var lines = allLines();
+    var nodes = {};      // key -> {id, xy}
+    var list = [];
+    var adj = [];
+
+    function node(xy) {
+      var k = key(xy[0], xy[1]);
+      if (!nodes[k]) {
+        nodes[k] = { id: list.length, xy: xy };
+        list.push(xy);
+        adj.push([]);
+      }
+      return nodes[k].id;
+    }
+    function link(a, b) {
+      if (a === b) return;
+      var w = dist2(list[a], list[b]);
+      adj[a].push({ to: b, w: w });
+      adj[b].push({ to: a, w: w });
+    }
+
+    /* 各線分を、他の線分との交点で切る */
+    for (var i = 0; i < lines.length; i++) {
+      for (var s = 1; s < lines[i].length; s++) {
+        var a = lines[i][s - 1], b = lines[i][s];
+        var cuts = [0, 1];
+        for (var j = 0; j < lines.length; j++) {
+          if (j === i) continue;
+          for (var u = 1; u < lines[j].length; u++) {
+            var t = segIntersect(a, b, lines[j][u - 1], lines[j][u]);
+            if (t !== null) cuts.push(Math.max(0, Math.min(1, t)));
+          }
+        }
+        cuts.sort(function (x, y) { return x - y; });
+        var prev = null;
+        for (var c = 0; c < cuts.length; c++) {
+          if (prev !== null && cuts[c] - prev < 1e-4) continue;
+          var xy = [a[0] + (b[0] - a[0]) * cuts[c], a[1] + (b[1] - a[1]) * cuts[c]];
+          var id = node(xy);
+          if (prev !== null) link(node([a[0] + (b[0] - a[0]) * prev, a[1] + (b[1] - a[1]) * prev]), id);
+          prev = cuts[c];
+        }
+      }
+    }
+    return { xy: list, adj: adj };
+  }
+
+  function graph() {
+    if (!GRAPH) GRAPH = buildGraph();
+    return GRAPH;
+  }
+
+  /** ある点を通りの上に寄せて、その辺の両端につないだ仮の点を返す */
+  function attach(g, p, extra) {
+    var best = null;
+    for (var i = 0; i < g.adj.length; i++) {
+      for (var e = 0; e < g.adj[i].length; e++) {
+        var j = g.adj[i][e].to;
+        if (j < i) continue;
+        var a = g.xy[i], b = g.xy[j];
+        var vx = b[0] - a[0], vy = b[1] - a[1];
+        var len2 = vx * vx + vy * vy;
+        var t = len2 === 0 ? 0 : ((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / len2;
+        t = Math.max(0, Math.min(1, t));
+        var x = a[0] + vx * t, y = a[1] + vy * t;
+        var d = dist2([x, y], p);
+        if (!best || d < best.d) best = { d: d, xy: [x, y], a: i, b: j };
+      }
+    }
+    if (!best) return null;
+    var id = g.xy.length + extra.length;
+    extra.push({ id: id, xy: best.xy, links: [best.a, best.b] });
+    return extra[extra.length - 1];
+  }
+
+  /** 通りに沿った最短経路。返すのは座標の並び。 */
+  function route(from, to) {
+    var g = graph();
+    var extra = [];
+    var A = attach(g, from, extra);
+    var B = attach(g, to, extra);
+    if (!A || !B) return [from, to];
+
+    var n = g.xy.length + extra.length;
+    function xyOf(i) { return i < g.xy.length ? g.xy[i] : extra[i - g.xy.length].xy; }
+    function neighbours(i) {
+      if (i < g.xy.length) {
+        var out = g.adj[i].slice();
+        for (var k = 0; k < extra.length; k++) {
+          if (extra[k].links.indexOf(i) !== -1) {
+            out.push({ to: extra[k].id, w: dist2(g.xy[i], extra[k].xy) });
+          }
+        }
+        return out;
+      }
+      var ex = extra[i - g.xy.length];
+      return ex.links.map(function (j) { return { to: j, w: dist2(ex.xy, g.xy[j]) }; });
+    }
+
+    var INF = Infinity;
+    var d = new Float64Array(n).fill(INF);
+    var prev = new Int32Array(n).fill(-1);
+    var done = new Uint8Array(n);
+    d[A.id] = 0;
+    /* 点の数は千のオーダーなので、毎回いちばん近い未確定点を探す素朴な形で足りる */
+    for (var step = 0; step < n; step++) {
+      var u = -1, bd = INF;
+      for (var i2 = 0; i2 < n; i2++) if (!done[i2] && d[i2] < bd) { bd = d[i2]; u = i2; }
+      if (u === -1 || u === B.id) break;
+      done[u] = 1;
+      var nb = neighbours(u);
+      for (var k2 = 0; k2 < nb.length; k2++) {
+        var v = nb[k2].to, nd = d[u] + nb[k2].w;
+        if (nd < d[v]) { d[v] = nd; prev[v] = u; }
+      }
+    }
+    if (d[B.id] === INF) return [from, to];
+
+    var path = [];
+    for (var cur = B.id; cur !== -1; cur = prev[cur]) path.push(xyOf(cur));
+    path.reverse();
+    /* 通りに寄せた分の最後のひと跨ぎ（地点そのものまで）を足す */
+    if (dist2(path[path.length - 1], to) > 0.5) path.push(to);
+    if (dist2(path[0], from) > 0.5) path.unshift(from);
+    return path;
+  }
+
+  /** 配送車のルート：物流拠点から、通りに沿って目的地まで */
+  function vanRoute(target) { return route(DEPOT, target); }
 
   /** 地図の座標 → マーケット格子（m） */
   function toGrid(p) {
@@ -366,6 +520,7 @@ window.LM_SF = (function () {
     water: waterPolygon, shore: shorePts, embarcadero: embarcadero, piers: piers,
     freeways: freeways,
     PARKS: PARKS, LANDMARKS: LANDMARKS, DISTRICTS: DISTRICTS, BAY: BAY,
-    PLACES: PLACES, DEPOT: DEPOT, WALK: WALK, vanRoute: vanRoute
+    PLACES: PLACES, DEPOT: DEPOT, WALK: WALK,
+    route: route, vanRoute: vanRoute
   };
 })();

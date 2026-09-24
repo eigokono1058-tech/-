@@ -205,20 +205,18 @@ window.LM_DATA = (function () {
   var PARCELS = [
     {
       id: "ord_0031",
-      title: { ja: "冷凍ミールキット 7食", en: "Frozen meal kits ×7" },
-      merchant: { ja: "ネットスーパー", en: "Online supermarket" },
-      orderedBy: "agent",
-      agentReason: {
-        ja: "冷凍庫の在庫が2食を下回ったため自動発注",
-        en: "Freezer stock dropped below two meals, so the agent reordered"
-      },
-      temp: "frozen",
-      value: 28,
-      needs: ["frozen"],
+      /* 温度帯の縛りがあると、駅でも店でも「受け取れません」が先に出てしまい、
+         デモが前に進まない。常温の品物にして、どこでも受け取れる状態にしてある。 */
+      title: { ja: "ノートPCのドック", en: "Laptop dock" },
+      merchant: { ja: "家電のオンラインストア", en: "Online electronics store" },
+      orderedBy: "user",
+      temp: "ambient",
+      value: 180,
+      needs: [],
       requiresIdentity: false,
       delegable: true,
       dropAllowed: false,
-      icon: "❄️",
+      icon: "💻",
       defaultPoint: "home_door",
       slaMin: 45
     },
