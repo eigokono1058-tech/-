@@ -105,13 +105,6 @@
       }
     }
 
-    var tagBox = $("tags");
-    if (tagBox) {
-      tagBox.innerHTML = (I18N ? I18N.list(P.tags) : P.tags || []).map(function (x) {
-        return '<span class="pill">' + esc(x) + "</span>";
-      }).join("");
-    }
-
     /* ---- links ---- */
     var unsetLinks = [];
     visible = [];
