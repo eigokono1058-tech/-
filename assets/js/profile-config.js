@@ -141,9 +141,9 @@ window.PROFILE = {
           note: { ja: "ピンを差して受取先を変える", en: "Drop a pin, change where it lands" }
         },
         {
-          label: { ja: "Launchpad用ブリーフ", en: "Launchpad brief" },
+          label: { ja: "当日、メンターに聞くこと", en: "What I want to ask" },
           href: "./launchpad/",
-          note: { ja: "当日メンターに聞く4つの問い", en: "The questions I'm bringing" }
+          note: { ja: "Launchpadセッションの質問", en: "For the Launchpad session" }
         },
         {
           label: { ja: "構想を読む（ピッチ）", en: "Read the pitch" },
