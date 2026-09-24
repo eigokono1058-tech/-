@@ -49,12 +49,6 @@ window.PROFILE = {
     en: "Making parcels arrive where and when you can actually receive them."
   },
 
-  // 興味・専門タグ / interests
-  tags: {
-    ja: ["配送体験", "ラストワンマイル", "再配達", "アイデア検証", "AIマッチング", "プロトタイピング"],
-    en: ["Delivery experience", "Last-mile logistics", "Failed deliveries", "Validation", "AI matching", "Prototyping"]
-  },
-
   /* ---- 連絡先 / contact -----------------------------------------------
      公開サイトにメールを載せるとボットに収集されて迷惑メールが増えるので、
      既定では載せていません。載せる場合は下の行のコメントを外してください。
@@ -105,7 +99,9 @@ window.PROFILE = {
       // 共有リンクに付く ?s= / ?t= は追跡用パラメータなので落としている
       url: "https://x.com/otbvnkvqc5ngy17",
       icon: "x",
-      accent: "#0f1419"
+      // Xのロゴは黒。暗い背景では沈んで見えなくなるので、本文の色に追従させる
+      // （ダークテーマでは白、ライトテーマではほぼ黒になり、Xの見せ方とも合う）
+      accent: "var(--text)"
     },
     {
       id: "instagram",

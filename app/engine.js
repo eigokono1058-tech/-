@@ -308,6 +308,35 @@ window.LM_ENGINE = (function () {
     return ev;
   }
 
+  /** 直前の受取先に戻す。これは新しい判断ではなく巻き戻しなので、
+      ポリシーの可否判定は通さない（元々その状態だったものに戻すだけ）。
+      エージェントの「元に戻す」からのみ呼ばれる。 */
+  function restore(parcelId, pointId) {
+    var t = tracking(parcelId);
+    var point = D.pointById(pointId);
+    if (!point) return null;
+    if (t.grant) {
+      log("GRANT_REVOKED", parcelId, {
+        ja: "取り消しにより グラント " + t.grant.grant_id + " を失効",
+        en: "Revoked grant " + t.grant.grant_id + " because the change was undone"
+      }, { level: "warn", holder: t.holder });
+    }
+    t.pointId = pointId;
+    t.grant = null;
+    t.etaMin = point.eta_min;
+    t.status = "planning";
+    t.steps = null;
+    t.stepIndex = 0;
+    t.exception = null;
+    t.pendingApproval = null;
+    log("UNDO", parcelId, {
+      ja: "受取先を「" + tl(point.name, "ja") + "」に戻しました",
+      en: "Destination restored to “" + tl(point.name, "en") + "”"
+    }, { level: "warn", holder: t.holder });
+    emit();
+    return t;
+  }
+
   function approve(parcelId) {
     var t = tracking(parcelId);
     if (!t.pendingApproval) return null;
@@ -631,6 +660,7 @@ window.LM_ENGINE = (function () {
     tracking: tracking,
     evaluate: evaluate,
     assign: assign,
+    restore: restore,
     approve: approve,
     rejectApproval: rejectApproval,
     startHandover: startHandover,
