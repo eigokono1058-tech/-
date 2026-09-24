@@ -418,7 +418,20 @@ body.is-app .grid-lines { display: none; }
 .alt-facts { font-size: 12.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 .alt-go { color: var(--text-faint); font-size: 18px; justify-self: end; }
 
-/* もうひとつの案。閉じているときは1行、押すと開く */
+/* 候補は2つ。同じ形の箱に、番号を振って縦に並べる */
+.cand-1 {
+  margin-top: 14px; padding: 12px 15px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand-2) 42%, var(--border));
+  background: color-mix(in srgb, var(--brand-2) 6%, var(--surface-2));
+}
+.cand-n {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--brand-2); margin-bottom: 8px;
+}
+.cand-1 .swap { margin-top: 0; }
+
+/* 第2候補。閉じているときは1行、押すと開く */
 .alt2-head {
   appearance: none; cursor: pointer; width: 100%;
   display: grid; grid-template-columns: auto 1fr 14px; align-items: center; gap: 10px;
