@@ -8,7 +8,6 @@ window.LM_UI = (function () {
   var I18N = window.LM_I18N;
 
   var focus = D.PARCELS[0].id;
-  var lastVerdict = null;
   var refs = {};
 
   /* ---------- strings ---------- */
@@ -172,7 +171,6 @@ window.LM_UI = (function () {
   /* ---------- assignment ---------- */
   function tryAssign(parcelId, pointId) {
     var ev = E.assign(parcelId, pointId);
-    lastVerdict = { ev: ev, pointId: pointId, parcelId: parcelId };
     // 一覧から選んだ場合も、地図のピンをその場所へ動かして見た目を一致させる
     if (ev.verdict !== "deny") {
       var pt = D.pointById(pointId);
@@ -181,10 +179,6 @@ window.LM_UI = (function () {
       if (!ev.needsApproval) headTo(parcelId);
     }
     renderAll();
-    if (ev.verdict === "deny" || ev.needsApproval) {
-      var box = $("verdictBox");
-      if (box && box.scrollIntoView) box.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
     return ev;
   }
 
@@ -261,18 +255,6 @@ window.LM_UI = (function () {
   }
 
   /* ---------- flow view ---------- */
-  function renderBlockedBanner() {
-    var box = $("blockedBanner");
-    if (!box) return;
-    var stuck = D.PARCELS.filter(function (p) { return E.tracking(p.id).status === "planning"; });
-    if (!stuck.length) { box.innerHTML = ""; return; }
-    box.innerHTML = '<div class="banner" style="margin-bottom:16px">' +
-      "<b>⛔ " + stuck.length + t(S.blockedTitle) + "</b><br>" +
-      '<span class="small">' +
-      stuck.map(function (p) { return esc(t(p.title)); }).join(" / ") +
-      t(S.blockedBody) + "</span></div>";
-  }
-
   function renderParcels() {
     var box = $("parcelList");
     if (!box) return;
@@ -298,7 +280,6 @@ window.LM_UI = (function () {
       btn.addEventListener("click", function () {
         focus = p.id;
         M.setFocus(p.id);
-        lastVerdict = null;
         renderAll();
       });
       box.appendChild(btn);
@@ -351,18 +332,12 @@ window.LM_UI = (function () {
       html += '<div class="banner ' + (isAuto ? "ok" : "danger") + '" style="margin-bottom:10px">' +
         "<b>" + t(isAuto ? S.autoRecovered : S.escalated) + "：" + esc(t(tr.exception.label)) + "</b><br>" +
         esc(t(tr.exception.note)) +
-        (isAuto ? "" :
-          '<div class="row row-wrap" style="margin-top:10px">' +
-          '<button class="btn btn-sm" data-act="exc-retry">' + t(S.retry) + "</button>" +
-          '<button class="btn btn-sm" data-act="exc-reroute">' + t(S.rerouteBtn) + "</button>" +
-          '<button class="btn btn-sm" data-act="exc-return">' + t(S.returnBtn) + "</button></div>") +
         "</div>";
     }
 
     html += '<div class="row row-wrap">';
     html += '<button class="btn btn-sm btn-primary" data-act="pick">' + t(S.changeDest) + "</button>";
     if (tr.status === "arrived") html += '<button class="btn btn-sm" data-act="handover">' + t(S.doHandover) + "</button>";
-    if (tr.status === "planning") html += '<button class="btn btn-sm" data-act="ai-suggest">' + t(S.aiSuggest) + "</button>";
     html += '<button class="btn btn-sm btn-ghost" data-act="tab-grant">' + t(S.seeGrant) + "</button>";
     html += "</div>";
 
@@ -377,30 +352,10 @@ window.LM_UI = (function () {
     else if (act === "handover") E.startHandover(focus);
     else if (act === "approve") { E.approve(focus); renderAll(); }
     else if (act === "reject") { E.rejectApproval(focus); renderAll(); }
-    else if (act === "exc-retry") E.resolveException(focus, "retry");
-    else if (act === "exc-reroute") E.resolveException(focus, "reroute");
-    else if (act === "exc-return") E.resolveException(focus, "return");
     else if (act === "tab-grant") setTab("grant");
-    else if (act === "ai-suggest") aiSuggest();
   }
 
-  function aiSuggest() {
-    var p = D.parcelById(focus);
-    var best = null;
-    D.POINTS.forEach(function (pt) {
-      var ev = E.evaluate(p, pt);
-      if (ev.verdict === "deny") return;
-      var score = (pt.eta_min || 30) + (ev.verdict === "conditional" ? 6 : 0) +
-        (pt.risk === "theft" ? 25 : 0) + (pt.risk === "intrusion" ? 60 : 0);
-      if (!best || score < best.score) best = { pt: pt, ev: ev, score: score };
-    });
-    if (!best) return;
-    lastVerdict = { ev: best.ev, pointId: best.pt.id, parcelId: focus, suggested: true };
-    renderAll();
-    var box = $("verdictBox");
-    if (box && box.scrollIntoView) box.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
+  /** 受取先シートの中で、その地点の可否と条件を出す。 */
   function verdictCard(ev, pt, suggested) {
     var html = '<div class="verdict ' + ev.verdict + '">' +
       "<h4>" + VERDICT_ICON[ev.verdict] + " " + esc(t(pt.name)) + "：" + t(S.verdict[ev.verdict]) +
@@ -416,41 +371,6 @@ window.LM_UI = (function () {
       }).join("") + "</div>";
     }
     return html + "</div>";
-  }
-
-  function renderVerdict() {
-    var box = $("verdictBox");
-    if (!box) return;
-    if (!lastVerdict || lastVerdict.parcelId !== focus) { box.innerHTML = ""; return; }
-    var ev = lastVerdict.ev;
-    var pt = D.pointById(lastVerdict.pointId);
-    var html = verdictCard(ev, pt, lastVerdict.suggested);
-    if (lastVerdict.suggested && ev.verdict !== "deny") {
-      html += '<div class="row" style="margin-top:10px"><button class="btn btn-sm btn-primary" id="applySuggest">' +
-        t(S.applySuggest) + "</button></div>";
-    }
-    box.innerHTML = html;
-    var apply = $("applySuggest");
-    if (apply) apply.addEventListener("click", function () { tryAssign(focus, lastVerdict.pointId); });
-  }
-
-  function renderExceptions() {
-    var box = $("excList");
-    if (!box) return;
-    box.innerHTML = D.EXCEPTIONS.map(function (x) {
-      return '<button class="exc" type="button" data-exc="' + x.id + '">' +
-        '<span class="sev pill ' + SEV_CLASS[x.severity] + '">' + t(S.sev[x.severity]) + "</span>" +
-        "<b>" + esc(t(x.label)) + "</b>" +
-        '<span class="ed">' + esc(t(x.teaches)) + "</span></button>";
-    }).join("");
-    box.querySelectorAll("[data-exc]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        E.injectException(focus, b.getAttribute("data-exc"));
-        renderAll();
-        var fp = $("focusPanel");
-        if (fp && fp.scrollIntoView) fp.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-    });
   }
 
   /* ---------- picker sheet ---------- */
@@ -1081,11 +1001,8 @@ window.LM_UI = (function () {
     requestAnimationFrame(function () {
       renderScheduled = false;
       renderPinCard();
-      renderBlockedBanner();
       renderParcels();
       renderFocusPanel();
-      renderVerdict();
-      renderExceptions();
       renderGrantView();
       renderDial();
       renderLog();
@@ -1167,7 +1084,6 @@ window.LM_UI = (function () {
       M.resetWalk();
       M.followMe(true);
       committed = {};
-      lastVerdict = null;
       var sg = $("agentSurge");
       if (sg) { sg.classList.remove("is-on"); sg.textContent = t({ ja: "例外を起こす", en: "Force an exception" }); }
       renderAgentPanel();
