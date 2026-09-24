@@ -28,7 +28,8 @@ window.LM_UI = (function () {
     thinking: "thinking",     // エージェントが考えている
     proposed: "proposed",     // エージェントの結果
     enroute: "enroute",       // 受取先が決まって、そこへ向かっている
-    done: "done"              // 受け取った
+    done: "done",             // 受け取った
+    cancelled: "cancelled"    // 途中でやめた
   };
 
   var state = ST.idle;
@@ -137,6 +138,16 @@ window.LM_UI = (function () {
       en: "You were held up, so the van re-timed. You still arrive together"
     },
     detour: { ja: "寄り道する（+15分）", en: "Take a detour (+15 min)" },
+    cancel: { ja: "キャンセル", en: "Cancel" },
+    cancelled: { ja: "キャンセルしました", en: "Cancelled" },
+    cancelledSub: {
+      ja: "配送を止めました。荷物は預かったままです。",
+      en: "The delivery has been stopped. The parcel is still with us."
+    },
+    cancelNoFee: {
+      ja: "今回はキャンセル料は発生しませんでした",
+      en: "No cancellation fee this time"
+    },
     agentFound: { ja: "2つ見つけました", en: "Two ways to do this" },
     agentSub: {
       ja: "方針の内側です。どちらでいくか選んでください。",
@@ -364,6 +375,7 @@ window.LM_UI = (function () {
     if (state === ST.proposed) return renderProposed();
     if (state === ST.enroute) return renderEnroute();
     if (state === ST.done) return renderDone();
+    if (state === ST.cancelled) return renderCancelled();
   }
 
   /* --- 配送中。このアプリの分岐点 --- */
@@ -753,13 +765,41 @@ window.LM_UI = (function () {
       '<div class="eta"><span>' + esc(t(S.vanEta)) + '</span><b id="etaVan">' + esc(POL.hhmm(Math.round(meet))) + "</b></div>" +
       "</div>" +
       '<p class="meet-note">' + esc(t(retimed ? S.retimed : S.matching)) + "</p>" +
-      '<div class="row sheet-cta"><button class="btn btn-sm btn-ghost grow" id="mDetour" type="button">' +
-      esc(t(S.detour)) + "</button></div>"
+      '<div class="row sheet-cta">' +
+      '<button class="btn btn-sm btn-ghost grow" id="mDetour" type="button">' +
+      esc(t(S.detour)) + "</button>" +
+      '<button class="btn btn-sm btn-cancel" id="mCancel" type="button">' +
+      esc(t(S.cancel)) + "</button></div>"
     );
     var d = $("mDetour");
     if (d) d.addEventListener("click", function () {
       if (M.delayWalk(15)) syncMeet();
     });
+    var c = $("mCancel");
+    if (c) c.addEventListener("click", cancelRun);
+  }
+
+  /* 途中でやめる。配送を止めて、最初の状態に戻す。
+     動いているものを残さないよう、ここで全部リセットしてしまう。 */
+  function cancelRun() {
+    E.reset(); A.reset(); PR.reset(); M.resetWalk();
+    decision = null; pickedId = null;
+    meetMin = null; agreedMin = null; retimed = false;
+    setFastForward(false);
+    M.setPickable(false);
+    state = ST.cancelled;
+    render();
+  }
+
+  function renderCancelled() {
+    sheet(
+      '<div class="done-card is-cancel">' +
+      '<div class="done-check" aria-hidden="true">×</div>' +
+      "<b>" + esc(t(S.cancelled)) + "</b>" +
+      '<span class="done-where">' + esc(t(S.cancelledSub)) + "</span>" +
+      '<div class="facts">' + fact(t(S.cancelNoFee)) + "</div></div>" + againRow()
+    );
+    bindAgain();
   }
 
   function renderDone() {
