@@ -85,17 +85,17 @@
   <section class="main-q">
     <span class="label">MAIN QUESTION</span>
     <p class="q">
-      <span data-l="ja">人が荷物を受け取るのにいちばん良い方法を、AIエージェントが自動で選んで手配する。これをどう設計すべきでしょうか。</span>
-      <span data-l="en">An AI agent that chooses the best way for a person to receive a parcel, and arranges it for them.
-        How should that be designed?</span>
+      <span data-l="ja">人の行動と道路の状況を同時に読み込んで、荷物をいつ・どこで受け取るかをAIエージェントが決める。これをOpenAIのエージェント機能で実現するとしたら、どういう設計になるでしょうか。設計のご相談をさせてください。</span>
+      <span data-l="en">An agent that reads how a person moves and what the roads are doing at the same time, then decides
+        when and where their parcel should be received. If I were to build this on OpenAI's agent capabilities,
+        how should it be designed? I would like to talk through the design with you.</span>
     </p>
     <p class="how">
-      <span data-l="ja">エージェントが見比べるのは2つです。ひとつは<b>人の側</b>——普段の行動から見えてくるルート（家・職場・駅・よく寄る店）と、今日の予定。もうひとつは<b>道の側</b>——渋滞の状況と、衛星やLiDARで見た道路の状態。この2つを突き合わせて、自宅配送のままにするか、駅のロッカーに移すか、帰り道の路上で受け取るかを決めます。</span>
-      <span data-l="en">It weighs two things. One is <b>the person</b> — the routes that show up in how they usually move
-        (home, office, station, the shops they pass) and what is on their calendar today. The other is
-        <b>the road</b> — congestion, plus road conditions read from satellite and LiDAR. Out of those two it
-        decides whether to keep the home delivery, move it to a station locker, or hand it over on a street
-        the person is already walking down.</span>
+      <span data-l="ja">エージェントに入れたい情報は2つです。ひとつは<b>使う人の情報</b>——普段の行動から見えてくる日常の動きと、その日の予定。ここからある程度の行動予測が出せると考えています。もうひとつは<b>いまの道路情報</b>。この2つを組み合わせて、エージェントが受け取る場所と時刻を提案する。そういう設計を考えています。</span>
+      <span data-l="en">Two things would go into the agent. One is <b>the user</b>: the daily pattern that shows up in how they
+        usually move, plus what is on their calendar that day — enough, I think, to predict roughly where they
+        will be. The other is <b>live road conditions</b>. Combining the two, the agent proposes a place and a
+        time to receive the parcel. That is the design I have in mind.</span>
     </p>
   </section>
 
@@ -107,22 +107,23 @@
     <li>
       <span class="n">1</span>
       <span>
-        <span data-l="ja">どこまでをエージェントが自動で決めてよくて、どこから本人に聞くべきでしょうか。</span>
-        <span data-l="en">How much should the agent decide on its own, and where does it have to ask?</span>
+        <span data-l="ja">どの部分でOpenAIの新しいエージェントがいちばん力を発揮するでしょうか。どこまでをモデルに任せてよく、どこからは人が管理すべきでしょうか。</span>
+        <span data-l="en">Where would OpenAI's newer agent capabilities add the most here? How far can the model be left
+          to decide, and where does a person have to stay in control?</span>
       </span>
     </li>
     <li>
       <span class="n">2</span>
       <span>
-        <span data-l="ja">一人ひとりの受け取りやすさを上げながら、配送網全体の効率を落とさずに済む方法はあるでしょうか。</span>
-        <span data-l="en">Can one person's convenience go up without the delivery network getting less efficient?</span>
+        <span data-l="ja">このアイデアは、実際に叶えられそうでしょうか。率直なご意見をお聞かせください。</span>
+        <span data-l="en">Looking at this idea — does it seem achievable? I would like your honest read.</span>
       </span>
     </li>
     <li>
       <span class="n">3</span>
       <span>
-        <span data-l="ja">これが本当に役に立つと示せる、いちばん小さいMVPは何でしょうか。</span>
-        <span data-l="en">What is the smallest thing that would show this is actually useful?</span>
+        <span data-l="ja">一人ひとりの受け取りやすさを上げながら、配送網全体の効率を落とさずに済む方法はあるでしょうか。</span>
+        <span data-l="en">Can one person's convenience go up without the delivery network getting less efficient?</span>
       </span>
     </li>
   </ul>

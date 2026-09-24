@@ -283,14 +283,11 @@ body.is-app .grid-lines { display: none; }
 
 /* 配送車と走行ルート */
 .m-route { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-/* 自動運転タクシー。車体の色は荷物ごとに変わるので fill は JS 側で入れる */
-.m-van-body { stroke: rgba(0, 0, 0, 0.28); stroke-width: 0.9; }
-.m-van-win { fill: rgba(255, 255, 255, 0.82); }
-.m-van-wheel { fill: #12161f; stroke: rgba(255, 255, 255, 0.35); stroke-width: 0.7; }
-.m-van-load { fill: #c9a26a; stroke: rgba(0, 0, 0, 0.35); stroke-width: 0.7; }
-.m-van-lidar { fill: #e9edf5; stroke: rgba(0, 0, 0, 0.3); stroke-width: 0.6; }
-.m-van-halo { opacity: 0.18; }
-.m-van.is-focus .m-van-halo { opacity: 0.3; }
+/* 配送車。地点マーカー（.m-point-dot）と同じ形。輪の色は荷物ごとに JS で入れる */
+.m-van-dot { fill: var(--map-halo); stroke-width: 2.4; }
+.m-van-ico { font-size: 10.5px; pointer-events: none; }
+.m-van-halo { opacity: 0.16; }
+.m-van.is-focus .m-van-halo { opacity: 0.28; }
 
 /* ==========================================================================
    下のシート
