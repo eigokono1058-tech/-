@@ -2,7 +2,7 @@
    プロフィール設定ファイル  ——  ここだけ書き換えれば完成します
    Profile config  ——  the only file you need to edit
    --------------------------------------------------------------------------
-   見せる場: OpenAI DevDay 2026 (Sep 29, 2026 / Fort Mason, San Francisco)
+   見せる場: OpenAI DevDay 2026 のメンターセッション
    既定の表示言語は英語（assets/js/i18n.js の DEFAULT_LANG で変更可）。
 
    * "REPLACE_ME" が残っているリンクはサイト上に表示されません
