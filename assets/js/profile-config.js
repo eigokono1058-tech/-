@@ -130,8 +130,8 @@ window.PROFILE = {
         en: "A delivery experience built around when and where you can receive"
       },
       summary: {
-        ja: "日本では対面での受け渡しが多く、受取人が不在だと再配達になる。受け取る場所と時間を、自分で選べるようにしたい。駅のロッカーでも、職場でも、帰り道の路上でも。家で待たなくてよくなれば、荷物のために予定を空ける必要はなくなる。受け取る人の都合と配送側の都合は、どちらも立てられる。それを動く試作で確かめている。",
-        en: "Japan still relies on direct handoffs, so a parcel becomes a redelivery whenever nobody is home. I want people to choose where and when they take delivery instead — a locker at the station, the office, or a street on the way home. Nobody has to keep an evening free for a parcel. Both sides can win here, and there is a working prototype that shows how."
+        ja: "日本では対面での受け渡しが多く、受取人が不在だと再配達になる。受け取る場所と時間を、自分で選べるようにしたい。駅のロッカーでも、職場でも、帰り道の路上でも。荷物のために予定を空ける必要はなくなる。サンフランシスコの地図で動く試作を作った。",
+        en: "Japan still relies on direct handoffs, so a parcel becomes a redelivery whenever nobody is home. I want people to choose where and when they take delivery — a locker at the station, the office, or a street on the way home. Nobody has to keep an evening free for a parcel. I built a working prototype on a map of San Francisco."
       },
       links: [
         {
