@@ -307,7 +307,48 @@ var T = {
 };
 var DURATION = 35.0;
 
-function seek(t) {
+
+/* ---------- 無音を詰める ----------------------------------------------
+   台本どおりの時刻（T）はそのままに、実際に読み上げた長さに合わせて
+   各場面を伸び縮みさせる。中の動きの間合いは比率で保たれる。        */
+var SCENE_CUES = [[0],[1],[2],[3],[4],[5]];
+var ORIG_T = null, BOUNDS = null;
+
+window.applyTiming = function (spans, pad, tail) {
+  pad = pad == null ? 0.26 : pad;
+  tail = tail == null ? 0.55 : tail;
+  if (!ORIG_T) { ORIG_T = {}; Object.keys(T).forEach(function (k) { ORIG_T[k] = T[k].slice(); }); }
+  var keys = Object.keys(ORIG_T);
+  BOUNDS = [0];
+  keys.forEach(function (k, i) {
+    var cs = SCENE_CUES[i];
+    var end = spans[cs[cs.length - 1]][1] + pad;
+    BOUNDS.push(Math.max(end, BOUNDS[i] + 0.4));
+  });
+  BOUNDS[BOUNDS.length - 1] += tail;
+  CUES = spans.map(function (s, i) { return [s[0], s[1], CUES[i][2]]; });
+  window.CUES = CUES;
+  window.DURATION = DURATION = BOUNDS[BOUNDS.length - 1];
+  return DURATION;
+};
+
+/** 実際の時刻 → 台本上の時刻 */
+function remap(rt) {
+  if (!BOUNDS) return rt;
+  var keys = Object.keys(ORIG_T);
+  for (var i = 0; i < keys.length; i++) {
+    if (rt < BOUNDS[i + 1] || i === keys.length - 1) {
+      var n0 = BOUNDS[i], n1 = BOUNDS[i + 1];
+      var o = ORIG_T[keys[i]];
+      var k = n1 - n0 <= 0 ? 0 : (rt - n0) / (n1 - n0);
+      return o[0] + Math.max(0, Math.min(1, k)) * (o[1] - o[0]);
+    }
+  }
+  return rt;
+}
+
+function seek(realT) {
+  var t = remap(realT);
   buildGrid("s3grid");
   buildGrid("s4grid");
   buildGrid("s5grid");
@@ -399,7 +440,7 @@ function seek(t) {
   /* ---- 字幕 ---- */
   var line = "";
   for (var i = 0; i < CUES.length; i++) {
-    if (t >= CUES[i][0] && t < CUES[i][1]) { line = CUES[i][2]; break; }
+    if (realT >= CUES[i][0] && realT < CUES[i][1]) { line = CUES[i][2]; break; }
   }
   $("subs").innerHTML = line ? "<span>" + line + "</span>" : "";
 }
