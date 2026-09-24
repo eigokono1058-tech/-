@@ -238,6 +238,23 @@ window.LM_MAP = (function () {
       g.classList.toggle("is-picked", picked === g.getAttribute("data-id"));
     });
   }
+  /** エージェントに「道の上」の案を出させるための下ごしらえ。
+      帰り道の少し先にある通りを1点選んで、ピンとして置く。
+      これをしておくと、駅や店と並べて道の上の案も点数がつく。 */
+  function proposeStreet() {
+    var p = personPos();
+    var ahead = pointAt(WALK, Math.min(1, walkT + 0.22 * (walkDir > 0 ? 1 : -1)));
+    var s = snap(ahead.x, ahead.y);
+    if (!s || s.pointId) s = snap(p.x + 18, p.y + 18);
+    if (!s || s.pointId) return false;
+    writePin({
+      x: s.x, y: s.y, mode: "fixed", kind: "street",
+      pointId: null, label: s.label, committed: false
+    });
+    drawPin();
+    return true;
+  }
+
   /** 配送中の車を、いまいる場所から新しい目的地へ向け直す */
   function divert(parcelId, to) {
     if (!vanPos) return false;
@@ -852,6 +869,7 @@ window.LM_MAP = (function () {
     paceWalk: paceWalk,
     delayWalk: delayWalk,
     divert: divert,
+    proposeStreet: proposeStreet,
     clearDivert: clearDivert,
     vanAt: function () { return vanPos; },
     movePinTo: movePinTo,

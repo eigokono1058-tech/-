@@ -42,6 +42,7 @@ window.LM_UI = (function () {
   var RATE_NORMAL = 0.15;
   var RATE_FAST = 0.9;
   var fastForward = false;
+  var altOpen = false;
   function rate() { return fastForward ? RATE_FAST : RATE_NORMAL; }
 
   function $(id) { return document.getElementById(id); }
@@ -115,6 +116,16 @@ window.LM_UI = (function () {
       en: "You were held up, so the van re-timed. You still arrive together"
     },
     detour: { ja: "寄り道する（+15分）", en: "Take a detour (+15 min)" },
+    agentFound: { ja: "2つ見つけました", en: "Two ways to do this" },
+    agentSub: {
+      ja: "方針の内側です。どちらでいくか選んでください。",
+      en: "Both are inside your rules. Pick one."
+    },
+    altHead: { ja: "もうひとつの案", en: "The other option" },
+    pickThis: { ja: "こちらにする", en: "Use this one" },
+    goWith: { ja: "これでいく", en: "Go with this" },
+    kindStreet: { ja: "道の上", en: "On the street" },
+    kindPlace: { ja: "建物・駅", en: "A place" },
     ff: { ja: "早送り", en: "Fast-forward" },
     ffOn: { ja: "早送り中 ×6", en: "Fast-forward ×6" },
     recenter: { ja: "元の位置", en: "Recentre" },
@@ -143,7 +154,7 @@ window.LM_UI = (function () {
     if (state === ST.proposed && decision) {
       if (decision.action === "none") head = t(S.noNeed);
       else if (decision.outcome === "failed") head = t(S.failed);
-      else if (decision.action !== "auto") head = t(S.ask);
+      else head = t(S.agentFound);          // まだ実行していない。選ぶのはこれから
     }
     var tr = tracking();
     var pt = D.pointById(tr.pointId);
@@ -485,14 +496,16 @@ window.LM_UI = (function () {
   function startAgent() {
     state = ST.thinking;
     M.setPickable(false);
+    M.proposeStreet();          // 道の上の案も点数の土俵に乗せる
     render();
     if (thinkTimer) clearTimeout(thinkTimer);
     thinkTimer = setTimeout(function () {
-      var all = A.runAll("user_action");
+      /* 提案までにとどめる。押されるまで実行しない。 */
+      var all = A.runAll("user_action", { proposeOnly: true });
       decision = null;
       all.forEach(function (d) { if (d.parcelId === HERO) decision = d; });
       if (!decision) { backToIdle(); return; }
-      if (decision.action === "auto" && decision.outcome === "executed") headTo(tracking().pointId);
+      altOpen = false;
       state = ST.proposed;
       render();
     }, reduced() ? 0 : 1500);
@@ -534,45 +547,79 @@ window.LM_UI = (function () {
       return;
     }
 
-    var auto = d.action === "auto";
     var saved = savedMinutes(d);
+    var alt = d.alt;
 
     sheet(
-      resCard(auto ? "ok" : "ask", auto ? "✓" : "?", auto ? t(S.changed) : t(S.ask), "") +
+      resCard("ask", "✦", t(S.agentFound), t(S.agentSub)) +
       '<div class="swap">' +
       '<div class="swap-side is-from"><span>' + esc(t(d.from.name)) + "</span><b>" + esc(d.from.at) + "</b></div>" +
       '<span class="swap-arrow" aria-hidden="true">→</span>' +
       '<div class="swap-side is-to"><span>' + esc(t(d.to.name)) + "</span><b>" + esc(d.to.at) + "</b></div>" +
       "</div>" +
       '<div class="facts">' +
+      fact(t(d.to.kind === "street" ? S.kindStreet : S.kindPlace)) +
       fact(d.to.extraCost === 0 ? t(S.free) : "+" + yen(d.to.extraCost)) +
       fact(t(S.walk) + " " + d.to.walkMin + (ja() ? "分" : "m")) +
       (saved ? fact(saved + " " + t(S.earlier)) : "") + "</div>" +
-      (auto
-        ? '<div class="row row-wrap sheet-cta">' +
-          '<button class="btn btn-ghost" id="mUndo" type="button">' + esc(t(S.undo)) + "</button>" +
-          '<span class="countdown" id="mCount"></span></div>'
-        : '<div class="row row-wrap sheet-cta">' +
-          '<button class="btn btn-ghost" id="mKeep" type="button">' + esc(t(S.keep)) + "</button>" +
-          '<button class="btn btn-primary grow" id="mApply" type="button">' + esc(t(S.apply)) + "</button></div>") +
+
+      /* もうひとつの案。押すと開く。 */
+      (alt
+        ? '<button class="alt2-head' + (altOpen ? " is-open" : "") + '" id="mAlt2" type="button" ' +
+          'aria-expanded="' + (altOpen ? "true" : "false") + '">' +
+          "<span>" + esc(t(S.altHead)) + "</span>" +
+          '<b>' + esc(t(alt.name)) + "</b>" +
+          '<span class="alt2-chev" aria-hidden="true">' + (altOpen ? "▴" : "▾") + "</span></button>" +
+          (altOpen
+            ? '<div class="alt2-body">' +
+              '<div class="facts">' +
+              fact(t(alt.kind === "street" ? S.kindStreet : S.kindPlace)) +
+              fact(esc(alt.at)) +
+              fact(alt.extraCost === 0 ? t(S.free) : "+" + yen(alt.extraCost)) +
+              fact(t(S.walk) + " " + alt.walkMin + (ja() ? "分" : "m")) + "</div>" +
+              '<button class="btn btn-sm alt2-pick" id="mAlt2Pick" type="button">' +
+              esc(t(S.pickThis)) + "</button></div>"
+            : "")
+        : "") +
+
+      '<div class="row row-wrap sheet-cta">' +
+      '<button class="btn btn-ghost" id="mKeep" type="button">' + esc(t(S.keep)) + "</button>" +
+      '<button class="btn btn-primary grow" id="mApply" type="button">' + esc(t(S.goWith)) + "</button></div>" +
       othersRow()
     );
 
-    var undo = $("mUndo");
-    if (undo) undo.addEventListener("click", function () {
-      A.undo(d.id);
-      M.stopWalking();
-      backToIdle();
+    var head = $("mAlt2");
+    if (head) head.addEventListener("click", function () { altOpen = !altOpen; renderProposed(); });
+    var pick = $("mAlt2Pick");
+    if (pick) pick.addEventListener("click", function () {
+      A.choose(d.id, d.altOption ? d.altOption.id : null);
+      afterChoice(d);
     });
     var apply = $("mApply");
     if (apply) apply.addEventListener("click", function () {
-      A.confirm(d.id);
-      headTo(tracking().pointId);
-      state = ST.enroute;
-      render();
+      A.choose(d.id, d.to.optionId);
+      afterChoice(d);
     });
     var keep = $("mKeep");
     if (keep) keep.addEventListener("click", function () { A.reject(d.id); backToIdle(); });
+  }
+
+  /** 案が決まったあと。歩き出して、落ち合う時刻を合わせる。 */
+  function afterChoice(d) {
+    if (d.outcome === "failed") { state = ST.proposed; render(); return; }
+    var pt = D.pointById(tracking().pointId);
+    if (pt && pt.dynamic && D.PIN.kind === "street" && M.divert(HERO, [D.PIN.x, D.PIN.y])) {
+      E.resetProgress(HERO);
+    } else {
+      M.clearDivert(HERO);
+    }
+    headTo(tracking().pointId);
+    agreedMin = Math.round(d.to.atMin);
+    meetMin = agreedMin;
+    retimed = false;
+    E.setMeetAt(HERO, agreedMin, true);
+    state = ST.enroute;
+    render();
   }
 
   function resCard(tone, ico, head, sub) {
