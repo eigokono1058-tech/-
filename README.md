@@ -9,7 +9,7 @@ Launchpad セッション: **Product design and UXR**（OpenAIのメンターと
 1. QRをかざすと開く **自己紹介サイト**（各SNS・実績サイトへワンタップ）
 2. Launchpadで見せる **ブリーフ**（提出した内容・いまの到達点・メンターに聞く4つの質問）
 3. プロジェクト **DELIVERY OS** — 日本の不在配送・再配達を減らす物流の受取体験
-   （動くプロトタイプ・ピッチ・事業計画）
+   （動くプロトタイプ・ピッチ・Launchpad用ブリーフ）
 
 すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・外部ライブラリ依存なしで動く。
 
@@ -33,7 +33,6 @@ URLに `?lang=en` / `?lang=ja` / `?lang=both` を付ければ指定して開け�
 | QRキット | [`/qr/`](./qr/) | QRのプレビュー・印刷（名刺91×55mm / A6ポスター）・ダウンロード |
 | ピッチ（事業構想1ページ） | [`/pitch/`](./pitch/) | 課題・数字・解決策・誰が払うか・足りないもの |
 | デモ（動くプロトタイプ） | [`/app/`](./app/) | 受取先の動的変更・ポリシー判定・権限発行・例外処理・需要検証 |
-| 事業計画ドキュメント | [`/plan/`](./plan/) | 事業計画／足りないもの／検証計画（Markdownをサイト上で整形表示） |
 
 ---
 
@@ -92,7 +91,7 @@ python3 tools/make_avatar.py ~/Desktop/group.jpg --crop 0.51,0.13,0.20,0.45 --pr
 > リポジトリ名を `profile` などに変える、または独自ドメインを設定する。
 > **どちらもURLが変わるのでQRを作り直す必要がある。印刷前に決めること。**
 
-`.nojekyll` を置いてあるので、`plan/` の `.md` ファイルはそのまま配信される（Jekyll処理されない）。
+`.nojekyll` を置いてあるので、`_` で始まる名前のファイルもそのまま配信される（Jekyll処理されない）。
 
 ### 3. QRを作り直す（URL・名前・肩書きを変えた場合）
 
@@ -181,15 +180,6 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
 ├── launchpad/index.html        Launchpadセッション用ブリーフ（当日の中心資料）
 ├── pitch/index.html            事業構想1ページ（DELIVERY OS）
-├── plan/
-│   ├── index.html              ドキュメントビューア（言語で .md / .en.md を切り替え）
-│   ├── md.js                   最小限のMarkdownレンダラ
-│   ├── business-plan.md        事業計画（全体構想）
-│   ├── business-plan.en.md     Business plan (English)
-│   ├── open-questions.md       足りないもの・未解決論点
-│   ├── open-questions.en.md    Open questions (English)
-│   ├── validation-plan.md      検証計画（インタビュースクリプト付き）
-│   └── validation-plan.en.md   Validation plan (English)
 ├── app/
 │   ├── index.html              デモ本体
 │   ├── app.css                 デモ専用スタイル
@@ -216,7 +206,6 @@ python3 -m http.server 8000
 # → http://localhost:8000/
 ```
 
-`plan/` はMarkdownを `fetch` で読むため、**ファイルを直接開く（file://）と表示できない**。
 必ずHTTPサーバー経由で開くこと。
 
 ---
@@ -237,7 +226,6 @@ POSTが失敗してもlocalStorageへの保存は必ず行われるので、会�
 ## ⚠️ 注意
 
 - デモは**架空データによる概念検証用シミュレーション**で、実在の配送事業者・車両とは接続していない
-- 事業計画中の数値のうち、出典のないものは `[要検証]` を付けた仮定
 - 動画2本は構想を映像化したもの（このリポジトリを作った環境では再生できるコーデックがなかったため、
   内容を確認せずファイル名とメタデータのみでキャプションを付けている。文言は必要に応じて直すこと）
 - 英語版はすべて書き下ろし（機械翻訳の直訳ではない）。固有名詞や社名を入れるときは英語側も直すこと
@@ -259,7 +247,6 @@ switched with the button in the top right, and can be forced with `?lang=en` or 
 | QR kit | [`/qr/`](./qr/) | Preview, download and print (business card 91×55mm, A6 poster) in both languages |
 | Pitch | [`/pitch/`](./pitch/) | The problem in numbers, the solution, who pays, what is unproven |
 | Demo | [`/app/`](./app/) | Change the destination mid-delivery, watch a policy engine rule on it, issue a scoped receipt grant, break it on purpose |
-| Business plan | [`/plan/`](./plan/) | Plan, open questions and validation plan (English versions are `*.en.md`) |
 
 The short version of the idea: AI agents will soon order and pay on our behalf, but goods still arrive
 physically, and today's delivery assumes somebody is home. This project treats the **last few meters**
