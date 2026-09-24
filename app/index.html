@@ -4,261 +4,107 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dynamic Delivery Orchestration OS — demo</title>
-<meta name="description" content="A prototype for the receiving side of AI-driven commerce: change the destination mid-delivery, let a policy engine decide, issue a scoped receipt grant, and see what escalates to a human.">
+<meta name="description" content="Choose where a parcel meets you, or hand it to an agent that decides inside the boundaries you set.">
 <meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="../assets/favicon.svg">
 <link rel="stylesheet" href="../assets/css/site.css">
 <link rel="stylesheet" href="app.css">
 <script src="../assets/js/i18n.js"></script>
 </head>
-<body>
+<body class="is-app">
 
-<!-- ===== onboarding ===== -->
+<!-- ===== はじめに ===== -->
 <div class="onboard" id="onboard">
   <div class="onboard-inner">
-    <div style="font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:0.2em;color:var(--brand-2)">DELIVERY OS / PROTOTYPE</div>
-
-    <div data-l="ja">
-      <h1 style="font-size:24px;margin:12px 0 10px">荷物は「家」ではなく<br>「人」に届く、としたら？</h1>
-      <p class="small muted">
-        AIエージェントが発注まで自動化しても、荷物は物理的に届きます。いまの物流は
-        <b>「本人が家にいる」前提</b>で設計されているため、ここが最後のボトルネックになります。
-      </p>
-      <p class="small muted">
-        このデモは、受取を<b>人間の在宅からシステムの権限管理に置き換える</b>とどうなるかを触って確かめるものです。
-      </p>
-    </div>
-    <div data-l="en">
-      <h1 style="font-size:24px;margin:12px 0 10px">What if parcels arrived<br>to a person, not a house?</h1>
-      <p class="small muted">
-        Even when an AI agent handles ordering end to end, the goods still arrive physically. Delivery today is
-        built on the assumption that <b>someone is home</b> — and that is where automation stops.
-      </p>
-      <p class="small muted">
-        This prototype lets you feel what happens when receiving moves from
-        <b>a human being home to a system managing permissions</b>.
-      </p>
-    </div>
-
-    <div class="stack" style="margin:18px 0 20px">
-      <div class="row"><span class="step-num">1</span><span class="small">
-        <span data-l="ja">配送中の荷物を選び、地図にピンを差して「ここで受け取る」</span>
-        <span data-l="en">Pick a parcel in transit, drop a pin on the map and say “receive here”</span>
-      </span></div>
-      <div class="row"><span class="step-num">2</span><span class="small">
-        <span data-l="ja">ポリシーエンジンが可否を判定し、受取グラントを発行する</span>
-        <span data-l="en">A policy engine rules on it and issues a receipt grant</span>
-      </span></div>
-      <div class="row"><span class="step-num">3</span><span class="small">
-        <span data-l="ja">例外を発生させて、どこから人間に戻すかを確かめる</span>
-        <span data-l="en">Trigger an exception and see what gets handed back to a human</span>
-      </span></div>
-      <div class="row"><span class="step-num">4</span><span class="small">
-        <span data-l="ja">最後に「使いたいか」を答えてもらう</span>
-        <span data-l="en">Then tell me whether you would actually use it</span>
-      </span></div>
-    </div>
-
-    <button class="btn btn-primary" id="obStart" type="button" style="width:100%">
-      <span data-l="ja">デモを始める</span><span data-l="en">Start the demo</span>
+    <div class="ob-mark" aria-hidden="true">📦</div>
+    <h2 class="ob-title">
+      <span data-l="ja">荷物が、あなたに合わせる。</span>
+      <span data-l="en">Packages adapt to people.</span>
+    </h2>
+    <p class="ob-lede">
+      <span data-l="ja">受け取る場所を自分で選ぶか、方針を決めてエージェントに任せるか。</span>
+      <span data-l="en">Pick where it meets you — or set your boundaries and let the agent decide.</span>
+    </p>
+    <button class="btn btn-primary btn-wide" id="obStart" type="button">
+      <span data-l="ja">はじめる</span><span data-l="en">Start</span>
     </button>
-    <div class="row" style="justify-content:center;margin-top:12px">
-      <button class="btn btn-sm btn-ghost lang-btn" id="langBtnOnboard" type="button">EN</button>
-    </div>
-    <p class="tiny faint" style="margin-top:12px">
-      <span data-l="ja">※ 架空のデータによる概念検証用シミュレーションです。実在の事業者・車両とは接続していません。</span>
-      <span data-l="en">A concept simulation on fictional data. Nothing here is connected to a real carrier or vehicle.</span>
+    <div class="ob-lang"><span id="langBtnOnboard"></span></div>
+    <p class="ob-note">
+      <span data-l="ja">架空のデータによるデモです。</span>
+      <span data-l="en">A demo on fictional data.</span>
     </p>
   </div>
 </div>
 
-<!-- ===== app bar ===== -->
-<header class="app-bar">
-  <a class="brand" href="../" title="Back to profile">
-    <span aria-hidden="true">⌂</span> DELIVERY OS
-  </a>
-  <span class="clock" id="clock">18:02</span>
-  <span class="pill lvl pill-ok" id="lvlPill">L3</span>
+<!-- ===== アプリバー ===== -->
+<header class="ab">
+  <a class="ab-home" href="../" title="Profile"><span aria-hidden="true">⌂</span></a>
+  <span class="ab-title">DELIVERY OS</span>
+  <span class="ab-clock" id="clock">18:02</span>
   <span class="grow"></span>
-  <button class="btn btn-sm btn-ghost lang-btn" id="langBtn" type="button" style="min-height:32px;padding:4px 8px">EN</button>
-  <button class="btn btn-sm btn-ghost" id="themeBtn" type="button" aria-label="Theme" style="min-height:32px;padding:4px 10px">◐</button>
+  <button class="ab-btn" id="langBtn" type="button">EN</button>
+  <button class="ab-btn" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </header>
 
-<main class="wrap">
+<!-- ================= 受取（主役） ================= -->
+<section class="view is-active" id="view-map">
+  <div class="stage">
+    <div class="status" id="status" role="status"></div>
+    <svg id="map" viewBox="0 -40 360 320" role="group"
+         aria-label="Map. Tap a pickup point to choose where the parcel meets you."></svg>
+  </div>
+  <div class="sheet2" id="sheet2"></div>
+</section>
 
-  <!-- ================= FLOW ================= -->
-  <section class="view is-active" id="view-flow">
-    <div class="map-wrap">
-      <svg id="map" role="group" aria-label="Neighbourhood map. Tap anywhere to drop the pickup pin, or drag the pin itself."></svg>
-      <div class="map-legend">
-        <span data-l="ja">📍 受取ピン</span><span data-l="en">📍 Pickup pin</span>
-        <span data-l="ja">🧑 移動中の自分</span><span data-l="en">🧑 Me, walking</span>
-        <span data-l="ja">🏭 物流Hub</span><span data-l="en">🏭 Depot</span>
-        <span data-l="ja">点線 = 徒歩ルート</span><span data-l="en">Dotted = walking route</span>
-      </div>
-    </div>
-    <div class="pin-card" id="pinCard"></div>
-    <p class="tiny faint" style="margin:8px 0 18px">
-      <span data-l="ja">地図をタップするか、ピンをドラッグすると受取ピンが動きます（配車アプリで「ここで乗る」を指定するのと同じ操作）。ピンは道路と受取地点にスナップし、動かすたびにポリシーエンジンが可否を判定します。<b>「ここで受け取る」</b>で選択中の荷物の受取先が確定します。<b>⌖ 自分に追従</b>にすると、歩いている自分にピンがついてきます。</span>
-      <span data-l="en">Tap the map or drag the pin to move it — the same gesture as setting a pickup point in a ride-hailing app. The pin snaps to streets and pickup points, and the policy engine rules on every position as you move it. <b>Receive here</b> commits the selected parcel to that spot; <b>⌖ Follow me</b> lets the pin travel with you as you walk.</span>
-    </p>
-
-    <!-- エージェントに任せる。ここがこのデモの主役 -->
-    <div class="agent-bar">
-      <div class="agent-bar__head">
-        <b>
-          <span data-l="ja">エージェントに任せる</span><span data-l="en">Hand it to the agent</span>
-        </b>
-        <span class="tiny faint">
-          <span data-l="ja">方針の内側は黙って実行し、外に出るときだけ聞きます</span>
-          <span data-l="en">It acts inside your policy and only asks when a choice falls outside</span>
-        </span>
-      </div>
-      <div class="row row-wrap">
-        <button class="btn btn-sm btn-primary" id="agentRun" type="button">
-          <span data-l="ja">▶ 4件を任せる</span><span data-l="en">▶ Hand over all four</span>
-        </button>
-        <button class="btn btn-sm" id="agentSurge" type="button">
-          <span data-l="ja">例外を起こす</span><span data-l="en">Force an exception</span>
-        </button>
-        <a class="btn btn-sm btn-ghost" href="#view-policy" id="agentPolicyLink">
-          <span data-l="ja">方針を見る</span><span data-l="en">See the policy</span>
-        </a>
-      </div>
-    </div>
-
-    <div id="agentThinking"></div>
-    <div id="deliveredBox"></div>
-    <div id="agentDecisions"></div>
-
-    <h2 style="font-size:15px">
-      <span data-l="ja">配送中の荷物</span><span data-l="en">Parcels on their way</span>
+<!-- ================= 記録 ================= -->
+<section class="view" id="view-log">
+  <div class="pad">
+    <h2 class="vh">
+      <span data-l="ja">エージェントが呼んだもの</span><span data-l="en">What the agent called</span>
     </h2>
-    <p class="small muted" style="margin-bottom:10px">
-      <span data-l="ja">4件のうち3件はAIエージェントが自動発注したものです。</span>
-      <span data-l="en">Three of the four were ordered automatically by an AI agent.</span>
-    </p>
-    <div class="stack" id="parcelList"></div>
-
-    <div class="card" style="margin-top:16px" id="focusPanel"></div>
-  </section>
-
-  <!-- ================= POLICY ================= -->
-  <section class="view" id="view-policy">
-    <h2 style="font-size:17px">
-      <span data-l="ja">配送の方針（一度だけ設定します）</span>
-      <span data-l="en">Your delivery policy (set once)</span>
-    </h2>
-    <p class="small muted" style="margin-bottom:14px">
-      <span data-l="ja">毎回AとBとCから選ぶ必要はありません。境界だけ決めておけば、あとはエージェントがその内側で勝手に決めます。外に出るときだけ聞きます。</span>
-      <span data-l="en">You do not pick between A, B and C every time. Set the boundaries once and the agent decides inside them. It only asks when a choice would fall outside.</span>
-    </p>
-
-    <div class="card" id="policyForm"></div>
-
-    <p class="tiny faint" style="margin:10px 0 0">
-      <span data-l="ja">※ 値を動かすと、保留中の判断がその場で作り直されます。上限を上げると「確認」が「自動」に変わるのが見えます。</span>
-      <span data-l="en">Move a value and any pending decision is re-made on the spot — raise a limit and watch “asks you” become “does it silently”.</span>
-    </p>
-
-    <div id="policySummary" style="margin-top:18px"></div>
-  </section>
-
-  <!-- ================= GRANT ================= -->
-  <section class="view" id="view-grant">
-    <h2 style="font-size:17px">
-      <span data-l="ja">受取権限と責任分界</span><span data-l="en">Permissions and where liability sits</span>
-    </h2>
-    <p class="small muted" style="margin-bottom:14px">
-      <span data-l="ja">「誰が・何の目的で・どこまで・いつまで・何を実行できるか」を1枚のグラントとして表現します。ITのアクセス権管理を、そのまま物理世界に持ち込む発想です。</span>
-      <span data-l="en">Who, for what purpose, how far, until when, and what they may do — expressed as a single grant. It is IT access management carried straight into the physical world.</span>
-    </p>
-    <div id="grantBox"></div>
-
-    <h2 style="font-size:16px;margin-top:26px">
-      <span data-l="ja">自律レベル（どこまでAIに委譲するか）</span>
-      <span data-l="en">Autonomy level — how much you delegate</span>
-    </h2>
-    <p class="small muted" style="margin-bottom:12px">
-      <span data-l="ja">全部自動化することが目的ではありません。リスクに応じて人間の介入点を設計します。</span>
-      <span data-l="en">Full automation is not the goal. You design where a human steps in, based on risk.</span>
-    </p>
-    <div class="dial" id="dialBox"></div>
-    <div id="dialWarn"></div>
-  </section>
-
-  <!-- ================= LOG ================= -->
-  <section class="view" id="view-log">
-    <div class="row spread">
-      <h2 style="font-size:17px;margin:0">
-        <span data-l="ja">受渡し記録</span><span data-l="en">Chain of custody</span>
-      </h2>
-      <span class="pill"><span id="logCount">0</span></span>
-    </div>
-    <p class="small muted" style="margin:10px 0 14px">
-      <span data-l="ja">自動化が進むほど「何か起きたとき誰の責任か」が問題になります。占有がどこで移ったか、どの条件を満たして開錠したかを、署名付きで残すことが責任分界の土台になります。</span>
-      <span data-l="en">The more you automate, the more "who is liable when it goes wrong" matters. Recording where custody moved and which conditions unlocked the box — signed — is what makes that boundary real.</span>
-    </p>
-    <div class="log" id="logBox"></div>
-
-    <h2 style="font-size:16px;margin-top:26px">
-      <span data-l="ja">エージェントが実際に呼んだもの</span>
-      <span data-l="en">What the agent actually called</span>
-    </h2>
-    <p class="small muted" style="margin-bottom:10px">
-      <span data-l="ja">「AIが考えている」ではなく「何を呼んだか」を出します。配送OSを MCPサーバーとして公開するなら、ここがそのまま外向きの面になります。順序にも意味があり、先にロッカーの席を取ってから配送先を変えます。途中で失敗したら、進んだぶんを逆順で戻します。</span>
-      <span data-l="en">Not “the AI is thinking” but “here is what it called”. If this shipped as an MCP server, this list is the public surface. Order matters: it books the locker before rerouting the carrier, and if a step fails it rolls back what already happened.</span>
+    <p class="vsub">
+      <span data-l="ja">配送OSをMCPサーバーとして出すなら、ここがそのまま外向きの面になります。</span>
+      <span data-l="en">If this shipped as an MCP server, this list is the public surface.</span>
     </p>
     <div class="toolcalls" id="toolCalls"></div>
 
-    <div class="row row-wrap" style="margin-top:16px">
+    <h2 class="vh u-mt">
+      <span data-l="ja">受渡し記録</span><span data-l="en">Chain of custody</span>
+    </h2>
+    <div class="log" id="logBox"></div>
+
+    <div class="row row-wrap u-mt">
       <button class="btn btn-sm" id="failBtn" type="button">
-        <span data-l="ja">次の配送先変更を失敗させる</span><span data-l="en">Make the next reroute fail</span>
+        <span data-l="ja">配送先変更を失敗させる</span><span data-l="en">Make a reroute fail</span>
       </button>
       <button class="btn btn-sm btn-ghost" id="resetBtn" type="button">
-        <span data-l="ja">シミュレーションを初期化</span><span data-l="en">Reset the simulation</span>
+        <span data-l="ja">最初から</span><span data-l="en">Start over</span>
       </button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= SURVEY ================= -->
-  <section class="view" id="view-survey">
-    <h2 style="font-size:17px">
-      <span data-l="ja">これ、本当に使いたいですか？</span><span data-l="en">Would you actually use this?</span>
+<!-- ================= 検証 ================= -->
+<section class="view" id="view-survey">
+  <div class="pad">
+    <h2 class="vh">
+      <span data-l="ja">これ、使いたいですか？</span><span data-l="en">Would you use this?</span>
     </h2>
-    <p class="small muted" style="margin-bottom:8px">
-      <span data-l="ja">触ってみた率直な感想を教えてください。<b>「使わない」「金は払わない」という回答が一番価値があります。</b>個人が払わないなら、課金対象は配送事業者や不動産側だという判断材料になります。</span>
-      <span data-l="en">Be blunt. <b>“I would not use it” and “I would not pay” are the most valuable answers.</b> If individuals will not pay, that tells me the customer is the carrier or the building owner, not the resident.</span>
+    <p class="vsub">
+      <span data-l="ja"><b>「使わない」が一番価値のある回答です。</b></span>
+      <span data-l="en"><b>“I would not use it” is the most valuable answer.</b></span>
     </p>
     <div id="surveyForm"></div>
     <hr>
-    <h3 style="font-size:15px">
-      <span data-l="ja">集計</span><span data-l="en">Results so far</span>
-    </h3>
+    <h3 class="vh3"><span data-l="ja">集計</span><span data-l="en">Results</span></h3>
     <div id="surveyStats"></div>
-    <p class="tiny faint" style="margin-top:18px">
-      <a href="../"><span data-l="ja">← プロフィールに戻る</span><span data-l="en">← Back to profile</span></a> ·
-      <a href="../pitch/"><span data-l="ja">事業構想を見る</span><span data-l="en">Read the pitch</span></a>
-    </p>
-  </section>
+  </div>
+</section>
 
-</main>
-
-<!-- ===== bottom sheet ===== -->
-<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Choose a pickup point">
-  <div class="sheet-panel" id="sheetBody"></div>
-</div>
-
-<!-- ===== tab bar ===== -->
+<!-- ===== タブ ===== -->
 <nav class="tabbar" role="tablist" aria-label="Sections">
-  <button id="tab-flow" role="tab" aria-selected="true" type="button"><span class="ti">🚚</span>
-    <span data-l="ja">配送</span><span data-l="en">Delivery</span>
-  </button>
-  <button id="tab-policy" role="tab" aria-selected="false" type="button"><span class="ti">🎚</span>
-    <span data-l="ja">方針</span><span data-l="en">Policy</span>
-  </button>
-  <button id="tab-grant" role="tab" aria-selected="false" type="button"><span class="ti">🔑</span>
-    <span data-l="ja">権限</span><span data-l="en">Grant</span>
+  <button id="tab-map" role="tab" aria-selected="true" type="button"><span class="ti">📍</span>
+    <span data-l="ja">受取</span><span data-l="en">Receive</span>
   </button>
   <button id="tab-log" role="tab" aria-selected="false" type="button"><span class="ti">📜</span>
     <span data-l="ja">記録</span><span data-l="en">Log</span>
