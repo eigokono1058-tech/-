@@ -17,7 +17,25 @@ window.LM_MAP = (function () {
 
   var svg = null;
   var layers = {};
-  var hooks = {};          // { onPin: fn(pin) }
+  var hooks = {};          // { onPick: fn(pointId), onArrive: fn(pointId) }
+
+  /* 受取地点を選べる状態かどうか。選べるときだけ地図が反応する。 */
+  var pickable = false;
+  var picked = null;
+
+  function setPickable(on) {
+    pickable = !!on;
+    if (!on) picked = null;
+    if (svg) svg.classList.toggle("is-pickable", pickable);
+    paintPicked();
+  }
+
+  function paintPicked() {
+    if (!layers.points) return;
+    Array.prototype.forEach.call(layers.points.querySelectorAll(".m-point"), function (g) {
+      g.classList.toggle("is-picked", picked === g.getAttribute("data-id"));
+    });
+  }
   var focusParcel = null;
 
   /* ---------- 道路（描画とスナップの両方に使う） ---------- */
@@ -227,7 +245,7 @@ window.LM_MAP = (function () {
   function mount(target, h) {
     svg = target;
     hooks = h || {};
-    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("viewBox", "0 -40 " + W + " " + (H + 80));
     svg.innerHTML = "";
 
     var defs = el("defs");
@@ -292,8 +310,17 @@ window.LM_MAP = (function () {
         class: "m-label",
         "text-anchor": "middle"
       }, T(pt.label || pt.name)));
+      function choose(e) {
+        if (!pickable) return;
+        e.preventDefault();
+        e.stopPropagation();
+        picked = pt.id;
+        paintPicked();
+        if (hooks.onPick) hooks.onPick(pt.id);
+      }
+      g.addEventListener("click", choose);
       g.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPinToPointPending(pt.id); }
+        if (e.key === "Enter" || e.key === " ") choose(e);
       });
       layers.points.appendChild(g);
     });
@@ -530,6 +557,9 @@ window.LM_MAP = (function () {
     update: update,
     setFocus: function (id) { focusParcel = id; },
     personProgress: function () { return walkT; },
+    setPickable: setPickable,
+    /* 言語が変わったら描き直す。ラベルがSVGのテキストなので作り直すのが早い */
+    relabel: function () { if (svg) mount(svg, hooks); },
     resetWalk: resetWalk,
     walkTo: walkTo,
     stopWalking: stopWalking,
