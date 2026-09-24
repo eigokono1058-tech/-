@@ -90,19 +90,41 @@
 
   /* ---------- link list ---------- */
   .links { display: grid; gap: 11px; }
+  /* 押すものだと分かるように、立体のボタンにする。
+     下に3pxの「厚み」を出し、押すとその分だけ沈む。 */
   .link-row {
     display: flex; align-items: center; gap: 14px;
     padding: 15px 16px;
-    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--surface-2, var(--surface)) 94%, transparent) 0%,
+      color-mix(in srgb, var(--surface) 88%, transparent) 100%);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text); text-decoration: none;
-    box-shadow: var(--shadow-soft);
-    transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--text) 9%, transparent),
+      0 3px 0 color-mix(in srgb, var(--border) 90%, transparent),
+      0 9px 18px -9px rgba(0, 0, 0, 0.5);
+    transition: transform 0.14s var(--ease), box-shadow 0.14s var(--ease),
+                border-color 0.2s var(--ease);
     min-height: 68px;
+    margin-bottom: 3px;   /* 厚みのぶん */
   }
-  .link-row:hover { text-decoration: none; transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border)); }
-  .link-row:active { transform: scale(0.99); }
+  .link-row:hover {
+    text-decoration: none; transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--text) 12%, transparent),
+      0 5px 0 color-mix(in srgb, var(--accent, var(--brand-1)) 30%, var(--border)),
+      0 14px 24px -10px rgba(0, 0, 0, 0.55);
+  }
+  .link-row:active {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent),
+      0 0 0 color-mix(in srgb, var(--border) 90%, transparent),
+      0 3px 8px -6px rgba(0, 0, 0, 0.5);
+  }
   .link-ico {
     width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px;
     display: grid; place-items: center;

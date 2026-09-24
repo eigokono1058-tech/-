@@ -38,12 +38,33 @@ window.LM_UI = (function () {
 
   /* 再生の速さ。既定は、人が歩いているように見える速さ。
      受取先が決まったら「早送り」が出て、そこへ着くまでを縮められる。
-     時計も配送車も歩く速さも、同じ数字で一緒に動く。 */
+     時計も配送車も歩く速さも、同じ数字で一緒に動く。
+
+     早送りは倍率を固定しない。受取時刻までの残りが何分あっても、
+     実時間 FF_ARRIVE_SEC 秒で着くように速さを決める。
+     固定の6倍だと、2時間先のロッカーを選んだときに実時間で5分以上
+     かかってしまい、止まって見えるため。 */
   var RATE_NORMAL = 0.15;
-  var RATE_FAST = 0.9;
+  var RATE_FAST = 0.9;          // 早送りの下限（＝6倍）
+  var FF_ARRIVE_SEC = 12;       // 早送りで着くまでにかけたい実時間（秒）
   var fastForward = false;
+  var ffRate = RATE_FAST;       // 早送り中の速さ。押した時点で決めて固定する
+  var ffMult = 6;               // ボタンに出す倍率
   var altOpen = false;
-  function rate() { return fastForward ? RATE_FAST : RATE_NORMAL; }
+
+  function rate() { return fastForward ? ffRate : RATE_NORMAL; }
+
+  /* 押した時点の「残り」から速さを決める。
+     毎フレーム計算し直すと、残りが減るほど遅くなって近づくだけになり、
+     いつまでも着かない。だから一度決めたら変えない。
+       1秒あたりに進めたい分 = remain / FF_ARRIVE_SEC
+       実際に進む分           = rate * speed / 60 */
+  function ffRateFor() {
+    var tr = tracking();
+    var remain = tr && tr.meetAtMin != null ? tr.meetAtMin - E.state.simMinutes : null;
+    if (remain == null || remain <= 0) return RATE_FAST;
+    return Math.max(RATE_FAST, (remain / FF_ARRIVE_SEC) * 60 / E.state.speed);
+  }
 
   function $(id) { return document.getElementById(id); }
   function t(v) { return I18N ? I18N.t(v) : (v && (v.ja || v)) || ""; }
@@ -129,7 +150,7 @@ window.LM_UI = (function () {
     kindStreet: { ja: "道の上", en: "On the street" },
     kindPlace: { ja: "建物・駅", en: "A place" },
     ff: { ja: "早送り", en: "Fast-forward" },
-    ffOn: { ja: "早送り中 ×6", en: "Fast-forward ×6" },
+    ffOn: { ja: "早送り中", en: "Fast-forward" },
     recenter: { ja: "元の位置", en: "Recentre" },
     fee: { ja: "配送料", en: "Delivery" },
     chargedNote: {
@@ -178,7 +199,8 @@ window.LM_UI = (function () {
         b.classList.toggle("is-on", fastForward);
         b.setAttribute("aria-pressed", fastForward ? "true" : "false");
         b.innerHTML = '<span class="ff-ico" aria-hidden="true">' + (fastForward ? "⏩" : "▶︎") + "</span>" +
-          "<span>" + esc(t(fastForward ? S.ffOn : S.ff)) + "</span>";
+          "<span>" + esc(t(fastForward ? S.ffOn : S.ff)) +
+          (fastForward ? " ×" + ffMult : "") + "</span>";
       }
     }
     var r = $("reBtn");
@@ -193,6 +215,10 @@ window.LM_UI = (function () {
 
   function setFastForward(on) {
     fastForward = !!on;
+    if (fastForward) {
+      ffRate = ffRateFor();
+      ffMult = Math.max(2, Math.round(ffRate / RATE_NORMAL));
+    }
     renderFF();
   }
 
@@ -553,16 +579,15 @@ window.LM_UI = (function () {
     var alt = d.alt;
 
     sheet(
-      resCard("ask", "✦", t(S.agentFound), t(S.agentSub)) +
+      /* 見つけた件数は主役ではない。場所の名前を主役にする。 */
+      '<p class="pick-note"><b>' + esc(t(S.agentFound)) + "</b> " + esc(t(S.agentSub)) + "</p>" +
 
-      /* 第1候補。第2候補と同じ見た目の箱に入れて、番号で並べて見せる。 */
+      /* 第1候補 */
       '<div class="cand cand-1">' +
       '<div class="cand-n">' + esc(t(S.cand1)) + "</div>" +
-      '<div class="swap">' +
-      '<div class="swap-side is-from"><span>' + esc(t(d.from.name)) + "</span><b>" + esc(d.from.at) + "</b></div>" +
-      '<span class="swap-arrow" aria-hidden="true">→</span>' +
-      '<div class="swap-side is-to"><span>' + esc(t(d.to.name)) + "</span><b>" + esc(d.to.at) + "</b></div>" +
-      "</div>" +
+      '<div class="cand-name">' + esc(t(d.to.name)) + "</div>" +
+      '<div class="cand-when"><b>' + esc(d.to.at) + "</b>" +
+      '<span class="cand-was">' + esc(t(d.from.name)) + " <s>" + esc(d.from.at) + "</s></span></div>" +
       '<div class="facts">' +
       fact(t(d.to.kind === "street" ? S.kindStreet : S.kindPlace)) +
       fact(d.to.extraCost === 0 ? t(S.free) : "+" + yen(d.to.extraCost)) +
@@ -571,10 +596,11 @@ window.LM_UI = (function () {
 
       /* 第2候補。押すと開く。 */
       (alt
-        ? '<button class="alt2-head' + (altOpen ? " is-open" : "") + '" id="mAlt2" type="button" ' +
+        ? '<button class="cand alt2-head' + (altOpen ? " is-open" : "") + '" id="mAlt2" type="button" ' +
           'aria-expanded="' + (altOpen ? "true" : "false") + '">' +
-          "<span>" + esc(t(S.altHead)) + "</span>" +
-          '<b>' + esc(t(alt.name)) + "</b>" +
+          '<span class="cand-n">' + esc(t(S.cand2)) + "</span>" +
+          '<span class="cand-line"><b class="cand-name">' + esc(t(alt.name)) + "</b>" +
+          '<span class="cand-t">' + esc(alt.at) + "</span></span>" +
           '<span class="alt2-chev" aria-hidden="true">' + (altOpen ? "▴" : "▾") + "</span></button>" +
           (altOpen
             ? '<div class="alt2-body">' +
