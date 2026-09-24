@@ -39,6 +39,8 @@ body { padding-bottom: 76px; }
 .app-bar .brand {
   font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
   color: var(--brand-2);
+  /* 自律レベルの表示が長い言語でも、ブランド名は1行に保つ */
+  white-space: nowrap; flex: 0 0 auto;
 }
 .app-bar .clock {
   font-family: var(--mono); font-size: 13px; font-weight: 700;
@@ -56,7 +58,7 @@ body { padding-bottom: 76px; }
 
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 45;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(14px);
   border-top: 1px solid var(--border);
@@ -64,11 +66,14 @@ body { padding-bottom: 76px; }
 }
 .tabbar button {
   appearance: none; border: 0; background: none; cursor: pointer;
-  padding: 9px 4px 11px; color: var(--text-faint);
-  font: inherit; font-size: 11px; font-weight: 600;
+  padding: 9px 2px 11px; color: var(--text-faint);
+  font: inherit; font-size: 10.5px; font-weight: 600;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   border-top: 2px solid transparent;
+  /* 5つ並ぶので、ラベルは折り返さず1行に収める */
+  min-width: 0; white-space: nowrap;
 }
+.tabbar button > span:not(.ti) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .tabbar button .ti { font-size: 17px; line-height: 1; }
 .tabbar button[aria-selected="true"] { color: var(--brand-2); border-top-color: var(--brand-2); }
 .tabbar .badge {
@@ -412,3 +417,178 @@ textarea { min-height: 84px; resize: vertical; }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12.5px; }
 .kv dt { color: var(--text-faint); }
 .kv dd { margin: 0; color: var(--text-dim); }
+
+/* ==========================================================================
+   配送エージェント
+   判断カード・考え中の表示・方針の設定・ツール呼び出し
+   色はすべて site.css の変数から。新しい色は作らない。
+   ========================================================================== */
+
+/* ---- 任せるバー ---- */
+.agent-bar {
+  margin: 4px 0 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand-2) 34%, var(--border));
+  border-radius: var(--radius);
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 12%, transparent), transparent 62%),
+    color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+.agent-bar__head { display: grid; gap: 2px; margin-bottom: 10px; }
+.agent-bar__head b { font-size: 15px; }
+.agent-bar .btn.is-on {
+  border-color: var(--warn);
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+}
+.agent-empty { margin: 0 0 16px; }
+
+/* ---- 考え中。何を呼んだかを併記する ---- */
+.think {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+.think-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--text-faint);
+  transition: color 0.2s ease;
+}
+.think-row.is-now { color: var(--text); }
+.think-row.is-done { color: var(--text-dim); }
+.think-tick { color: var(--brand-2); font-weight: 700; }
+.think-tool { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); }
+
+/* ---- 判断カード ---- */
+.dec {
+  --dec: var(--info);
+  margin: 0 0 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--dec) 38%, var(--border));
+  border-left: 3px solid var(--dec);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--dec) 9%, transparent), transparent 55%),
+    color-mix(in srgb, var(--surface) 92%, transparent);
+}
+.dec-ok { --dec: var(--ok); }
+.dec-warn { --dec: var(--warn); }
+.dec-danger { --dec: var(--danger); }
+.dec-info { --dec: var(--info); }
+
+.dec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.dec-head b { font-size: 14.5px; color: var(--dec); }
+.dec-head .pill { font-size: 11px; }
+
+.dec-move {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin: 10px 0 0; font-size: 13px;
+}
+.dec-from { color: var(--text-faint); text-decoration: line-through; }
+.dec-arrow { color: var(--dec); }
+.dec-to { color: var(--text); font-weight: 650; }
+
+.dec-reason { margin: 8px 0 0; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+
+.dec-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.dec-fact {
+  display: grid; gap: 1px; padding: 6px 10px;
+  border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+.dec-fact b { font-size: 13.5px; }
+.dec-note { margin: 10px 0 0; line-height: 1.55; }
+.dec-actions { margin-top: 12px; align-items: center; }
+.ok-text { color: var(--ok); }
+.warn-text { color: var(--warn); }
+
+/* ---- 判断の内訳 ---- */
+.dec-why { margin-top: 12px; }
+.dec-why > summary {
+  cursor: pointer; font-size: 12.5px; color: var(--text-faint);
+  padding: 4px 0; list-style: none;
+}
+.dec-why > summary::-webkit-details-marker { display: none; }
+.dec-why > summary::before { content: "▸ "; }
+.dec-why[open] > summary::before { content: "▾ "; }
+.why-block { margin: 8px 0 0; }
+.why-h {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;
+}
+.why-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 12.5px; padding: 3px 0; border-bottom: 1px solid var(--border-soft);
+}
+.why-row:last-child { border-bottom: 0; }
+/* 外した理由は長い文になる。横に並べると窮屈なので縦に積む。 */
+.why-row--stack { display: grid; gap: 1px; }
+.why-row--stack > span:last-child { font-size: 11.5px; line-height: 1.5; }
+.why-sub { font-size: 11px; color: var(--text-faint); padding: 0 0 4px; }
+
+/* ---- 方針 ---- */
+.pol-row {
+  display: grid; gap: 8px; padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.pol-row:last-of-type { border-bottom: 0; }
+.pol-label { display: grid; gap: 2px; }
+.pol-label b { font-size: 14px; }
+.pol-ctl output {
+  display: inline-block; font-family: var(--mono); font-size: 16px;
+  font-weight: 700; color: var(--brand-2); margin-bottom: 6px;
+}
+.pol-ctl input[type="range"] { width: 100%; accent-color: var(--brand-2); }
+.pol-ctl .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.pol-sum {
+  --s: var(--info);
+  margin-bottom: 10px; padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--s) 32%, var(--border));
+  border-left: 3px solid var(--s);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--s) 7%, transparent);
+}
+.pol-sum.ok { --s: var(--ok); }
+.pol-sum.warn { --s: var(--warn); }
+.pol-sum.danger { --s: var(--danger); }
+.pol-sum b { font-size: 13.5px; color: var(--s); }
+.pol-sum ul { margin: 6px 0 0; padding-left: 18px; }
+.pol-sum li { font-size: 12.5px; color: var(--text-dim); line-height: 1.7; }
+
+/* ---- ツール呼び出し ---- */
+.toolcalls {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  padding: 10px 12px; overflow-x: auto;
+}
+.tc { padding: 6px 0; border-bottom: 1px solid var(--border-soft); }
+.tc:last-child { border-bottom: 0; }
+.tc-line {
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+  color: var(--text-dim); white-space: pre-wrap; word-break: break-word;
+}
+.tc-line b { color: var(--brand-2); }
+.tc-res { color: var(--text-faint); }
+.tc-ms { margin-left: 8px; opacity: 0.6; }
+.tc-err .tc-res { color: var(--danger); }
+
+@media (min-width: 560px) {
+  .pol-row { grid-template-columns: 1fr 260px; align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .think-row { transition: none; }
+}
+
+/* 地点名が長くても、カードが横に伸びて画面を押し出さないようにする */
+.dec-move, .dec-reason, .dec-note, .why-row, .pol-sum li { overflow-wrap: anywhere; }
+.dec-fact { min-width: 0; }

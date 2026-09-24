@@ -101,6 +101,33 @@
       <span data-l="en">Tap the map or drag the pin to move it — the same gesture as setting a pickup point in a ride-hailing app. The pin snaps to streets and pickup points, and the policy engine rules on every position as you move it. <b>Receive here</b> commits the selected parcel to that spot; <b>⌖ Follow me</b> lets the pin travel with you as you walk.</span>
     </p>
 
+    <!-- エージェントに任せる。ここがこのデモの主役 -->
+    <div class="agent-bar">
+      <div class="agent-bar__head">
+        <b>
+          <span data-l="ja">エージェントに任せる</span><span data-l="en">Hand it to the agent</span>
+        </b>
+        <span class="tiny faint">
+          <span data-l="ja">方針の内側は黙って実行し、外に出るときだけ聞きます</span>
+          <span data-l="en">It acts inside your policy and only asks when a choice falls outside</span>
+        </span>
+      </div>
+      <div class="row row-wrap">
+        <button class="btn btn-sm btn-primary" id="agentRun" type="button">
+          <span data-l="ja">▶ 4件を任せる</span><span data-l="en">▶ Hand over all four</span>
+        </button>
+        <button class="btn btn-sm" id="agentSurge" type="button">
+          <span data-l="ja">例外を起こす</span><span data-l="en">Force an exception</span>
+        </button>
+        <a class="btn btn-sm btn-ghost" href="#view-policy" id="agentPolicyLink">
+          <span data-l="ja">方針を見る</span><span data-l="en">See the policy</span>
+        </a>
+      </div>
+    </div>
+
+    <div id="agentThinking"></div>
+    <div id="agentDecisions"></div>
+
     <div id="blockedBanner"></div>
 
     <h2 style="font-size:15px">
@@ -123,6 +150,27 @@
       <span data-l="en">Automating the happy path is table stakes. The design is won or lost on exceptions — and the autonomy level decides whether one is auto-recovered or handed back to you.</span>
     </p>
     <div class="exc-grid" id="excList"></div>
+  </section>
+
+  <!-- ================= POLICY ================= -->
+  <section class="view" id="view-policy">
+    <h2 style="font-size:17px">
+      <span data-l="ja">配送の方針（一度だけ設定します）</span>
+      <span data-l="en">Your delivery policy (set once)</span>
+    </h2>
+    <p class="small muted" style="margin-bottom:14px">
+      <span data-l="ja">毎回AとBとCから選ぶ必要はありません。境界だけ決めておけば、あとはエージェントがその内側で勝手に決めます。外に出るときだけ聞きます。</span>
+      <span data-l="en">You do not pick between A, B and C every time. Set the boundaries once and the agent decides inside them. It only asks when a choice would fall outside.</span>
+    </p>
+
+    <div class="card" id="policyForm"></div>
+
+    <p class="tiny faint" style="margin:10px 0 0">
+      <span data-l="ja">※ 値を動かすと、保留中の判断がその場で作り直されます。上限を上げると「確認」が「自動」に変わるのが見えます。</span>
+      <span data-l="en">Move a value and any pending decision is re-made on the spot — raise a limit and watch “asks you” become “does it silently”.</span>
+    </p>
+
+    <div id="policySummary" style="margin-top:18px"></div>
   </section>
 
   <!-- ================= GRANT ================= -->
@@ -161,7 +209,21 @@
       <span data-l="en">The more you automate, the more "who is liable when it goes wrong" matters. Recording where custody moved and which conditions unlocked the box — signed — is what makes that boundary real.</span>
     </p>
     <div class="log" id="logBox"></div>
-    <div class="row" style="margin-top:16px">
+
+    <h2 style="font-size:16px;margin-top:26px">
+      <span data-l="ja">エージェントが実際に呼んだもの</span>
+      <span data-l="en">What the agent actually called</span>
+    </h2>
+    <p class="small muted" style="margin-bottom:10px">
+      <span data-l="ja">「AIが考えている」ではなく「何を呼んだか」を出します。配送OSを MCPサーバーとして公開するなら、ここがそのまま外向きの面になります。順序にも意味があり、先にロッカーの席を取ってから配送先を変えます。途中で失敗したら、進んだぶんを逆順で戻します。</span>
+      <span data-l="en">Not “the AI is thinking” but “here is what it called”. If this shipped as an MCP server, this list is the public surface. Order matters: it books the locker before rerouting the carrier, and if a step fails it rolls back what already happened.</span>
+    </p>
+    <div class="toolcalls" id="toolCalls"></div>
+
+    <div class="row row-wrap" style="margin-top:16px">
+      <button class="btn btn-sm" id="failBtn" type="button">
+        <span data-l="ja">次の配送先変更を失敗させる</span><span data-l="en">Make the next reroute fail</span>
+      </button>
       <button class="btn btn-sm btn-ghost" id="resetBtn" type="button">
         <span data-l="ja">シミュレーションを初期化</span><span data-l="en">Reset the simulation</span>
       </button>
@@ -201,6 +263,9 @@
   <button id="tab-flow" role="tab" aria-selected="true" type="button"><span class="ti">🚚</span>
     <span data-l="ja">配送</span><span data-l="en">Delivery</span>
   </button>
+  <button id="tab-policy" role="tab" aria-selected="false" type="button"><span class="ti">🎚</span>
+    <span data-l="ja">方針</span><span data-l="en">Policy</span>
+  </button>
   <button id="tab-grant" role="tab" aria-selected="false" type="button"><span class="ti">🔑</span>
     <span data-l="ja">権限</span><span data-l="en">Grant</span>
   </button>
@@ -214,7 +279,11 @@
 
 <script src="../assets/js/theme.js"></script>
 <script src="data.js"></script>
+<script src="policy.js"></script>
+<script src="providers.js"></script>
+<script src="optimizer.js"></script>
 <script src="engine.js"></script>
+<script src="agent.js"></script>
 <script src="map.js"></script>
 <script src="survey.js"></script>
 <script src="ui.js"></script>

@@ -592,9 +592,395 @@ window.LM_UI = (function () {
     if (c) c.textContent = E.state.log.length;
   }
 
+  /* ======================================================================
+     配送エージェント
+     ここがこのデモの主役。方針の内側は黙って実行し、外に出るときだけ聞く。
+     ====================================================================== */
+  var A = window.LM_AGENT;
+  var POL = window.LM_POLICY;
+  var PR = window.LM_PROVIDERS;
+
+  var AG = {
+    thinking: [
+      { ja: "予定と現在地を確認しています", en: "Reading your calendar and location", tool: "calendar.busy_windows" },
+      { ja: "配送ネットワークを確認しています", en: "Checking the delivery network", tool: "locker.availability" },
+      { ja: "候補を評価しています", en: "Scoring the options", tool: "lastmeters.list_options" },
+      { ja: "方針と権限を照合しています", en: "Checking your policy and permissions", tool: "lastmeters.check_permission" },
+      { ja: "実行しています", en: "Executing", tool: "lastmeters.commit" }
+    ],
+    done: { ja: "変更しました", en: "Delivery updated" },
+    noneTitle: { ja: "変更していません", en: "Nothing changed" },
+    askTitle: { ja: "判断をお願いします", en: "Needs your decision" },
+    selfTitle: { ja: "本人の承認が要ります", en: "This one needs you" },
+    failTitle: { ja: "変更できませんでした", en: "The change did not go through" },
+    blockedTitle: { ja: "受け取る方法がありません", en: "No way to receive this" },
+    escalateTitle: { ja: "自分では決めません", en: "It will not keep deciding" },
+    undo: { ja: "元に戻す", en: "Undo" },
+    undone: { ja: "元に戻しました", en: "Undone" },
+    settled: { ja: "確定しました", en: "Locked in" },
+    keep: { ja: "今のままにする", en: "Keep current delivery" },
+    accept: { ja: "変更する", en: "Switch to it" },
+    approve: { ja: "承認して変更する", en: "Approve and switch" },
+    why: { ja: "判断の内訳を見る", en: "See how it decided" },
+    hide: { ja: "閉じる", en: "Hide" },
+    cands: { ja: "評価した候補", en: "Options it scored" },
+    chance: { ja: "受け取れる見込み", en: "Chance you receive it" },
+    checks: { ja: "方針との照合", en: "Checked against your policy" },
+    rejected: { ja: "候補から外したもの", en: "Ruled out before scoring" },
+    emptyRun: {
+      ja: "まだ何も任せていません。上の「4件を任せる」を押すと、エージェントが荷物ごとに判断します。",
+      en: "Nothing handed over yet. Press “Hand over all four” and the agent decides for each parcel."
+    },
+    surgeOn: { ja: "例外モード：駅ロッカーが満杯", en: "Exception mode: the station locker is full" },
+    surgeOff: { ja: "通常に戻す", en: "Back to normal" },
+    autoNote: {
+      ja: "方針の内側だったので、聞かずに実行して、あとから知らせています。取り消せるうちは聞きません。",
+      en: "It was inside your policy, so it acted first and told you after. While it can be undone, it does not ask."
+    },
+    confirmNote: {
+      ja: "方針の外に出るので、自動では決めません。",
+      en: "This falls outside your policy, so the agent will not decide it."
+    },
+    explicitNote: {
+      ja: "これは方針では上書きできません。本人の承認が要ります。",
+      en: "Your policy cannot override this one. It needs you."
+    }
+  };
+
+  var LEVEL_TONE = { auto: "ok", confirm: "warn", explicit: "danger", none: "info",
+    failed: "danger", blocked: "danger", escalate: "warn" };
+
+  var thinkingTimer = null;
+
+  function reducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  /** エージェントの「考え中」。2秒以内。何を呼んだかを併記する。 */
+  function runAgent() {
+    var box = $("agentThinking");
+    if (!box) return;
+    if (thinkingTimer) { clearInterval(thinkingTimer); thinkingTimer = null; }
+
+    function finish() {
+      box.innerHTML = "";
+      A.runAll("user_action");
+      renderAgentPanel();
+      renderAll();
+    }
+
+    if (reducedMotion()) {
+      box.innerHTML = '<div class="think">' + AG.thinking.map(function (s) {
+        return '<div class="think-row is-done"><span class="think-tick">✓</span>' +
+          '<span>' + esc(t(s)) + '</span><code class="think-tool">' + esc(s.tool) + "</code></div>";
+      }).join("") + "</div>";
+      finish();
+      return;
+    }
+
+    var i = 0;
+    function paint() {
+      box.innerHTML = '<div class="think">' + AG.thinking.map(function (s, n) {
+        var cls = n < i ? "is-done" : n === i ? "is-now" : "";
+        return '<div class="think-row ' + cls + '">' +
+          '<span class="think-tick">' + (n < i ? "✓" : n === i ? "•" : "") + "</span>" +
+          '<span>' + esc(t(s)) + '</span><code class="think-tool">' + esc(s.tool) + "</code></div>";
+      }).join("") + "</div>";
+    }
+    paint();
+    thinkingTimer = setInterval(function () {
+      i++;
+      if (i >= AG.thinking.length) {
+        clearInterval(thinkingTimer); thinkingTimer = null;
+        finish();
+        return;
+      }
+      paint();
+    }, 320);
+  }
+
+  function pctText(p) { return Math.round(p * 100) + "%"; }
+
+  /** 判断カード1枚。auto / confirm / explicit / none / failed を1つの形で出す。 */
+  function decisionCard(d) {
+    var tone = LEVEL_TONE[d.outcome === "failed" ? "failed" : d.action] || "info";
+    var title, note = "";
+    if (d.outcome === "failed") { title = AG.failTitle; }
+    else if (d.action === "none") { title = AG.noneTitle; }
+    else if (d.action === "blocked") { title = AG.blockedTitle; }
+    else if (d.action === "escalate") { title = AG.escalateTitle; }
+    else if (d.action === "auto") { title = AG.done; note = t(AG.autoNote); }
+    else if (d.action === "confirm") { title = AG.askTitle; note = t(AG.confirmNote); }
+    else { title = AG.selfTitle; note = t(AG.explicitNote); }
+
+    var h = '<article class="dec dec-' + tone + '" data-dec="' + esc(d.id) + '">';
+    h += '<header class="dec-head"><b>' + esc(t(title)) + "</b>" +
+      '<span class="pill tiny">' + esc(t(d.parcel.title)) + "</span></header>";
+
+    if (d.to && d.from && d.action !== "none") {
+      h += '<div class="dec-move"><span class="dec-from">' + esc(t(d.from.name)) + " " + esc(d.from.at) + "</span>" +
+        '<span class="dec-arrow">→</span>' +
+        '<span class="dec-to">' + esc(t(d.to.name)) + " " + esc(d.to.at) + "</span></div>";
+    }
+
+    h += '<p class="dec-reason">' + esc(t(d.reason)) + "</p>";
+
+    if (d.to && d.action !== "none") {
+      h += '<div class="dec-facts">' +
+        fact({ ja: "追加料金", en: "Extra" }, d.to.extraCost === 0 ? "¥0" : "¥" + d.to.extraCost) +
+        fact({ ja: "徒歩", en: "On foot" }, "+" + d.to.walkMin + (I18N && I18N.lang === "ja" ? "分" : " min")) +
+        fact(AG.chance, pctText(d.to.successP)) +
+        "</div>";
+    }
+
+    if (note) h += '<p class="dec-note tiny faint">' + esc(note) + "</p>";
+
+    /* 取り消し。残り時間を出し、0になったら「確定しました」に変わる。 */
+    if (d.action === "auto" && d.outcome === "executed") {
+      h += '<div class="row row-wrap dec-actions">' +
+        '<button class="btn btn-sm" data-undo="' + esc(d.id) + '" type="button">' + esc(t(AG.undo)) + "</button>" +
+        '<span class="tiny faint" data-countdown="' + esc(d.id) + '"></span></div>';
+    } else if (d.outcome === "undone") {
+      h += '<p class="tiny ok-text dec-actions">' + esc(t(AG.undone)) + "</p>";
+    } else if ((d.action === "confirm" || d.action === "explicit") && d.outcome === "pending") {
+      h += '<div class="row row-wrap dec-actions">' +
+        '<button class="btn btn-sm btn-ghost" data-reject="' + esc(d.id) + '" type="button">' + esc(t(AG.keep)) + "</button>" +
+        '<button class="btn btn-sm btn-primary" data-confirm="' + esc(d.id) + '" type="button">' +
+        esc(t(d.action === "explicit" ? AG.approve : AG.accept)) + "</button></div>";
+    } else if (d.outcome === "confirmed") {
+      h += '<p class="tiny ok-text dec-actions">' + esc(t(AG.settled)) + "</p>";
+    } else if (d.outcome === "rejected") {
+      h += '<p class="tiny faint dec-actions">' + esc(t(AG.keep)) + "</p>";
+    }
+
+    /* 判断の内訳。数字だけでなく「なぜその数字か」まで開ける。 */
+    if (d.candidates && d.candidates.length) {
+      h += '<details class="dec-why"><summary>' + esc(t(AG.why)) + "</summary>";
+      if (d.approval && d.approval.checks && d.approval.checks.length) {
+        h += '<div class="why-block"><span class="why-h">' + esc(t(AG.checks)) + "</span>" +
+          d.approval.checks.map(function (c) {
+            return '<div class="why-row"><span>' + esc(t(c.label)) + "</span>" +
+              '<span class="' + (c.ok ? "ok-text" : "warn-text") + '">' +
+              (c.ok ? "✓ " : "✕ ") + esc(t(c.value)) + "</span></div>";
+          }).join("") + "</div>";
+      }
+      h += '<div class="why-block"><span class="why-h">' + esc(t(AG.cands)) + "</span>" +
+        d.candidates.slice(0, 4).map(function (c, n) {
+          return '<div class="why-row"><span>' + (n === 0 ? "★ " : "") + esc(t(c.name)) +
+            ' <span class="faint">' + esc(c.at) + "</span></span>" +
+            '<span class="faint">¥' + c.extraCost + " · " + pctText(c.successP) + "</span></div>" +
+            '<div class="why-sub">' + c.success.applied.map(function (f) {
+              return esc(t(f.label)) + " " + (f.delta > 0 ? "+" : "") + Math.round(f.delta * 100) + "pt";
+            }).join(" / ") + "</div>";
+        }).join("") + "</div>";
+      if (d.rejected && d.rejected.length) {
+        h += '<div class="why-block"><span class="why-h">' + esc(t(AG.rejected)) + "</span>" +
+          d.rejected.map(function (r) {
+            return '<div class="why-row why-row--stack"><span>' + esc(t(r.option.label)) + "</span>" +
+              '<span class="faint">' + esc(t(r.reason)) + "</span></div>";
+          }).join("") + "</div>";
+      }
+      h += "</details>";
+    }
+    h += "</article>";
+    return h;
+  }
+
+  function fact(label, value) {
+    return '<div class="dec-fact"><span class="tiny faint">' + esc(t(label)) +
+      '</span><b>' + esc(value) + "</b></div>";
+  }
+
+  var decSig = "";
+
+  /** 荷物ごとに最新の判断を1枚だけ、荷物の並び順で出す。
+      同じ荷物の古い判断を積み上げても読みづらいだけなので置き換える。 */
+  function latestPerParcel() {
+    var all = A.decisions();
+    var seen = {};
+    all.forEach(function (d) { if (!seen[d.parcelId]) seen[d.parcelId] = d; });
+    var out = [];
+    D.PARCELS.forEach(function (p) { if (seen[p.id]) out.push(seen[p.id]); });
+    return out;
+  }
+
+  function renderAgentPanel(force) {
+    var box = $("agentDecisions");
+    if (!box) return;
+    var list = latestPerParcel();
+    var sig = list.map(function (d) { return d.id + ":" + d.outcome; }).join("|") +
+      "|" + (I18N ? I18N.mode : "");
+    if (!force && sig === decSig) return;   // 変わっていなければ触らない（開いた内訳を閉じないため）
+    decSig = sig;
+
+    if (!list.length) {
+      box.innerHTML = '<p class="small muted agent-empty">' + esc(t(AG.emptyRun)) + "</p>";
+      return;
+    }
+    box.innerHTML = list.map(decisionCard).join("");
+
+    box.querySelectorAll("[data-undo]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        A.undo(b.getAttribute("data-undo"));
+        renderAgentPanel(); renderAll();
+      });
+    });
+    box.querySelectorAll("[data-confirm]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        A.confirm(b.getAttribute("data-confirm"));
+        renderAgentPanel(); renderAll();
+      });
+    });
+    box.querySelectorAll("[data-reject]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        A.reject(b.getAttribute("data-reject"));
+        renderAgentPanel(); renderAll();
+      });
+    });
+  }
+
+  /** 取り消しの残り時間。毎フレーム呼ばれるので、DOMは作り直さず文字だけ差し替える。 */
+  function tickCountdowns() {
+    var nodes = document.querySelectorAll("[data-countdown]");
+    for (var i = 0; i < nodes.length; i++) {
+      var d = A.byId(nodes[i].getAttribute("data-countdown"));
+      if (!d) continue;
+      var card = nodes[i].closest(".dec");
+      if (A.canUndo(d)) {
+        var s = A.undoSecondsLeft(d);
+        nodes[i].textContent = (I18N && I18N.lang === "ja" ? "あと " : "")
+          + Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2)
+          + (I18N && I18N.lang === "ja" ? " で確定" : " left");
+      } else if (d.outcome === "executed") {
+        /* 取り消せなくなった瞬間に、確定したことを伝える */
+        nodes[i].textContent = t(AG.settled);
+        var btn = card && card.querySelector("[data-undo]");
+        if (btn) btn.remove();
+      }
+    }
+  }
+
+  /* ---------- 方針 ---------- */
+  function renderPolicy() {
+    var box = $("policyForm");
+    if (!box) return;
+    /* 操作中のスライダーを作り直すと指が離れてしまう。触っている間は触らない。 */
+    if (box.contains(document.activeElement) && box.innerHTML) return;
+    var p = POL.get();
+    var L = POL.LABELS;
+    var ja = I18N && I18N.lang === "ja";
+
+    function row(key, control) {
+      return '<div class="pol-row"><div class="pol-label"><b>' + esc(t(L[key].title)) + "</b>" +
+        '<span class="tiny faint">' + esc(t(L[key].note)) + "</span></div>" + control + "</div>";
+    }
+    function slider(name, min, max, step, val, fmt) {
+      return '<div class="pol-ctl"><output id="out-' + name + '">' + esc(fmt(val)) + "</output>" +
+        '<input type="range" id="pol-' + name + '" min="' + min + '" max="' + max +
+        '" step="' + step + '" value="' + val + '" aria-label="' + esc(t(L[name] ? L[name].title : name)) + '"></div>';
+    }
+    function radios(name, opts, val) {
+      return '<div class="pol-ctl"><div class="opts">' + opts.map(function (o) {
+        return '<label class="opt' + (o.v === val ? " is-on" : "") + '">' +
+          '<input type="radio" name="pol-' + name + '" value="' + esc(o.v) + '"' +
+          (o.v === val ? " checked" : "") + "><span>" + esc(t(o.l)) + "</span></label>";
+      }).join("") + "</div></div>";
+    }
+
+    var yen = function (v) { return "¥" + Number(v).toLocaleString(); };
+    var mins = function (v) { return v + (ja ? "分" : " min"); };
+
+    var h = "";
+    h += row("maxExtraCostJpy", slider("maxExtraCostJpy", 0, 1500, 50, p.maxExtraCostJpy, yen));
+    h += row("maxRouteDeviationMin", slider("maxRouteDeviationMin", 0, 60, 5, p.maxRouteDeviationMin, mins));
+    h += row("optimize", radios("optimize", POL.OPTIMIZE_OPTS, p.optimize));
+    h += row("shareLocation", radios("shareLocation", POL.SHARE_OPTS, p.shareLocation));
+    h += row("explicitOverJpy", slider("explicitOverJpy", 0, 100000, 5000, p.explicitOverJpy, yen));
+    h += '<div class="pol-row"><div class="pol-label"><b>' + esc(t(L.quiet.title)) + "</b>" +
+      '<span class="tiny faint">' + esc(t(L.quiet.note)) + '</span></div>' +
+      '<div class="pol-ctl"><b class="mono">' + POL.hhmm(p.quietFromMin) + " – " + POL.hhmm(p.quietToMin) + "</b></div></div>";
+    h += '<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" id="polReset" type="button">' +
+      (ja ? "既定に戻す" : "Reset to defaults") + "</button></div>";
+    box.innerHTML = h;
+
+    function onPolicyChange(patch) {
+      POL.set(patch);
+      /* 方針が変われば判断もやり直す。上限を上げると confirm が auto に変わる。 */
+      A.runAll("user_action");
+      renderPolicy();
+      renderPolicySummary();
+      renderAgentPanel();
+      renderAll();
+    }
+
+    [["maxExtraCostJpy", yen], ["maxRouteDeviationMin", mins], ["explicitOverJpy", yen]]
+      .forEach(function (pair) {
+        var name = pair[0], fmt = pair[1];
+        var el = $("pol-" + name);
+        if (!el) return;
+        el.addEventListener("input", function () {
+          var o = $("out-" + name);
+          if (o) o.textContent = fmt(el.value);
+        });
+        el.addEventListener("change", function () {
+          var patch = {}; patch[name] = Number(el.value);
+          onPolicyChange(patch);
+        });
+      });
+    box.querySelectorAll('input[type="radio"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        var patch = {};
+        patch[r.name.replace("pol-", "")] = r.value;
+        onPolicyChange(patch);
+      });
+    });
+    var pr = $("polReset");
+    if (pr) pr.addEventListener("click", function () {
+      POL.reset(); A.runAll("user_action");
+      renderPolicy(); renderPolicySummary(); renderAgentPanel(); renderAll();
+    });
+  }
+
+  function renderPolicySummary() {
+    var box = $("policySummary");
+    if (!box) return;
+    var s = POL.summary(POL.get());
+    var ja = I18N && I18N.lang === "ja";
+    function block(cls, head, items) {
+      return '<div class="pol-sum ' + cls + '"><b>' + esc(head) + "</b><ul>" +
+        items.map(function (i) { return "<li>" + esc(t(i)) + "</li>"; }).join("") + "</ul></div>";
+    }
+    box.innerHTML =
+      block("ok", ja ? "黙ってやること" : "Done without asking", s.silent) +
+      block("warn", ja ? "必ず確認すること" : "Always confirmed with you", s.confirm) +
+      block("danger", ja ? "本人の承認が要ること" : "Needs you in person", s.explicit);
+  }
+
+  /* ---------- ツール呼び出し ---------- */
+  function renderToolCalls() {
+    var box = $("toolCalls");
+    if (!box) return;
+    var list = PR.calls(24);
+    if (!list.length) {
+      box.innerHTML = '<p class="muted small">' +
+        (I18N && I18N.lang === "ja"
+          ? "まだ呼び出しがありません。「配送」タブでエージェントに任せてください。"
+          : "No calls yet. Hand the parcels to the agent on the Delivery tab.") + "</p>";
+      return;
+    }
+    box.innerHTML = list.map(function (c) {
+      var body = c.error ? "✕ " + c.error : JSON.stringify(c.result);
+      if (body && body.length > 150) body = body.slice(0, 150) + "…";
+      return '<div class="tc' + (c.error ? " tc-err" : "") + '">' +
+        '<div class="tc-line">→ <b>' + esc(c.tool) + "</b>(" +
+        esc(JSON.stringify(c.args).slice(1, -1).slice(0, 110)) + ")</div>" +
+        '<div class="tc-line tc-res">← ' + esc(body) + '<span class="tc-ms">' + c.ms + "ms</span></div></div>";
+    }).join("");
+  }
+
   /* ---------- tabs ---------- */
   function setTab(name) {
-    ["flow", "grant", "log", "survey"].forEach(function (x) {
+    ["flow", "policy", "grant", "log", "survey"].forEach(function (x) {
       var v = $("view-" + x);
       if (v) v.classList.toggle("is-active", x === name);
       var b = $("tab-" + x);
@@ -621,6 +1007,10 @@ window.LM_UI = (function () {
       renderGrantView();
       renderDial();
       renderLog();
+      renderPolicy();
+      renderPolicySummary();
+      renderAgentPanel();
+      renderToolCalls();
       var lvl = $("lvlPill");
       if (lvl) {
         var a = D.AUTONOMY[E.state.autonomy];
@@ -633,6 +1023,7 @@ window.LM_UI = (function () {
   function liveBits() {
     var c = $("clock");
     if (c) c.textContent = E.now().slice(0, 5);
+    tickCountdowns();
     if (refs.bars) {
       Object.keys(refs.bars).forEach(function (id) {
         var el = refs.bars[id];
@@ -648,9 +1039,39 @@ window.LM_UI = (function () {
     E.subscribe(function () { renderAll(); });
     E.init();
 
-    ["flow", "grant", "log", "survey"].forEach(function (x) {
+    ["flow", "policy", "grant", "log", "survey"].forEach(function (x) {
       var b = $("tab-" + x);
       if (b) b.addEventListener("click", function () { setTab(x); });
+    });
+
+    /* ---- エージェント ---- */
+    var run = $("agentRun");
+    if (run) run.addEventListener("click", runAgent);
+
+    var surge = $("agentSurge");
+    if (surge) surge.addEventListener("click", function () {
+      var on = PR.getMode() !== "surge";
+      PR.setMode(on ? "surge" : "normal");
+      surge.textContent = t(on ? AG.surgeOff : { ja: "例外を起こす", en: "Force an exception" });
+      surge.classList.toggle("is-on", on);
+      runAgent();
+    });
+
+    var pl = $("agentPolicyLink");
+    if (pl) pl.addEventListener("click", function (e) { e.preventDefault(); setTab("policy"); });
+
+    var fail = $("failBtn");
+    if (fail) fail.addEventListener("click", function () {
+      /* すでに全部決まっていると変更が起きず、失敗させる相手がいない。
+         いったん巻き戻してから、次の配送先変更を失敗させる。 */
+      E.reset();
+      A.reset();
+      PR.reset();
+      PR.setFailNextReroute(true);
+      fail.classList.add("is-on");
+      setTab("flow");
+      runAgent();
+      setTimeout(function () { fail.classList.remove("is-on"); }, 2600);
     });
     $("sheet").addEventListener("click", function (e) { if (e.target === $("sheet")) closeSheet(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
@@ -658,9 +1079,14 @@ window.LM_UI = (function () {
     var resetBtn = $("resetBtn");
     if (resetBtn) resetBtn.addEventListener("click", function () {
       E.reset();
+      A.reset();
+      PR.reset();
       M.resetWalk();
       M.followMe(true);
       lastVerdict = null;
+      var sg = $("agentSurge");
+      if (sg) { sg.classList.remove("is-on"); sg.textContent = t({ ja: "例外を起こす", en: "Force an exception" }); }
+      renderAgentPanel();
       renderAll();
     });
 
