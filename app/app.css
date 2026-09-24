@@ -266,11 +266,14 @@ body.is-app .grid-lines { display: none; }
 .m-person-dot { fill: var(--brand-1); stroke: var(--map-halo); stroke-width: 2.2; }
 .m-person-acc { fill: var(--brand-1); opacity: 0.13; }
 
-/* 地図の飾りは指を受けない。受取地点の上に配送車が乗ると押せなくなるため。 */
-.m-land, .m-water-layer, .m-parks, .m-casing, .m-roads, .m-hwys,
+/* 地図の飾りは指を受けない。受取地点の上に配送車が乗ると押せなくなるため。
+   いちばん下の地面（.m-land）だけは指を受ける。ここで受けないと、
+   地図を動かすのも、道の上にピンを差すのもできなくなる。 */
+.m-water-layer, .m-parks, .m-casing, .m-roads, .m-hwys,
 .m-street-names, .m-districts, .m-landmarks, .m-person, .m-vehicles, .m-routes {
   pointer-events: none;
 }
+.m-land { pointer-events: fill; }
 
 /* 配送車と走行ルート */
 .m-route { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }

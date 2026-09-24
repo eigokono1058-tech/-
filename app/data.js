@@ -222,64 +222,6 @@ window.LM_DATA = (function () {
       defaultPoint: "home_door",
       slaMin: 45
     },
-    {
-      id: "ord_0032",
-      title: { ja: "処方薬（継続処方・1ヶ月分）", en: "Prescription medicine (1 month)" },
-      merchant: { ja: "オンライン薬局", en: "Online pharmacy" },
-      orderedBy: "agent",
-      agentReason: {
-        ja: "リモート診察後の定期処方。残薬5日で自動手配",
-        en: "Repeat prescription after a remote consult, triggered at five days of stock left"
-      },
-      temp: "ambient",
-      value: 22,
-      needs: ["identity"],
-      requiresIdentity: true,
-      delegable: false,
-      dropAllowed: false,
-      icon: "💊",
-      defaultPoint: "home_door",
-      slaMin: 120,
-      legal: {
-        ja: "薬機法上、薬剤師による情報提供と本人（または家族）への交付が必要",
-        en: "Japanese pharmaceutical law requires a pharmacist's guidance and handover to the patient or family"
-      }
-    },
-    {
-      id: "ord_0033",
-      title: { ja: "トイレットペーパー 12ロール", en: "Toilet paper ×12" },
-      merchant: { ja: "定期便", en: "Subscription" },
-      orderedBy: "agent",
-      agentReason: {
-        ja: "消費ペースから残5日と推定し自動発注",
-        en: "Consumption rate implied five days left, so the agent reordered"
-      },
-      temp: "ambient",
-      value: 7,
-      needs: [],
-      requiresIdentity: false,
-      delegable: true,
-      dropAllowed: true,
-      icon: "🧻",
-      defaultPoint: "home_door",
-      slaMin: 240
-    },
-    {
-      id: "ord_0034",
-      title: { ja: "スマートウォッチ", en: "Smartwatch" },
-      merchant: { ja: "家電EC", en: "Electronics retailer" },
-      orderedBy: "human",
-      agentReason: null,
-      temp: "ambient",
-      value: 450,
-      needs: ["secure"],
-      requiresIdentity: false,
-      delegable: false,
-      dropAllowed: false,
-      icon: "⌚",
-      defaultPoint: "home_door",
-      slaMin: 180
-    }
   ];
 
   /* ---- ポリシールール / policy rules ---------------------------------- */
