@@ -235,7 +235,7 @@ body.is-app .grid-lines { display: none; }
   fill: var(--map-label-strong); font-size: 8.6px; font-weight: 700;
   stroke-width: 3px; letter-spacing: 0.01em;
 }
-.m-point-label.is-me { fill: var(--brand-1); }
+.m-point-label.is-me { fill: var(--brand-1); stroke-width: 4.2px; }
 
 /* 選べる状態のときだけ、地点が押せるように見える */
 #map.is-pickable .m-point { cursor: pointer; }

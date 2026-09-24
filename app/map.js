@@ -120,34 +120,52 @@ window.LM_MAP = (function () {
     var p = personPos();
     if (heading && heading.pointId === pointId) return;
     var pts = SF.route([p.x, p.y], [x, y]);
+    var d = Math.max(1.5, walkDur(polyLength(pts).total));
     heading = {
       pts: pts, t: 0, pointId: pointId, arrived: false,
-      dur: Math.max(1.5, walkDur(polyLength(pts).total))
+      dur: d,
+      naturalDur: d          // ふつうに歩いた場合。調整してもこれは変えない
     };
   }
   function stopWalking() { heading = null; }
   function hasArrived() { return !!(heading && heading.arrived); }
   function headingTo() { return heading ? heading.pointId : null; }
 
-  /** 受取人があと何分で着くか（シミュレーション上の分）。
-      配送車はこの数字を見て、落ち合う時刻を合わせ直す。 */
+  function simPerSec() { return (window.LM_ENGINE && LM_ENGINE.state.speed) || 30; }
+
+  /** 受取人があと何分で着くか（いまの歩く速さで） */
   function walkMinutesLeft() {
-    if (!heading) return 0;
-    if (heading.arrived) return 0;
-    var simPerSec = (window.LM_ENGINE && LM_ENGINE.state.speed) || 30;
-    return (1 - heading.t) * heading.dur * simPerSec / 60;
+    if (!heading || heading.arrived) return 0;
+    return (1 - heading.t) * heading.dur * simPerSec() / 60;
   }
 
-  /** 寄り道して遅れる。歩く道のりはそのままに、かかる時間だけ伸ばす。 */
+  /** ふつうに歩いたら、あと何分で着くか（落ち合う時刻の下限になる） */
+  function naturalMinutesLeft() {
+    if (!heading || heading.arrived) return 0;
+    return (1 - heading.t) * (heading.naturalDur || heading.dur) * simPerSec() / 60;
+  }
+
+  /** まだ歩き出す前に、そこまで何分かかるかを見る */
+  function walkEtaTo(xy) {
+    var p = personPos();
+    return walkDur(polyLength(SF.route([p.x, p.y], xy)).total) * simPerSec() / 60;
+  }
+
+  /** 残りの道のりを、ちょうどこの分数で歩くように速さを変える。
+      早く着きすぎないための調整。位置（t）は動かさない。 */
+  function paceWalk(simMinutes) {
+    if (!heading || heading.arrived || heading.t >= 1) return false;
+    var sec = Math.max(0.2, simMinutes * 60 / simPerSec());
+    heading.dur = sec / (1 - heading.t);
+    return true;
+  }
+
+  /** 寄り道して遅れる。ふつうに歩いた場合の到着も、そのぶん後ろへ動く。 */
   function delayWalk(simMinutes) {
-    if (!heading || heading.arrived) return false;
-    var simPerSec = (window.LM_ENGINE && LM_ENGINE.state.speed) || 30;
-    var addSec = simMinutes * 60 / simPerSec;
-    var remain = (1 - heading.t) * heading.dur;
-    var next = remain + addSec;
-    /* t の進み方を変えずに残り時間だけ伸ばすため、dur と t を引き直す */
-    heading.dur = heading.dur * (1 - heading.t) === 0 ? heading.dur : heading.t * heading.dur + next;
-    heading.t = heading.dur === 0 ? 0 : (heading.dur - next) / heading.dur;
+    if (!heading || heading.arrived || heading.t >= 1) return false;
+    var add = (simMinutes * 60 / simPerSec()) / (1 - heading.t);
+    heading.naturalDur = (heading.naturalDur || heading.dur) + add;
+    heading.dur += add;
     return true;
   }
   function resetWalk() { walkT = 0; walkDir = 1; dwell = 0; heading = null; routeOverride = {}; }
@@ -244,6 +262,64 @@ window.LM_MAP = (function () {
     return n;
   }
   function g(cls) { return el("g", { class: cls }); }
+
+  /* ---------- 文字が重ならないように置く ------------------------------------
+     地図の文字は、重なった時点で両方とも読めなくなる。
+     だから置く前に場所を確かめて、空いていなければ別の場所を試し、
+     どこも空いていなければその文字は出さない。 */
+  var taken = [];
+
+  /** 傾いた長方形を、4隅の座標で表す */
+  function boxAt(cx, cy, w, h, deg) {
+    var a = deg * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
+    var hw = w / 2 + 2.8, hh = h / 2 + 2.2;   // 縁取りのぶんも見込む
+    var pts = [];
+    [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].forEach(function (p) {
+      pts.push([cx + p[0] * co - p[1] * si, cy + p[0] * si + p[1] * co]);
+    });
+    return pts;
+  }
+  /** 分離軸で、2つの長方形が重なるかを見る */
+  function hits(A, B) {
+    var boxes = [A, B];
+    for (var b = 0; b < 2; b++) {
+      var box = boxes[b];
+      for (var i = 0; i < 4; i++) {
+        var p1 = box[i], p2 = box[(i + 1) % 4];
+        var nx = -(p2[1] - p1[1]), ny = p2[0] - p1[0];
+        var a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity, k;
+        for (k = 0; k < 4; k++) {
+          var va = A[k][0] * nx + A[k][1] * ny;
+          if (va < a0) a0 = va; if (va > a1) a1 = va;
+          var vb = B[k][0] * nx + B[k][1] * ny;
+          if (vb < b0) b0 = vb; if (vb > b1) b1 = vb;
+        }
+        if (a1 < b0 || b1 < a0) return false;
+      }
+    }
+    return true;
+  }
+  function reserve(box) { taken.push(box); }
+  function free(box) {
+    for (var i = 0; i < taken.length; i++) if (hits(box, taken[i])) return false;
+    return true;
+  }
+
+  /** 文字を置く。置けたら true。置けなければ何も残さない。 */
+  function putLabel(parent, text, cls, x, y, deg, size) {
+    if (!text) return false;
+    var node = el("text", { class: cls, "text-anchor": "middle", x: 0, y: 0 }, text);
+    parent.appendChild(node);
+    var w;
+    try { w = node.getComputedTextLength(); } catch (e) { w = 0; }
+    if (!w) w = text.length * size * 0.62;
+    var box = boxAt(x, y, w, size * 1.4, deg);
+    if (!free(box)) { parent.removeChild(node); return false; }
+    reserve(box);
+    node.setAttribute("transform",
+      "translate(" + r2(x) + " " + r2(y) + ")" + (deg ? " rotate(" + r2(deg) + ")" : ""));
+    return true;
+  }
 
   var EMOJI = {
     home: "🏠", locker: "🔐", store: "🏪", office: "🏢",
@@ -514,48 +590,59 @@ window.LM_MAP = (function () {
     });
     svg.appendChild(hwy);
 
-    /* 通りの名前。主要な通りだけ、通りに沿って寝かせて置く。
-       置く場所は「いつも見えている範囲の中心にいちばん近いところ」。
-       線の真ん中に置くと、画面の外に出てしまう通りが多いため。 */
-    var names = g("m-street-names");
+    /* ---- ここから文字。重ならない順に置いていく ----
+       1. 受取地点の名前（このアプリの主役なので、先に場所を取っておく）
+       2. 地区名  3. 目印  4. マーケット通り  5. 主要な通り                */
+    taken = [];
     var cx = SF.FOCUS.x + SF.FOCUS.w / 2, cy = SF.FOCUS.y + SF.FOCUS.h / 2;
-    streets.forEach(function (s) {
-      if (s.w !== "arterial" && s.w !== "market") return;
-      var at = nearestOn(s.pts, cx, cy, 0.08, 0.92);
-      var ang = at.angle;
-      if (ang > 90) ang -= 180;
-      if (ang < -90) ang += 180;
-      names.appendChild(el("text", {
-        x: 0, y: 0, class: "m-street-name" + (s.w === "market" ? " is-major" : ""),
-        "text-anchor": "middle",
-        transform: "translate(" + r2(at.x) + " " + r2(at.y) + ") rotate(" + r2(ang) + ")"
-      }, T(s.name)));
-    });
-    svg.appendChild(names);
 
-    /* 地区名 */
-    var districts = g("m-districts");
-    SF.DISTRICTS.forEach(function (d) {
-      districts.appendChild(el("text", {
-        x: d.at[0], y: d.at[1], class: "m-district", "text-anchor": "middle"
-      }, T(d)));
+    D.POINTS.forEach(function (pt) {
+      if (pt.dynamic || !pt.xy) return;
+      var label = T(pt.label || pt.name);
+      reserve(boxAt(pt.xy[0], pt.xy[1] + (pt.labelAbove ? -16 : 25),
+        label.length * 6.2, 11, 0));
+      reserve(boxAt(pt.xy[0], pt.xy[1], 24, 24, 0));   // 印そのもの
     });
-    districts.appendChild(el("text", {
-      x: SF.BAY.at[0], y: SF.BAY.at[1], class: "m-district is-water", "text-anchor": "middle"
-    }, T(SF.BAY)));
+
+    var districts = g("m-districts");
     svg.appendChild(districts);
+    putLabel(districts, T(SF.BAY), "m-district is-water", SF.BAY.at[0], SF.BAY.at[1], 0, 9);
+    SF.DISTRICTS.forEach(function (d) {
+      putLabel(districts, T(d), "m-district", d.at[0], d.at[1], 0, 9);
+    });
 
     /* 目印。絵文字は端末によって出ない字があるので、小さな丸と名前だけにする。 */
     var marks = g("m-landmarks");
-    SF.LANDMARKS.forEach(function (m) {
-      var lm = g("m-landmark");
-      lm.appendChild(el("circle", { cx: m.at[0], cy: m.at[1], r: 2.2, class: "m-landmark-dot" }));
-      lm.appendChild(el("text", {
-        x: m.at[0], y: m.at[1] + 10, class: "m-landmark-name", "text-anchor": "middle"
-      }, T(m)));
-      marks.appendChild(lm);
-    });
     svg.appendChild(marks);
+    SF.LANDMARKS.forEach(function (m) {
+      if (!putLabel(marks, T(m), "m-landmark-name", m.at[0], m.at[1] + 10, 0, 6.2)) return;
+      marks.insertBefore(el("circle", { cx: m.at[0], cy: m.at[1], r: 2.2, class: "m-landmark-dot" }),
+        marks.lastChild);
+    });
+
+    /* 通りの名前。中心に近いところから順に、空いている場所を探して置く。 */
+    var names = g("m-street-names");
+    svg.appendChild(names);
+    var ordered = streets.filter(function (s) { return s.w === "market"; })
+      .concat(streets.filter(function (s) { return s.w === "arterial"; }));
+    ordered.forEach(function (s) {
+      var major = s.w === "market";
+      var size = major ? 7.4 : 6.2;
+      var spots = [];
+      for (var i = 0; i <= 14; i++) {
+        var tt = 0.08 + 0.84 * (i / 14);
+        var at = pointAt(s.pts, tt);
+        spots.push({ at: at, d: dist(at.x, at.y, cx, cy) });
+      }
+      spots.sort(function (a, b) { return a.d - b.d; });
+      for (var k = 0; k < spots.length; k++) {
+        var a = spots[k].at, ang = a.angle;
+        if (ang > 90) ang -= 180;
+        if (ang < -90) ang += 180;
+        if (putLabel(names, T(s.name), "m-street-name" + (major ? " is-major" : ""),
+          a.x, a.y, ang, size)) break;
+      }
+    });
 
     layers.routes = g("m-routes");
     svg.appendChild(layers.routes);
@@ -760,6 +847,9 @@ window.LM_MAP = (function () {
     hasArrived: hasArrived,
     headingTo: headingTo,
     walkMinutesLeft: walkMinutesLeft,
+    naturalMinutesLeft: naturalMinutesLeft,
+    walkEtaTo: walkEtaTo,
+    paceWalk: paceWalk,
     delayWalk: delayWalk,
     divert: divert,
     clearDivert: clearDivert,

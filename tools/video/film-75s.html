@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DELIVERY OS — film source (75s, with the premise)</title>
+<!--
+  前提から入る版。いきなり解決策の話をせず、
+  「なぜこれから物の流れが激しくなるのか」から始める。
+
+  window.seek(t) に秒を渡すと、その時刻の絵になる（実時間では動かさない）。
+  window.CUES が字幕。画面の字幕も .vtt も音声も、ここ1箇所から作る。
+-->
+<style>
+  :root {
+    --bg: #0a0c12; --ink: #eef1f7; --dim: #98a3b7;
+    --b1: #5b8cff; --b2: #2dd4bf; --b3: #a78bfa;
+    --danger: #f87171; --warn: #fbbf24; --line: #1e2433;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 720px; height: 1280px; overflow: hidden; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "DejaVu Sans", "Liberation Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #stage { position: relative; width: 720px; height: 1280px; overflow: hidden; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  #g1 { width: 560px; height: 560px; left: -140px; top: -120px; background: #1b3a7a; }
+  #g2 { width: 520px; height: 520px; right: -160px; bottom: 60px; background: #10564f; }
+
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  svg { position: absolute; inset: 0; width: 720px; height: 1280px; }
+
+  .cap {
+    position: absolute; left: 62px; right: 62px; top: 128px;
+    font-size: 52px; line-height: 1.16; font-weight: 700; letter-spacing: -0.025em;
+  }
+  .cap.sm { font-size: 42px; }
+  .grad {
+    background: linear-gradient(100deg, var(--b1), var(--b2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .note { position: absolute; left: 62px; right: 62px; font-size: 25px; line-height: 1.5; color: var(--dim); }
+
+  .row3 { position: absolute; left: 62px; right: 62px; display: grid; gap: 14px; }
+  .item {
+    display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 20px;
+    padding: 20px 24px; border-radius: 20px;
+    border: 1px solid var(--line); background: #10151f;
+  }
+  .item .ico {
+    width: 62px; height: 62px; border-radius: 16px; display: grid; place-items: center;
+    background: #18202e; font-size: 30px;
+  }
+  .item b { display: block; font-size: 27px; font-weight: 700; }
+  .item span { font-size: 21px; color: var(--dim); line-height: 1.4; }
+  .item.bad { border-color: #5c2b2b; background: #1a1317; }
+  .item.bad .ico { background: #2a1a1e; }
+  .item.good { border-color: #1d4f47; background: #0e1e1f; }
+  .item.good .ico { background: #14302e; }
+
+  .tag {
+    position: absolute; display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 999px; font-size: 24px; font-weight: 600;
+    white-space: nowrap; border: 1px solid var(--line); background: #121826; color: var(--dim);
+  }
+  .tag.bad { border-color: #5c2b2b; background: #1d1417; color: var(--danger); }
+  .tag.good { border-color: #1d4f47; background: #0f1f20; color: var(--b2); }
+  .tag.warn { border-color: #5c4a1f; background: #1d1a10; color: var(--warn); }
+
+  .bignum {
+    position: absolute; left: 62px; right: 62px;
+    font-size: 88px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .wordmark {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-size: 32px; font-weight: 800; letter-spacing: 0.34em;
+  }
+  .strike { position: absolute; left: 62px; right: 62px; text-align: center; }
+  .strike b { font-size: 46px; font-weight: 700; }
+
+  #subs {
+    position: absolute; left: 44px; right: 44px; bottom: 70px;
+    text-align: center; font-size: 28px; line-height: 1.4; font-weight: 600;
+    color: #fff; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  }
+  #subs span {
+    display: inline; padding: 6px 13px; border-radius: 10px;
+    background: rgba(8, 10, 16, 0.84);
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="glow" id="g1"></div>
+  <div class="glow" id="g2"></div>
+
+  <!-- 1. エージェントが発注する時代 -->
+  <section class="scene" id="s1">
+    <div class="cap">AI will do<br><span class="grad">the ordering.</span></div>
+    <div class="row3" id="s1rows" style="top:370px">
+      <div class="item" id="i1"><span class="ico">🧊</span>
+        <span><b>A fridge that senses</b><span>What runs out is reordered. No one taps anything.</span></span></div>
+      <div class="item" id="i2"><span class="ico">💊</span>
+        <span><b>A doctor at a distance</b><span>The prescription just keeps arriving.</span></span></div>
+    </div>
+  </section>
+
+  <!-- 2. 人間は物理の世界にいる -->
+  <section class="scene" id="s2">
+    <div class="cap sm">We still live<br>in the physical world.</div>
+    <svg viewBox="0 0 720 1280">
+      <g id="s2body">
+        <circle cx="360" cy="560" r="52" fill="#1b2435" stroke="#3a4762" stroke-width="4"/>
+        <path d="M290 700 C 290 640 320 626 360 626 C 400 626 430 640 430 700 L 430 830 L 290 830 Z"
+              fill="#1b2435" stroke="#3a4762" stroke-width="4"/>
+      </g>
+      <g id="s2ring" opacity="0">
+        <circle cx="360" cy="700" r="230" fill="none" stroke="#2dd4bf" stroke-width="3" stroke-dasharray="10 14"/>
+      </g>
+    </svg>
+    <div class="tag" id="s2a" style="left:96px; top:470px">🍚 food</div>
+    <div class="tag" id="s2b" style="left:470px; top:600px">💧 water</div>
+    <div class="tag" id="s2c" style="left:118px; top:790px">💊 medicine</div>
+    <div class="note" id="s2n" style="top:900px; text-align:center">
+      The body has not changed in tens of thousands of years.<br>These have to physically arrive.
+    </div>
+  </section>
+
+  <!-- 3. 送るのは解けている。受け取るが詰まる -->
+  <section class="scene" id="s3">
+    <div class="cap">So more will move.</div>
+    <div class="row3" style="top:400px">
+      <div class="item good" id="i3"><span class="ico">✓</span>
+        <span><b>Shipping</b><span>Solved. Sorted, tracked, routed, optimised.</span></span></div>
+      <div class="item bad" id="i4"><span class="ico">✕</span>
+        <span><b>Receiving</b><span>Still needs a human, standing in one fixed place.</span></span></div>
+    </div>
+    <div class="note" id="s3n" style="top:760px; text-align:center">This is where it jams.</div>
+  </section>
+
+  <!-- 4. 日本：対面だから、不在で戻る -->
+  <section class="scene" id="s4">
+    <div class="cap sm">Japan hands it over<br>in person.</div>
+    <svg viewBox="0 0 720 1280">
+      <rect x="0" y="800" width="720" height="80" fill="#141a26"/>
+      <line x1="0" y1="840" x2="720" y2="840" stroke="#2a3346" stroke-width="4" stroke-dasharray="30 24"/>
+      <g>
+        <rect x="256" y="560" width="208" height="240" rx="10" fill="#1a2231" stroke="#3a4762" stroke-width="3"/>
+        <path d="M238 562 L360 466 L482 562 Z" fill="#20293b" stroke="#3a4762" stroke-width="3"/>
+        <rect x="332" y="676" width="56" height="124" rx="5" fill="#0e1421" stroke="#2f3a52" stroke-width="3"/>
+      </g>
+      <g id="s4van">
+        <rect x="-60" y="-30" width="120" height="60" rx="11" fill="#5b8cff"/>
+        <rect x="-60" y="-30" width="40" height="34" rx="9" fill="#8fb0ff"/>
+        <circle cx="-32" cy="34" r="12" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+        <circle cx="34" cy="34" r="12" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+      </g>
+    </svg>
+    <div class="tag bad" id="s4slip" style="left:330px; top:614px">nobody home</div>
+    <div class="bignum" id="s4num" style="top:900px">0</div>
+    <div class="note" id="s4n" style="top:1004px">times a year, the same parcel is carried twice</div>
+  </section>
+
+  <!-- 5. 無人になっても、受け取れなければ回るだけ -->
+  <section class="scene" id="s5">
+    <div class="cap sm">Driverless<br>doesn't fix it.</div>
+    <svg viewBox="0 0 720 1280">
+      <circle id="s5loop" cx="360" cy="700" r="170" fill="none" stroke="#f87171"
+              stroke-width="7" stroke-linecap="round"/>
+      <g id="s5van">
+        <rect x="-46" y="-23" width="92" height="46" rx="9" fill="#5b8cff"/>
+        <rect x="-46" y="-23" width="30" height="27" rx="7" fill="#8fb0ff"/>
+      </g>
+      <text x="360" y="690" text-anchor="middle" font-size="30" fill="#98a3b7" font-family="DejaVu Sans">no one</text>
+      <text x="360" y="734" text-anchor="middle" font-size="30" fill="#98a3b7" font-family="DejaVu Sans">to receive it</text>
+    </svg>
+    <div class="note" id="s5n" style="top:940px; text-align:center">
+      Fewer drivers every year. A van with no driver<br>still comes back a second time.
+    </div>
+  </section>
+
+  <!-- 6. アメリカ：置き配は盗まれる -->
+  <section class="scene" id="s6">
+    <div class="cap sm">Leaving it at the door<br>is not the answer.</div>
+    <div class="row3" style="top:420px">
+      <div class="item bad" id="i5"><span class="ico">📦</span>
+        <span><b>It gets taken</b><span>Left on the step, in public, for hours.</span></span></div>
+      <div class="item bad" id="i6"><span class="ico">👁</span>
+        <span><b>Everyone sees</b><span>What you bought, and when you are out.</span></span></div>
+    </div>
+  </section>
+
+  <!-- 7. ロボットに玄関を開けさせるのは、もっと悪い -->
+  <section class="scene" id="s7">
+    <div class="cap sm">And a robot with<br>your front door key?</div>
+    <svg viewBox="0 0 720 1280">
+      <g id="s7robot">
+        <rect x="300" y="580" width="120" height="110" rx="20" fill="#1b2435" stroke="#3a4762" stroke-width="4"/>
+        <circle cx="332" cy="624" r="11" fill="#5b8cff"/>
+        <circle cx="388" cy="624" r="11" fill="#5b8cff"/>
+        <rect x="336" y="656" width="48" height="8" rx="4" fill="#3a4762"/>
+        <rect x="330" y="690" width="60" height="90" rx="12" fill="#1b2435" stroke="#3a4762" stroke-width="4"/>
+      </g>
+      <g id="s7key" opacity="0">
+        <circle cx="470" cy="700" r="34" fill="#fbbf24"/>
+        <rect x="466" y="700" width="8" height="52" fill="#fbbf24"/>
+        <rect x="466" y="738" width="26" height="8" fill="#fbbf24"/>
+        <circle cx="470" cy="694" r="12" fill="#1a1205"/>
+      </g>
+    </svg>
+    <div class="tag warn" id="s7w" style="left:62px; right:62px; top:892px; white-space:normal; line-height:1.35; text-align:center; justify-content:center">Overpower the robot, and you are inside the house</div>
+  </section>
+
+  <!-- 8. 「家で受け取る」をやめる -->
+  <section class="scene" id="s8">
+    <div class="strike" id="s8s" style="top:420px">
+      <b id="s8text">You have to be home.</b>
+      <svg viewBox="0 0 720 1280" style="position:absolute;left:-62px;top:-420px">
+        <line id="s8line" x1="120" y1="452" x2="120" y2="452" stroke="#f87171" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="cap" id="s8cap" style="top:560px; text-align:center">
+      <span class="grad">Delete that.</span>
+    </div>
+  </section>
+
+  <!-- 9. どこでも受け取れる -->
+  <section class="scene" id="s9">
+    <div class="cap sm">Receive it<br>anywhere.</div>
+    <div class="row3" style="top:380px">
+      <div class="item good" id="i7"><span class="ico">🏪</span>
+        <span><b>A store on your way</b><span>Or your office. Or a locker at the station.</span></span></div>
+      <div class="item good" id="i8"><span class="ico">🤝</span>
+        <span><b>A neighbour</b><span>Share a code that expires. Never your keys.</span></span></div>
+      <div class="item good" id="i9"><span class="ico">🚕</span>
+        <span><b>On the way home</b><span>Pick it up as you pass. No detour.</span></span></div>
+    </div>
+    <div class="note" id="s9n" style="top:920px; text-align:center">
+      Switched from your phone, while it is already moving.
+    </div>
+  </section>
+
+  <!-- 10. 道にピンを差す。人に届く -->
+  <section class="scene" id="s10">
+    <svg viewBox="0 0 720 1280">
+      <g id="s10grid"></g>
+      <path id="s10route" d="M-40 1040 L 200 1040" fill="none"
+            stroke="#2dd4bf" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <g id="s10me">
+        <circle cx="0" cy="0" r="38" fill="#5b8cff" opacity="0.16"/>
+        <circle cx="0" cy="0" r="15" fill="#5b8cff" stroke="#0a0c12" stroke-width="4"/>
+      </g>
+      <g id="s10pin">
+        <path d="M0 -44 C -20 -78 -32 -94 -32 -112 A 32 32 0 1 1 32 -112 C 32 -94 20 -78 0 -44 Z"
+              fill="#2dd4bf" stroke="#0a0c12" stroke-width="5"/>
+        <circle cx="0" cy="-114" r="12" fill="#0a0c12"/>
+      </g>
+      <g id="s10van">
+        <rect x="-52" y="-26" width="104" height="52" rx="10" fill="#5b8cff"/>
+        <rect x="-52" y="-26" width="34" height="30" rx="8" fill="#8fb0ff"/>
+        <circle cx="-28" cy="30" r="11" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+        <circle cx="30" cy="30" r="11" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+      </g>
+      <g id="s10done" opacity="0">
+        <circle cx="0" cy="0" r="46" fill="#2dd4bf"/>
+        <path d="M -21 2 L -6 18 L 22 -15" fill="none" stroke="#06121f" stroke-width="9"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg>
+    <div class="cap">Drop a pin<br><span class="grad">on any street.</span></div>
+    <div class="tag good" id="s10tag" style="left:62px; top:320px">it comes to you, not to your address</div>
+  </section>
+
+  <!-- 11. 配送OS -->
+  <section class="scene" id="s11">
+    <div class="cap" style="top:300px; text-align:center">Packages<br><span class="grad">adapt to people.</span></div>
+    <div class="wordmark grad" id="s11mark" style="top:560px">DELIVERY OS</div>
+    <div class="note" id="s11sub" style="top:632px; text-align:center">
+      Not another carrier.<br>An operating system on top of the ones we have.
+    </div>
+  </section>
+
+  <div id="subs"></div>
+</div>
+
+<script>
+/* ---------- 字幕。ここが唯一の原本 ---------- */
+var CUES = [
+  [0.3, 6.4, "AI is about to do the ordering. A fridge that reorders. A doctor at a distance."],
+  [6.9, 13.4, "But we do not live in the virtual world. The body has not changed in tens of thousands of years."],
+  [13.8, 19.4, "Food, water and medicine have to physically arrive. So more things will move."],
+  [19.8, 25.4, "Shipping is solved. Receiving is where it jams."],
+  [25.8, 33.4, "Japan hands parcels over in person. If you are out, it goes back — 400 million times a year."],
+  [33.8, 40.4, "There are fewer drivers every year, and a van with no driver still comes back a second time."],
+  [40.8, 47.4, "America leaves it at the door. It gets taken, and everyone can see what you bought."],
+  [47.8, 54.4, "And a robot that opens your front door? Overpower the robot, and you are inside the house."],
+  [54.8, 59.4, "So delete the idea that you have to be home."],
+  [59.8, 67.4, "A store on your way. Your office. A neighbour with a code that expires. Switched from your phone."],
+  [67.8, 75.4, "Drop a pin on any street, like parking a shared bike. Share your location, and it comes to you."],
+  [75.8, 81.4, "Delivery OS. Packages adapt to people."]
+];
+
+/* ---------- 時間の道具 ---------- */
+function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+function easeOut(x) { return 1 - Math.pow(1 - x, 3); }
+function lerp(a, b, k) { return a + (b - a) * k; }
+function band(t, inA, inB, outA, outB) {
+  return Math.min(easeOut(seg(t, inA, inB)), 1 - ease(seg(t, outA, outB)));
+}
+function $(id) { return document.getElementById(id); }
+function set(id, o) {
+  var el = $(id);
+  if (!el) return;
+  if (o.opacity !== undefined) el.style.opacity = o.opacity;
+  if (o.x !== undefined || o.y !== undefined) {
+    el.style.transform = "translate(" + (o.x || 0) + "px," + (o.y || 0) + "px)";
+  }
+}
+function svgMove(id, x, y) {
+  var el = $(id);
+  if (el) el.setAttribute("transform", "translate(" + x + " " + y + ")");
+}
+function rows(t, a, ids, gap) {
+  ids.forEach(function (id, i) {
+    var k = easeOut(seg(t, a + 0.7 + i * (gap || 0.5), a + 1.5 + i * (gap || 0.5)));
+    set(id, { opacity: k, y: lerp(22, 0, k) });
+  });
+}
+function buildGrid(id) {
+  var g = $(id);
+  if (!g || g.dataset.built) return;
+  var html = "";
+  for (var y = 300; y <= 1260; y += 108) {
+    html += '<line x1="-20" y1="' + y + '" x2="740" y2="' + y + '" stroke="#1b2231" stroke-width="10"/>';
+  }
+  for (var x = 60; x <= 700; x += 120) {
+    html += '<line x1="' + x + '" y1="280" x2="' + x + '" y2="1280" stroke="#1b2231" stroke-width="10"/>';
+  }
+  g.innerHTML = html;
+  g.dataset.built = "1";
+}
+
+var T = {
+  s1: [0.0, 6.7], s2: [6.7, 13.6], s3: [13.6, 19.6], s4: [19.6, 33.6],
+  s5: [33.6, 40.6], s6: [40.6, 47.6], s7: [47.6, 54.6], s8: [54.6, 59.6],
+  s9: [59.6, 67.6], s10: [67.6, 75.6], s11: [75.6, 82.0]
+};
+var DURATION = 82.0;
+
+function seek(t) {
+  buildGrid("s10grid");
+  $("g1").style.opacity = 0.28 + 0.07 * Math.sin(t * 0.5);
+  $("g2").style.opacity = 0.24 + 0.07 * Math.cos(t * 0.4);
+
+  function scene(id, a) { $(id).style.opacity = band(t, a[0], a[0] + 0.45, a[1] - 0.5, a[1]); }
+
+  /* 1. エージェントが発注する */
+  var a = T.s1; scene("s1", a);
+  rows(t, a[0], ["i1", "i2"], 0.8);
+
+  /* 2. 人間は物理の世界にいる */
+  a = T.s2; scene("s2", a);
+  var k2 = easeOut(seg(t, a[0] + 0.4, a[0] + 1.2));
+  $("s2body").setAttribute("opacity", k2);
+  $("s2ring").setAttribute("opacity", 0.5 * easeOut(seg(t, a[0] + 1.2, a[0] + 2.2)));
+  [["s2a", 1.4], ["s2b", 1.9], ["s2c", 2.4]].forEach(function (p) {
+    var k = easeOut(seg(t, a[0] + p[1], a[0] + p[1] + 0.6));
+    set(p[0], { opacity: k, y: lerp(12, 0, k) });
+  });
+  set("s2n", { opacity: easeOut(seg(t, a[0] + 3.2, a[0] + 4.0)) });
+
+  /* 3. 送る／受け取る */
+  a = T.s3; scene("s3", a);
+  rows(t, a[0], ["i3", "i4"], 0.9);
+  set("s3n", { opacity: easeOut(seg(t, a[0] + 3.0, a[0] + 3.8)) });
+
+  /* 4. 日本：不在で戻る */
+  a = T.s4; scene("s4", a);
+  var v1 = easeOut(seg(t, a[0] + 0.4, a[0] + 2.0)), v2 = ease(seg(t, a[0] + 5.6, a[0] + 7.0));
+  svgMove("s4van", lerp(-180, 180, v1) + lerp(0, 980, v2), 820);
+  set("s4slip", { opacity: band(t, a[0] + 2.4, a[0] + 3.0, a[0] + 6.6, a[0] + 7.2),
+                  y: lerp(12, 0, easeOut(seg(t, a[0] + 2.4, a[0] + 3.0))) });
+  $("s4num").textContent = Math.round(easeOut(seg(t, a[0] + 7.4, a[0] + 11.4)) * 400000000).toLocaleString("en-US");
+  set("s4num", { opacity: band(t, a[0] + 7.4, a[0] + 8.0, a[1] - 0.6, a[1]) });
+  set("s4n", { opacity: band(t, a[0] + 8.2, a[0] + 8.8, a[1] - 0.6, a[1]) });
+
+  /* 5. 無人でも回るだけ */
+  a = T.s5; scene("s5", a);
+  var loop = $("s5loop"), llen = loop.getTotalLength();
+  var dr = easeOut(seg(t, a[0] + 0.4, a[0] + 2.4));
+  loop.setAttribute("stroke-dasharray", llen);
+  loop.setAttribute("stroke-dashoffset", llen * (1 - dr));
+  var turn = seg(t, a[0] + 0.6, a[1] - 0.6) * 1.6;
+  var ang = (turn % 1) * Math.PI * 2 - Math.PI / 2;
+  svgMove("s5van", 360 + Math.cos(ang) * 170, 700 + Math.sin(ang) * 170);
+  $("s5van").setAttribute("opacity", seg(t, a[0] + 0.5, a[0] + 0.9));
+  set("s5n", { opacity: easeOut(seg(t, a[0] + 3.0, a[0] + 3.8)) });
+
+  /* 6. 置き配 */
+  a = T.s6; scene("s6", a);
+  rows(t, a[0], ["i5", "i6"], 0.9);
+
+  /* 7. ロボットに鍵を渡す */
+  a = T.s7; scene("s7", a);
+  var k7 = easeOut(seg(t, a[0] + 0.4, a[0] + 1.2));
+  $("s7robot").setAttribute("opacity", k7);
+  $("s7key").setAttribute("opacity", easeOut(seg(t, a[0] + 1.6, a[0] + 2.4)));
+  set("s7w", { opacity: easeOut(seg(t, a[0] + 2.8, a[0] + 3.6)) });
+
+  /* 8. 「家で受け取る」を消す */
+  a = T.s8; scene("s8", a);
+  var w = easeOut(seg(t, a[0] + 0.8, a[0] + 1.8));
+  $("s8line").setAttribute("x2", String(120 + 480 * w));
+  set("s8cap", { opacity: easeOut(seg(t, a[0] + 2.0, a[0] + 2.8)) });
+
+  /* 9. どこでも受け取れる */
+  a = T.s9; scene("s9", a);
+  rows(t, a[0], ["i7", "i8", "i9"], 0.7);
+  set("s9n", { opacity: easeOut(seg(t, a[0] + 3.8, a[0] + 4.6)) });
+
+  /* 10. ピンを差す */
+  a = T.s10; scene("s10", a);
+  var w10 = easeOut(seg(t, a[0] + 0.5, a[0] + 4.2));
+  var px = lerp(200, 470, w10), py = lerp(940, 752, w10);
+  svgMove("s10me", px, py);
+  svgMove("s10pin", px, py);
+  $("s10pin").setAttribute("opacity", easeOut(seg(t, a[0] + 0.7, a[0] + 1.4)));
+  var rp = $("s10route");
+  rp.setAttribute("d", "M-40 1040 L " + px.toFixed(1) + " 1040 L " + px.toFixed(1) + " " + (py + 52).toFixed(1));
+  var rlen = rp.getTotalLength();
+  var draw = easeOut(seg(t, a[0] + 1.0, a[0] + 3.2));
+  rp.setAttribute("stroke-dasharray", rlen);
+  rp.setAttribute("stroke-dashoffset", rlen * (1 - draw));
+  var vt = easeOut(seg(t, a[0] + 1.4, a[0] + 5.0));
+  var vp = rp.getPointAtLength(Math.min(vt, 0.999) * rlen);
+  svgMove("s10van", vp.x, vp.y);
+  $("s10van").setAttribute("opacity", seg(t, a[0] + 1.3, a[0] + 1.6) * (1 - seg(t, a[0] + 5.2, a[0] + 5.6)));
+  var dk = easeOut(seg(t, a[0] + 5.2, a[0] + 5.8));
+  svgMove("s10done", px, py);
+  $("s10done").setAttribute("opacity", dk * band(t, a[0] + 5.2, a[0] + 5.8, a[1] - 0.5, a[1]));
+  set("s10tag", { opacity: easeOut(seg(t, a[0] + 2.4, a[0] + 3.2)) });
+
+  /* 11. 配送OS */
+  a = T.s11;
+  $("s11").style.opacity = band(t, a[0], a[0] + 0.5, DURATION - 0.4, DURATION);
+  set("s11mark", { opacity: easeOut(seg(t, a[0] + 1.0, a[0] + 1.8)) });
+  set("s11sub", { opacity: easeOut(seg(t, a[0] + 1.6, a[0] + 2.4)) });
+
+  /* 字幕 */
+  var line = "";
+  for (var i = 0; i < CUES.length; i++) {
+    if (t >= CUES[i][0] && t < CUES[i][1]) { line = CUES[i][2]; break; }
+  }
+  $("subs").innerHTML = line ? "<span>" + line + "</span>" : "";
+}
+
+window.seek = seek;
+window.DURATION = DURATION;
+window.CUES = CUES;
+seek(0);
+</script>
+</body>
+</html>
