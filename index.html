@@ -228,19 +228,18 @@
 
   <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い。
 
-       いまは hidden で伏せてある。本人が作り直した動画を差し込むまでの措置。
-       差し替えるときは assets/video/delivery-os.mp4 を置き換えて、
-       この hidden を外し、下の秒数の表記を直すだけでよい。 -->
-  <section class="film" aria-label="Concept film" hidden>
+       中身は本人が別で作ったもの。1080×1920 の H.264/AAC で、
+       字幕は映像に焼き込み済み。だから <track> は付けない。
+       差し替えるときは assets/video/delivery-os.mp4 を置き換え、
+       表紙（-poster.jpg）を作り直して、下の分秒の表記を直す。 -->
+  <section class="film" aria-label="Concept film">
     <div class="film-frame">
       <video id="film" playsinline preload="metadata" controlslist="nodownload"
-             poster="assets/video/delivery-os-poster.jpg?v=2" crossorigin="anonymous">
-        <source src="assets/video/delivery-os.mp4?v=2" type="video/mp4">
-        <source src="assets/video/delivery-os.webm?v=2" type="video/webm">
-        <track kind="captions" srclang="en" label="English" src="assets/video/delivery-os.en.vtt?v=2" default>
+             poster="assets/video/delivery-os-poster.jpg?v=3">
+        <source src="assets/video/delivery-os.mp4?v=3" type="video/mp4">
       </video>
       <button class="film-cover" id="filmPlay" type="button"
-              aria-label="Play the concept film, 46 seconds, English narration with subtitles">
+              aria-label="Play the concept film, 1 minute 53 seconds, English narration with subtitles">
         <span class="fc-mid">
           <span class="fc-play">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="#06121f" aria-hidden="true">
@@ -251,14 +250,13 @@
       </button>
     </div>
     <p class="film-meta">
-      <span data-l="en">46 seconds · English narration · subtitles</span>
-      <span data-l="ja">46秒 · 英語ナレーション · 字幕つき</span>
+      <span data-l="en">1 min 53 sec · English narration · subtitles</span>
+      <span data-l="ja">1分53秒 · 英語ナレーション · 字幕つき</span>
     </p>
     <p class="film-cap">
-      <span data-l="en">An agent can order in three seconds, but nobody is home to take it.
-        Why the obvious fixes do not hold, and what happens when the parcel follows
-        the person instead of waiting at an address.</span>
-      <span data-l="ja">AIが3秒で注文を終えても、受け取る人は家にいない。素直な解決策がなぜ効かないのか、そして荷物が住所ではなく「その人」を追いかけるとどうなるのか。</span>
+      <span data-l="en">Your fridge notices the milk is low and an agent orders it — but nobody is home to take it.
+        Why the obvious fixes do not hold, and what happens when your pickup point becomes wherever you are.</span>
+      <span data-l="ja">冷蔵庫が牛乳の残りに気づき、AIが注文を済ませる。でも受け取る人は家にいない。素直な解決策がなぜ効かないのか、そして受取場所が「いまいる場所」になるとどうなるのか。</span>
     </p>
   </section>
 
