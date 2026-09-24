@@ -455,13 +455,12 @@ window.LM_UI = (function () {
 
   /* ---------- タブ ---------- */
   function setTab(name) {
-    ["map", "log", "survey"].forEach(function (x) {
+    ["map", "log"].forEach(function (x) {
       var v = $("view-" + x);
       if (v) v.classList.toggle("is-active", x === name);
       var b = $("tab-" + x);
       if (b) b.setAttribute("aria-selected", x === name ? "true" : "false");
     });
-    if (name === "survey" && window.LM_SURVEY) window.LM_SURVEY.refresh();
     if (name !== "map") window.scrollTo({ top: 0 });
   }
 
@@ -486,7 +485,7 @@ window.LM_UI = (function () {
     E.subscribe(onEngine);
     E.init();
 
-    ["map", "log", "survey"].forEach(function (x) {
+    ["map", "log"].forEach(function (x) {
       var b = $("tab-" + x);
       if (b) b.addEventListener("click", function () { setTab(x); });
     });
@@ -520,7 +519,6 @@ window.LM_UI = (function () {
         render();
         renderLog();
         renderToolCalls();
-        if (window.LM_SURVEY) window.LM_SURVEY.relang();
       });
     }
 

@@ -75,11 +75,11 @@ body.is-app .grid-lines { display: none; }
 .view { display: none; }
 .view.is-active { display: block; }
 
-#view-log, #view-survey {
+#view-log {
   position: fixed; inset: 52px 0 66px;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
-#view-log.is-active, #view-survey.is-active { display: block; }
+#view-log.is-active { display: block; }
 .pad { max-width: var(--maxw); margin: 0 auto; padding: 22px 16px 40px; }
 .vh { font-size: 17px; letter-spacing: -0.01em; margin: 0 0 6px; }
 .vh3 { font-size: 15px; margin: 0 0 10px; }
@@ -383,7 +383,7 @@ body.is-app .grid-lines { display: none; }
    ========================================================================== */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 45;
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(2, 1fr);
   height: calc(66px + env(safe-area-inset-bottom, 0));
   padding-bottom: env(safe-area-inset-bottom, 0);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -456,45 +456,6 @@ body.is-app .grid-lines { display: none; }
 .log-row.ok .lk { color: var(--ok); }
 .log-row.warn .lk { color: var(--warn); }
 .log-row.danger .lk { color: var(--danger); }
-
-/* ==========================================================================
-   アンケート（既存の見た目を引き継ぐ）
-   ========================================================================== */
-.q { margin-bottom: 20px; }
-.q > b { display: block; font-size: 14px; margin-bottom: 8px; }
-.opts { display: flex; flex-wrap: wrap; gap: 7px; }
-.opt {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 13px; border-radius: 11px;
-  border: 1px solid var(--border); background: var(--surface-2);
-  font-size: 13.5px; cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-.opt input { accent-color: var(--brand-2); }
-.opt.is-on { border-color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
-.scale { display: flex; gap: 6px; }
-.scale button {
-  flex: 1; min-height: 44px; border-radius: 11px;
-  border: 1px solid var(--border); background: var(--surface-2);
-  color: var(--text); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer;
-}
-.scale button.is-on { border-color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 16%, transparent); color: var(--brand-2); }
-.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
-.stat {
-  padding: 13px; border-radius: 13px;
-  border: 1px solid var(--border); background: var(--surface-2);
-}
-.stat .sv { font-size: 21px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.stat .sk { font-size: 11px; color: var(--text-faint); margin-top: 3px; line-height: 1.4; }
-.bars { display: grid; gap: 5px; }
-.barline { display: grid; grid-template-columns: 110px 1fr 54px; gap: 9px; align-items: center; font-size: 12px; }
-.bt { height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
-.bt i { display: block; height: 100%; background: linear-gradient(90deg, var(--brand-1), var(--brand-2)); }
-.banner {
-  padding: 13px 15px; border-radius: 13px;
-  border: 1px solid var(--border); background: var(--surface-2); font-size: 13.5px;
-}
-.banner.ok { border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); background: color-mix(in srgb, var(--ok) 9%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
   .sheet2.is-in > *, .t2row, .res-ico, .done-check, .ob-mark, .maphint { animation: none !important; }
