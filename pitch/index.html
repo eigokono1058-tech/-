@@ -51,16 +51,38 @@
   .kd.bad { color: var(--danger); }
   .src { font-size: 11px; color: var(--text-faint); margin-top: 14px; line-height: 1.6; }
 
-  /* ---- flow diagram ---- */
-  .flow-wrap { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 10px 8px; background: color-mix(in srgb, var(--surface) 70%, transparent); overflow-x: auto; }
-  .flow-wrap svg { display: block; min-width: 620px; width: 100%; height: auto; }
-  .f-node { fill: var(--surface-2); stroke: var(--border); stroke-width: 1; }
-  .f-node-auto { fill: color-mix(in srgb, var(--brand-2) 14%, var(--surface-2)); stroke: color-mix(in srgb, var(--brand-2) 55%, transparent); }
-  .f-node-gap { fill: color-mix(in srgb, var(--danger) 16%, var(--surface-2)); stroke: var(--danger); stroke-width: 1.6; stroke-dasharray: 5 4; }
-  .f-txt { font-family: var(--font); font-size: 10.5px; font-weight: 600; fill: var(--text); }
-  .f-sub { font-family: var(--font); font-size: 8.6px; fill: var(--text-faint); }
-  .f-arrow { stroke: var(--border); stroke-width: 1.6; fill: none; }
-  .f-cap { font-family: var(--font); font-size: 10px; font-weight: 700; }
+  /* ---- 鎖の図。横スクロールさせず、狭い画面では折り返す ---- */
+  .chain { display: grid; gap: 10px; }
+  .chain-part { padding: 13px 14px 14px; border-radius: var(--radius); border: 1px dashed; }
+  .chain-part.is-auto {
+    border-color: color-mix(in srgb, var(--brand-2) 42%, transparent);
+    background: color-mix(in srgb, var(--brand-2) 5%, transparent);
+  }
+  .chain-part.is-gap {
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 7%, transparent);
+  }
+  .chain-cap {
+    margin: 0 0 10px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .chain-part.is-auto .chain-cap { color: var(--brand-2); }
+  .chain-part.is-gap .chain-cap { color: var(--danger); }
+  .chain-steps { display: flex; flex-wrap: wrap; gap: 8px; }
+  .step {
+    flex: 1 1 132px; min-width: 0;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface-2);
+  }
+  .step b { display: block; font-size: 14px; font-weight: 650; letter-spacing: -0.01em; }
+  .step > span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; line-height: 1.45; }
+  .step.is-gap {
+    flex: 1 1 100%;
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 10%, var(--surface-2));
+  }
+  .step.is-gap b { color: var(--danger); font-size: 15.5px; }
+  .chain-arrow { text-align: center; color: var(--text-faint); font-size: 16px; line-height: 1; }
 
   /* ---- component cards ---- */
   .comps { display: grid; gap: 12px; }
@@ -167,99 +189,80 @@
     </p>
 
     <blockquote class="pull" style="margin-top:22px">
-      <span data-l="ja">残っている問題は「再配達をゼロにする」ことではない。<br><b>置き配に逃がせない荷物（冷蔵・冷凍・医薬品・高額品）を、人が家にいなくても安全に渡すこと</b>である。そしてAIが自動発注するのは、まさにその定期消費財だ。</span>
-      <span data-l="en">The remaining problem is not "get redelivery to zero."<br>
-        It is <b>handing over the parcels you cannot just leave at a door — chilled, frozen, medicine, high value — when nobody is home</b>.
-        And those are exactly the repeat-purchase goods an AI agent will be ordering.</span>
+      <span data-l="ja">足りないのは、運ぶ力ではない。<b>受け取る側が、時間と場所を選べないこと</b>だ。届け先は住所ひとつ、時間帯は向こうが決める。だから家にいられず、荷物は戻っていく。</span>
+      <span data-l="en">What is missing is not the capacity to move things. It is that <b>the person receiving has no say
+        over when or where</b>. One address, and a window somebody else picked. So they are out, and the parcel
+        goes back.</span>
     </blockquote>
   </section>
 
   <!-- ===== GAP ===== -->
   <section>
     <h2 class="sec">
-      <span data-l="ja">2. 自動化は「到着」までしか進まない</span>
-      <span data-l="en">2. Automation only reaches "arrived"</span>
+      <span data-l="ja">2. 自動化されていないのは、受け取り方だけ</span>
+      <span data-l="en">2. The only part still unautomated is receiving</span>
     </h2>
     <p class="sec-note">
-      <span data-l="ja">配送員をロボットやドローンに置き換えても、最後に「誰が受け取るのか」が残る。ラストワンマイルの先の、ラスト数メートル。</span>
-      <span data-l="en">Replace the driver with a robot or a drone and one question is still open: who receives it? Past the last mile lie the last few meters.</span>
+      <span data-l="ja">発注も、倉庫も、配送も、機械がやれるようになった。最後に残っているのは、誰が・いつ・どこで受け取るかという一点だ。ここは車やロボットを増やしても解けない。</span>
+      <span data-l="en">Ordering, warehousing and driving can all be done by machines now. What is left is a single question:
+        who takes it, when, and where. More vehicles and more robots do not answer it.</span>
     </p>
 
-    <div class="flow-wrap">
-      <svg viewBox="0 0 700 150" role="img" aria-label="Flow from AI ordering to storage at home, showing that only the handover step is unsolved">
-        <g class="f-cap">
-          <text x="10" y="16" fill="var(--brand-2)" data-l="ja">自動化できる領域</text>
-          <text x="10" y="16" fill="var(--brand-2)" data-l="en">Automatable today</text>
-          <text x="455" y="16" fill="var(--danger)" data-l="ja">⛔ 未解決</text>
-          <text x="455" y="16" fill="var(--danger)" data-l="en">⛔ Unsolved</text>
-        </g>
-        <rect x="8" y="24" width="430" height="66" rx="8" fill="none" stroke="var(--brand-2)" stroke-opacity="0.35" stroke-dasharray="4 4"/>
-        <rect x="450" y="24" width="120" height="66" rx="8" fill="none" stroke="var(--danger)" stroke-opacity="0.5" stroke-dasharray="4 4"/>
+    <!-- 鎖の形。SVGだと横に長くてスマホで文字が潰れるので、折り返すHTMLで組む -->
+    <div class="chain">
+      <div class="chain-part is-auto">
+        <p class="chain-cap">
+          <span data-l="ja">もう自動化できている</span><span data-l="en">Already automated</span>
+        </p>
+        <div class="chain-steps">
+          <div class="step">
+            <b><span data-l="ja">AIが発注</span><span data-l="en">AI orders</span></b>
+            <span><span data-l="ja">在庫検知・決済</span><span data-l="en">stock check, payment</span></span>
+          </div>
+          <div class="step">
+            <b><span data-l="ja">自動倉庫</span><span data-l="en">Warehouse</span></b>
+            <span><span data-l="ja">ピッキング</span><span data-l="en">auto picking</span></span>
+          </div>
+          <div class="step">
+            <b><span data-l="ja">自動配送</span><span data-l="en">Autonomous transport</span></b>
+            <span><span data-l="ja">ロボット・車両</span><span data-l="en">robots and vehicles</span></span>
+          </div>
+          <div class="step">
+            <b><span data-l="ja">到着</span><span data-l="en">Arrival</span></b>
+            <span><span data-l="ja">建物の前まで</span><span data-l="en">as far as the door</span></span>
+          </div>
+        </div>
+      </div>
 
-        <g>
-          <rect class="f-node f-node-auto" x="18" y="38" width="94" height="40" rx="7"/>
-          <text class="f-txt" x="65" y="56" text-anchor="middle" data-l="ja">AIが発注</text>
-          <text class="f-txt" x="65" y="56" text-anchor="middle" data-l="en">AI orders</text>
-          <text class="f-sub" x="65" y="69" text-anchor="middle" data-l="ja">在庫検知・決済</text>
-          <text class="f-sub" x="65" y="69" text-anchor="middle" data-l="en">stock + payment</text>
+      <div class="chain-arrow" aria-hidden="true">↓</div>
 
-          <path class="f-arrow" d="M116 58h16"/>
-          <rect class="f-node f-node-auto" x="136" y="38" width="86" height="40" rx="7"/>
-          <text class="f-txt" x="179" y="56" text-anchor="middle" data-l="ja">自動倉庫</text>
-          <text class="f-txt" x="179" y="56" text-anchor="middle" data-l="en">Warehouse</text>
-          <text class="f-sub" x="179" y="69" text-anchor="middle" data-l="ja">ピッキング</text>
-          <text class="f-sub" x="179" y="69" text-anchor="middle" data-l="en">auto picking</text>
-
-          <path class="f-arrow" d="M226 58h16"/>
-          <rect class="f-node f-node-auto" x="246" y="38" width="96" height="40" rx="7"/>
-          <text class="f-txt" x="294" y="56" text-anchor="middle" data-l="ja">自動配送</text>
-          <text class="f-txt" x="294" y="56" text-anchor="middle" data-l="en">Autonomous</text>
-          <text class="f-sub" x="294" y="69" text-anchor="middle" data-l="ja">ロボット・車両</text>
-          <text class="f-sub" x="294" y="69" text-anchor="middle" data-l="en">robots, vehicles</text>
-
-          <path class="f-arrow" d="M346 58h16"/>
-          <rect class="f-node f-node-auto" x="366" y="38" width="66" height="40" rx="7"/>
-          <text class="f-txt" x="399" y="56" text-anchor="middle" data-l="ja">到着</text>
-          <text class="f-txt" x="399" y="56" text-anchor="middle" data-l="en">Arrival</text>
-          <text class="f-sub" x="399" y="69" text-anchor="middle" data-l="ja">建物の前</text>
-          <text class="f-sub" x="399" y="69" text-anchor="middle" data-l="en">at the door</text>
-
-          <path class="f-arrow" d="M436 58h16" stroke="var(--danger)"/>
-          <rect class="f-node f-node-gap" x="456" y="38" width="108" height="40" rx="7"/>
-          <text class="f-txt" x="510" y="55" text-anchor="middle" fill="var(--danger)" data-l="ja">誰が受け取る？</text>
-          <text class="f-txt" x="510" y="55" text-anchor="middle" fill="var(--danger)" data-l="en">Who receives?</text>
-          <text class="f-sub" x="510" y="68" text-anchor="middle" data-l="ja">在宅・解錠・本人確認</text>
-          <text class="f-sub" x="510" y="68" text-anchor="middle" data-l="en">presence, keys, ID</text>
-
-          <path class="f-arrow" d="M568 58h16"/>
-          <rect class="f-node" x="588" y="38" width="96" height="40" rx="7"/>
-          <text class="f-txt" x="636" y="56" text-anchor="middle" data-l="ja">家庭内で保管</text>
-          <text class="f-txt" x="636" y="56" text-anchor="middle" data-l="en">Stored at home</text>
-          <text class="f-sub" x="636" y="69" text-anchor="middle" data-l="ja">冷蔵庫まで</text>
-          <text class="f-sub" x="636" y="69" text-anchor="middle" data-l="en">into the fridge</text>
-        </g>
-
-        <g class="f-sub">
-          <text x="18" y="112" data-l="ja">ラストワンマイル</text>
-          <text x="18" y="112" data-l="en">The last mile</text>
-          <path class="f-arrow" d="M18 118h414" stroke-width="1"/>
-          <text x="456" y="112" fill="var(--danger)" data-l="ja">ラスト数メートル</text>
-          <text x="456" y="112" fill="var(--danger)" data-l="en">The last meters</text>
-          <path class="f-arrow" d="M456 118h108" stroke="var(--danger)" stroke-width="1"/>
-          <text x="18" y="140" data-l="ja">ここは技術で解ける</text>
-          <text x="18" y="140" data-l="en">solvable with technology</text>
-          <text x="456" y="140" fill="var(--danger)" data-l="ja">ここは権限と責任の問題</text>
-          <text x="456" y="140" fill="var(--danger)" data-l="en">a permissions and liability problem</text>
-        </g>
-      </svg>
+      <div class="chain-part is-gap">
+        <p class="chain-cap">
+          <span data-l="ja">ここだけ決まっていない</span><span data-l="en">This part is not decided</span>
+        </p>
+        <div class="chain-steps">
+          <div class="step is-gap">
+            <b><span data-l="ja">誰が、いつ、どこで受け取るか</span><span data-l="en">Who takes it, when, and where</span></b>
+            <span><span data-l="ja">いまは住所ひとつと、向こうが決めた時間帯しかない</span>
+              <span data-l="en">today there is only one address, in a window somebody else picked</span></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <p class="small muted" style="margin-top:16px">
-      <span data-l="ja">人間型ロボットが家で代わりに受け取る、という解もある。だがそれは<b>玄関の解錠権限をロボットに渡す</b>ことを意味する。ロボットを制圧・偽装できれば住居侵入がそのまま成立してしまう。だからこのプロジェクトは逆を選ぶ ——<b>「家で受け取らなければならない」という前提そのものを消す。</b></span>
-      <span data-l="en">One answer is a humanoid robot that receives on your behalf. But that means <b>handing a robot the right to unlock your front door</b>.
-        Overpower or spoof the robot and you have trespass, for free. So this project goes the other way:
-        <b>remove the assumption that receiving has to happen at home at all.</b></span>
+      <span data-l="ja">人間型ロボットに代わりに受け取らせる、という解もある。だがそれは玄関の解錠権限をロボットに渡すことで、制圧や偽装ができれば住居侵入がそのまま成立してしまう。だからこのプロジェクトは逆を選ぶ。<b>「家で受け取らなければならない」という前提のほうを消す。</b></span>
+      <span data-l="en">One answer is a humanoid robot that receives on your behalf — but that means handing a robot the right
+        to unlock your front door, and overpowering or spoofing it becomes trespass for free. So this project goes
+        the other way: <b>remove the assumption that receiving has to happen at home at all.</b></span>
     </p>
+
+    <blockquote class="pull" style="margin-top:20px">
+      <span data-l="ja">受け取る場所と時間は、<b>受け取る人が決める</b>。そのために要るのは新しい車両ではない。予定と行動、そして道路の状況を同時に読んで、選べる形にして差し出すエージェントだ。<b>OpenAIのエージェントで、これを組み立てたい。</b></span>
+      <span data-l="en">The place and the time should be <b>the recipient's to choose</b>. What that needs is not new vehicles.
+        It is an agent that reads a person's plans, their movements and the state of the roads at once, and hands
+        back something they can simply pick from. <b>I want to build that on OpenAI's agents.</b></span>
+    </blockquote>
   </section>
 
   <!-- ===== WHAT THE AGENT READS ===== -->
