@@ -80,6 +80,11 @@ window.LM_UI = (function () {
     earlier: { ja: "早い", en: "earlier" },
     noNeed: { ja: "いまの予定のままで受け取れます", en: "The current plan already works" },
     blocked: { ja: "ここでは受け取れません", en: "Not possible here" },
+    altsHead: { ja: "ここなら受け取れます", en: "These work instead" },
+    noAlts: {
+      ja: "この荷物を受け取れる場所が、いまは他にありません",
+      en: "Right now there is nowhere else this parcel can go"
+    },
     failed: { ja: "変更できませんでした", en: "The change did not go through" },
     rolledBack: { ja: "進んだ手続きは戻しました", en: "Everything already done was rolled back" },
     fee: { ja: "配送料", en: "Delivery" },
@@ -133,6 +138,7 @@ window.LM_UI = (function () {
     el.classList.remove("is-in");
     void el.offsetWidth;                 // アニメーションを毎回やり直す
     if (!reduced()) el.classList.add("is-in");
+    M.fit();                             // シートの高さが変わったので地図の位置を取り直す
   }
 
   function fact(v) { return '<span class="fact">' + esc(v) + "</span>"; }
@@ -141,6 +147,54 @@ window.LM_UI = (function () {
     var opts = PR.options(parcel());
     for (var i = 0; i < opts.length; i++) if (opts[i].pointId === pointId) return opts[i];
     return null;
+  }
+
+  /* ---------- 受け取れない場所を選んだとき ----------------------------------
+     断って終わりにしない。その荷物を実際に受け取れる場所を、
+     エージェントと同じ点数のつけ方（optimizer.js）で並べて、そのまま押せるようにする。 */
+  function alternatives(excludeId, n) {
+    var p = parcel();
+    var here = tracking().pointId;
+    var list = [];
+    PR.options(p).forEach(function (o) {
+      if (o.pointId === excludeId || o.pointId === here) return;
+      if (E.evaluate(p, o.point).verdict === "deny") return;
+      list.push(o);
+    });
+    if (window.LM_OPT) {
+      list = window.LM_OPT.rank(list, {
+        policy: POL.get(),
+        nowMin: Math.floor(E.state.simMinutes),
+        homeEtaMin: PR.USER.homeEtaMin,
+        parcel: p
+      }).map(function (r) { return r.option; });
+    }
+    return list.slice(0, n || 3);
+  }
+
+  function altList(excludeId) {
+    var alts = alternatives(excludeId, 3);
+    if (!alts.length) return '<p class="alts-none">' + esc(t(S.noAlts)) + "</p>";
+    return '<p class="alts-h">' + esc(t(S.altsHead)) + "</p>" +
+      '<div class="alts">' + alts.map(function (o) {
+        return '<button class="alt" type="button" data-pt="' + esc(o.pointId) + '">' +
+          '<span class="alt-ico" aria-hidden="true">' + (M.icons[o.point.icon] || "📦") + "</span>" +
+          '<span class="alt-body"><b>' + esc(t(o.point.name)) + "</b>" +
+          '<span class="alt-facts">' + esc(POL.hhmm(o.receivableAtMin)) + "　" +
+          esc(o.extraCost === 0 ? t(S.free) : "+" + yen(o.extraCost)) + "　" +
+          esc(t(S.walk) + " " + o.walkMin + (ja() ? "分" : "m")) + "</span></span>" +
+          '<span class="alt-go" aria-hidden="true">›</span></button>';
+      }).join("") + "</div>";
+  }
+
+  function bindAlts() {
+    Array.prototype.forEach.call(document.querySelectorAll(".alt"), function (b) {
+      b.addEventListener("click", function () {
+        var id = b.getAttribute("data-pt");
+        M.pick(id);
+        onPickPoint(id);
+      });
+    });
   }
 
   /* ---------- 状態ごとの描画 ---------- */
@@ -212,6 +266,7 @@ window.LM_UI = (function () {
           fact(t(S.walk) + " " + opt.walkMin + (ja() ? "分" : "m")) + "</div>"
         : '<p class="pick-no">' + esc(t(S.blocked)) + (why ? " — " + esc(why) : "") + "</p>") +
       "</div>" +
+      (ok ? "" : altList(pickedId)) +
       '<div class="row row-wrap sheet-cta">' +
       '<button class="btn btn-ghost" id="mBack" type="button">' + esc(t(S.cancel)) + "</button>" +
       (ok ? '<button class="btn btn-primary grow" id="mGo" type="button">' +
@@ -221,6 +276,7 @@ window.LM_UI = (function () {
     $("mBack").addEventListener("click", backToIdle);
     var go = $("mGo");
     if (go) go.addEventListener("click", function () { commit(pickedId); });
+    if (!ok) bindAlts();
   }
 
   function backToIdle() {
