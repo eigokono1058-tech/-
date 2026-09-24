@@ -50,8 +50,12 @@
 <section class="view is-active" id="view-map">
   <div class="stage">
     <div class="status" id="status" role="status"></div>
-    <svg id="map" viewBox="0 -95 360 430" role="group"
+    <svg id="map" role="group"
          aria-label="Map. Tap a pickup point to choose where the parcel meets you."></svg>
+    <!-- 受取先へ歩いている間だけ出る。移動を縮めるためのもの。 -->
+    <button class="mapctl" id="ffBtn" type="button" aria-pressed="false" hidden></button>
+    <!-- 地図を指で動かしたときだけ出る -->
+    <button class="mapctl is-re" id="reBtn" type="button" hidden></button>
   </div>
   <div class="sheet2" id="sheet2"></div>
 </section>

@@ -87,7 +87,7 @@ window.LM_SF = (function () {
     { at: 490, name: { ja: "フォルサム通り", en: "Folsom St" }, w: "arterial" },
     { at: 585, name: { ja: "シップリー小路", en: "Shipley St" }, w: "alley" },
     { at: 680, name: { ja: "ハリソン通り", en: "Harrison St" }, w: "arterial" },
-    { at: 775, name: { ja: "パーキンス小路", en: "Perry St" }, w: "alley" },
+    { at: 775, name: { ja: "ペリー小路", en: "Perry St" }, w: "alley" },
     { at: 870, name: { ja: "ブライアント通り", en: "Bryant St" }, w: "arterial" },
     { at: 1060, name: { ja: "ブラナン通り", en: "Brannan St" }, w: "arterial" },
     { at: 1250, name: { ja: "タウンゼント通り", en: "Townsend St" }, w: "arterial" },

@@ -699,13 +699,15 @@ window.LM_DATA = (function () {
       };
     } else {
       mm.name = {
-        ja: "差したピンの場所：" + next.label.ja,
-        en: "The pin you dropped: " + next.label.en
+        ja: next.label.ja + "の路上",
+        en: "On " + next.label.en
       };
-      mm.label = { ja: "ピン", en: "Pin" };
+      mm.label = { ja: "ここ", en: "Here" };
       mm.note = {
-        ja: "路上にピンを差して、そこで配送車と落ち合う。配車アプリで乗車地点を指定するのと同じ操作。",
-        en: "Drop a pin on the street and meet the van there — the same gesture as setting a pickup point in a ride-hailing app."
+        ja: "駅でも店でも自宅でもない、ただの道の上。そこに配送車が横付けする。" +
+          "配車アプリで乗車地点を指すのと同じ操作を、受取に持ち込む。",
+        en: "Not a station, a store or a home — just a spot on the street, where the van pulls over. " +
+          "The same gesture as setting a pickup point in a ride-hailing app, applied to receiving."
       };
     }
     return PIN;

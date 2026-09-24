@@ -85,6 +85,12 @@ window.LM_PROVIDERS = (function () {
       var s = SURGE[pointId];
       Object.keys(s).forEach(function (k) { out[k] = s[k]; });
     }
+    /* 道の上にピンを差したときだけ、そこまでの徒歩時間を実際の距離から出す。
+       追従ピン（既定）のままなら触らない。 */
+    if (pointId === "moving_me" && D.PIN && D.PIN.kind === "street") {
+      out.walkMin = Math.max(1, Math.round((D.PIN.walkM || 0) / 75));
+      out.label = D.PIN.label;
+    }
     return out;
   }
 
