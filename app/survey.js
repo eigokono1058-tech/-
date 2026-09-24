@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — 需要検証フォーム / demand validation survey (ja + en)
+   DELIVERY OS — 需要検証フォーム / demand validation survey (ja + en)
 
    回答はまずサーバー（Cloudflare Workers + D1）へ送り、同時にこの端末の
    localStorage にも残す。サーバーが無い／落ちている／オフラインでも、
@@ -515,7 +515,7 @@ window.LM_SURVEY = (function () {
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
   function exportJson() {
-    download("lastmeters-survey-" + stamp() + ".json", JSON.stringify(load(), null, 2), "application/json");
+    download("delivery-os-survey-" + stamp() + ".json", JSON.stringify(load(), null, 2), "application/json");
   }
   function exportCsv() {
     var list = load();
@@ -525,7 +525,7 @@ window.LM_SURVEY = (function () {
         (r.fears || []).join("|"), (r.note || "").replace(/\s+/g, " "), r.autonomyAtAnswer].map(csvCell).join(",");
     });
     // ExcelでUTF-8を正しく開くためBOMを付ける
-    download("lastmeters-survey-" + stamp() + ".csv", "﻿" + head.join(",") + "\n" + rows.join("\n"), "text/csv");
+    download("delivery-os-survey-" + stamp() + ".csv", "﻿" + head.join(",") + "\n" + rows.join("\n"), "text/csv");
   }
   function csvCell(v) {
     var s = v == null ? "" : String(v);

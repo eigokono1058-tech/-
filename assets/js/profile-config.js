@@ -126,7 +126,7 @@ window.PROFILE = {
      DevDayに提出した「What are you building?」と同じ内容にしている。         */
   projects: [
     {
-      codename: "LAST METERS",
+      codename: "DELIVERY OS",
       badge: { ja: "検討中 · 動く試作あり", en: "Exploring · working prototype" },
       title: {
         ja: "「受け取れない」をなくす、物流の受取体験",

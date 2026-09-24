@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — Cloudflare Worker
+   DELIVERY OS — Cloudflare Worker
    --------------------------------------------------------------------------
    役割は2つだけ。
 
@@ -199,7 +199,7 @@ async function exportCsv(request, env) {
   return new Response("﻿" + head.join(",") + "\n" + body, {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="lastmeters-survey-${new Date().toISOString().slice(0, 10)}.csv"`,
+      "content-disposition": `attachment; filename="delivery-os-survey-${new Date().toISOString().slice(0, 10)}.csv"`,
       "cache-control": "no-store"
     }
   });

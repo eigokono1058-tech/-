@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — Provider層 / mocked providers and the tool registry (ja + en)
+   DELIVERY OS — Provider層 / mocked providers and the tool registry (ja + en)
 
    配送OSが外の世界に触るための窓口。キャリア、ロッカー、自転車便、
    カレンダー、交通、天気、決済、そして将来の自動運転車。

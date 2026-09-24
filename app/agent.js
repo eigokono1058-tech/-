@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — 配送エージェント / the delivery agent (ja + en)
+   DELIVERY OS — 配送エージェント / the delivery agent (ja + en)
 
    方針を預かって、荷物ごとに「誰が・いつ・どこへ・どう」を決める層。
    物流の計算は optimizer.js（決定論）に任せ、ここは判断と調整だけをやる。
@@ -398,7 +398,7 @@ window.LM_AGENT = (function () {
       E.assign(parcel.id, chosen.pointId, { approved: true });
       d.grantId = E.tracking(parcel.id).grant ? E.tracking(parcel.id).grant.grant_id : null;
       d.toolCalls.push({
-        tool: "lastmeters.commit",
+        tool: "deliveryos.commit",
         args: { parcel_id: parcel.id, option_id: chosen.id, undo_window_s: POL.get().undoWindowSec },
         result: { grant_id: d.grantId, undo_until: hhmm(d.atMin + Math.round(POL.get().undoWindowSec / 60)) }
       });
@@ -447,7 +447,7 @@ window.LM_AGENT = (function () {
     if (!canUndo(d)) return null;
     E.restore(d.parcelId, d.from.pointId);
     d.toolCalls.push({
-      tool: "lastmeters.undo",
+      tool: "deliveryos.undo",
       args: { grant_id: d.grantId },
       result: { restored: d.from.pointId }
     });
@@ -469,7 +469,7 @@ window.LM_AGENT = (function () {
     if (!d) return null;
     d.outcome = "rejected";
     d.toolCalls.push({
-      tool: "lastmeters.keep_current",
+      tool: "deliveryos.keep_current",
       args: { parcel_id: d.parcelId },
       result: { kept: d.from ? d.from.pointId : null }
     });
@@ -514,9 +514,9 @@ window.LM_AGENT = (function () {
   /* ---------- 配送OSが外に見せるツール --------------------------------
      エージェント（ChatGPT側でも、この画面でも）はこの面だけを呼ぶ。
      MCPサーバーとして出すなら、ここがそのまま公開面になる。          */
-  PR.register("lastmeters.get_policy", function () { return POL.get(); });
-  PR.register("lastmeters.set_policy", function (a) { return POL.set(a.patch || {}); });
-  PR.register("lastmeters.list_options", function (a) {
+  PR.register("deliveryos.get_policy", function () { return POL.get(); });
+  PR.register("deliveryos.set_policy", function (a) { return POL.set(a.patch || {}); });
+  PR.register("deliveryos.list_options", function (a) {
     var parcel = D.parcelById(a.parcel_id);
     var ctx = context(parcel);
     return candidates(parcel, ctx).feasible.map(function (o) {
@@ -527,7 +527,7 @@ window.LM_AGENT = (function () {
       };
     });
   });
-  PR.register("lastmeters.check_permission", function (a) {
+  PR.register("deliveryos.check_permission", function (a) {
     var parcel = D.parcelById(a.parcel_id);
     var ctx = context(parcel);
     var opt = null;
@@ -536,7 +536,7 @@ window.LM_AGENT = (function () {
     var ap = decideApproval(parcel, opt, ctx);
     return { level: ap.level, reason: ap.reason };
   });
-  PR.register("lastmeters.status", function (a) {
+  PR.register("deliveryos.status", function (a) {
     var tr = E.tracking(a.parcel_id);
     return { parcel_id: a.parcel_id, destination: tr.pointId, status: tr.status };
   });
