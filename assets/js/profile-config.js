@@ -39,8 +39,8 @@ window.PROFILE = {
   /* 自己紹介1行 = DevDayに提出した「What are you building?」と同じ内容にしている。
      メンターが読んでいる文章と食い違わせないため。 */
   headline: {
-    ja: "日本の不在配送・再配達を減らしたい。荷物が、住所ではなく「受け取れる時間と場所」に届くようにする。",
-    en: "Reducing failed deliveries in Japan — so a parcel arrives when and where you can actually receive it, not at one fixed address."
+    ja: "荷物のために、家で待つ時間をなくす。受け取る場所も時間も、自分で決められる配達をつくっています。",
+    en: "No more evenings spent waiting for a parcel. Building delivery where you choose the place and the time."
   },
 
   // 名刺・ポスターの印刷に使う短いタグライン（長いと途中で切れるため）
