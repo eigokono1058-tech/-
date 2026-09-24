@@ -119,8 +119,9 @@ body.is-app .grid-lines { display: none; }
   background: var(--map-bg);
   overflow: hidden;
 }
-/* 地図は舞台いっぱいに広げる。表示範囲は map.js が画面の形に合わせて切り出す */
-#map { display: block; width: 100%; height: 100%; }
+/* 地図は舞台いっぱいに広げる。表示範囲は map.js が画面の形に合わせて切り出す。
+   touch-action: none で、指での移動と拡大を地図側が受け取る。 */
+#map { display: block; width: 100%; height: 100%; touch-action: none; }
 
 /* 上部の状態表示。地図の上に浮かせる */
 .status {
@@ -145,6 +146,32 @@ body.is-app .grid-lines { display: none; }
 .status.is-agent b { color: var(--brand-3); }
 .status.is-ok { border-color: color-mix(in srgb, var(--ok) 55%, transparent); }
 .status.is-ok b { color: var(--ok); }
+
+/* 地図の上に置く操作。受取先へ歩いている間だけ出る早送り */
+.mapctl {
+  position: absolute; right: 14px; top: 88px; z-index: 7;
+  appearance: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 40px; padding: 0 15px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: color-mix(in srgb, var(--sheet) 90%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  color: var(--text); font: inherit; font-size: 13.5px; font-weight: 650;
+  white-space: nowrap;
+  box-shadow: 0 8px 26px -12px rgba(0, 0, 0, 0.45);
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s ease, color 0.2s ease;
+}
+.mapctl[hidden] { display: none; }
+.mapctl:active { transform: scale(0.96); }
+.mapctl .ff-ico { font-size: 13px; line-height: 1; }
+.mapctl.is-on {
+  background: color-mix(in srgb, var(--brand-1) 92%, black);
+  border-color: transparent; color: #fff;
+}
+.mapctl.is-re { top: 136px; }
+.mapctl.is-re:not([hidden]) ~ #ffBtn { top: 88px; }
 
 /* ---- 地図そのもの ----
    陸 → 海 → 公園 → 道路の縁取り → 道路 → 文字、の順に重なる。 */
@@ -226,9 +253,24 @@ body.is-app .grid-lines { display: none; }
 .m-point:focus { outline: none; }
 .m-point:focus-visible .m-point-dot { stroke: var(--brand-1); stroke-width: 3; }
 
+/* 道の上に差すピン。このアプリの肝なので、いちばん目立つ色で立てる。 */
+.m-pin { pointer-events: none; transition: opacity 0.2s ease; }
+.m-pin-shadow { fill: rgba(0, 0, 0, 0.22); }
+.m-pin-body { fill: var(--brand-1); stroke: var(--map-halo); stroke-width: 2; }
+.m-pin-hole { fill: var(--map-halo); }
+.m-pin[data-state="set"] .m-pin-body { fill: var(--brand-2); }
+.m-point-label.is-pin { fill: var(--brand-1); }
+.m-pin[data-state="set"] .m-point-label.is-pin { fill: var(--brand-2); }
+
 /* 自分。地図アプリの青い点と同じ見え方 */
 .m-person-dot { fill: var(--brand-1); stroke: var(--map-halo); stroke-width: 2.2; }
 .m-person-acc { fill: var(--brand-1); opacity: 0.13; }
+
+/* 地図の飾りは指を受けない。受取地点の上に配送車が乗ると押せなくなるため。 */
+.m-land, .m-water-layer, .m-parks, .m-casing, .m-roads, .m-hwys,
+.m-street-names, .m-districts, .m-landmarks, .m-person, .m-vehicles, .m-routes {
+  pointer-events: none;
+}
 
 /* 配送車と走行ルート */
 .m-route { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }

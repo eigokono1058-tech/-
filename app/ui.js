@@ -36,6 +36,14 @@ window.LM_UI = (function () {
   var decision = null;
   var thinkTimer = null;
 
+  /* 再生の速さ。既定は、人が歩いているように見える速さ。
+     受取先が決まったら「早送り」が出て、そこへ着くまでを縮められる。
+     時計も配送車も歩く速さも、同じ数字で一緒に動く。 */
+  var RATE_NORMAL = 0.15;
+  var RATE_FAST = 0.9;
+  var fastForward = false;
+  function rate() { return fastForward ? RATE_FAST : RATE_NORMAL; }
+
   function $(id) { return document.getElementById(id); }
   function t(v) { return I18N ? I18N.t(v) : (v && (v.ja || v)) || ""; }
   function ja() { return I18N && I18N.lang === "ja"; }
@@ -64,7 +72,7 @@ window.LM_UI = (function () {
     completed: { ja: "受け取り完了", en: "Delivery completed" },
     pickMode: { ja: "自分で選ぶ", en: "I'll choose" },
     agentMode: { ja: "エージェントに任せる", en: "Let the agent" },
-    pickHint: { ja: "受け取る場所を選ぶ", en: "Pick a spot" },
+    pickHint: { ja: "地図のどこでもいい。道の上でも。", en: "Anywhere on the map — a street will do" },
     cancel: { ja: "やめる", en: "Cancel" },
     receiveHere: { ja: "ここで受け取る", en: "Receive here" },
     policyHead: { ja: "平日の方針", en: "Weekday policy" },
@@ -87,6 +95,9 @@ window.LM_UI = (function () {
     },
     failed: { ja: "変更できませんでした", en: "The change did not go through" },
     rolledBack: { ja: "進んだ手続きは戻しました", en: "Everything already done was rolled back" },
+    ff: { ja: "早送り", en: "Fast-forward" },
+    ffOn: { ja: "早送り中 ×6", en: "Fast-forward ×6" },
+    recenter: { ja: "元の位置", en: "Recentre" },
     fee: { ja: "配送料", en: "Delivery" },
     chargedNote: {
       ja: "配送料は登録のカードから自動で引き落とされます",
@@ -121,6 +132,35 @@ window.LM_UI = (function () {
     else if (state === ST.done) sub = t(pt.name);
     box.className = "status" + (s.tone ? " is-" + s.tone : "");
     box.innerHTML = "<b>" + esc(head) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "");
+  }
+
+  /* 地図の上のボタン。早送りは歩いている最中だけ、
+     元の位置は地図を指で動かしたときだけ出す。 */
+  function renderFF() {
+    var b = $("ffBtn");
+    if (b) {
+      var walking = !!M.headingTo() && state !== ST.done;
+      b.hidden = !walking;
+      if (walking) {
+        b.classList.toggle("is-on", fastForward);
+        b.setAttribute("aria-pressed", fastForward ? "true" : "false");
+        b.innerHTML = '<span class="ff-ico" aria-hidden="true">' + (fastForward ? "⏩" : "▶︎") + "</span>" +
+          "<span>" + esc(t(fastForward ? S.ffOn : S.ff)) + "</span>";
+      }
+    }
+    var r = $("reBtn");
+    if (r) {
+      r.hidden = !M.isMoved();
+      if (!r.hidden) {
+        r.innerHTML = '<span class="ff-ico" aria-hidden="true">⌖</span><span>' +
+          esc(t(S.recenter)) + "</span>";
+      }
+    }
+  }
+
+  function setFastForward(on) {
+    fastForward = !!on;
+    renderFF();
   }
 
   function destTime() {
@@ -200,6 +240,7 @@ window.LM_UI = (function () {
   /* ---------- 状態ごとの描画 ---------- */
   function render() {
     renderStatus();
+    renderFF();
     if (state === ST.idle) return renderIdle();
     if (state === ST.picking) return renderPicking();
     if (state === ST.confirming) return renderConfirming();
@@ -283,6 +324,7 @@ window.LM_UI = (function () {
     state = ST.idle;
     pickedId = null;
     decision = null;
+    setFastForward(false);
     M.setPickable(false);
     render();
   }
@@ -298,8 +340,14 @@ window.LM_UI = (function () {
 
   function headTo(pointId) {
     var pt = D.pointById(pointId);
-    if (pt && pt.xy && !pt.dynamic) M.walkTo(pt.xy[0], pt.xy[1], pt.id);
-    else M.stopWalking();
+    if (pt && pt.dynamic && D.PIN.kind === "street") {
+      /* 道の上にピンを差したなら、そこまでは自分で歩く */
+      M.walkTo(D.PIN.x, D.PIN.y, pt.id);
+    } else if (pt && pt.xy && !pt.dynamic) {
+      M.walkTo(pt.xy[0], pt.xy[1], pt.id);
+    } else {
+      M.stopWalking();                 // 追従ピン：向こうが来る
+    }
     M.setFocus(HERO);
   }
 
@@ -438,6 +486,7 @@ window.LM_UI = (function () {
   function restart() {
     E.reset(); A.reset(); PR.reset(); M.resetWalk();
     state = ST.idle; decision = null; pickedId = null;
+    setFastForward(false);
     M.setPickable(false);
     M.setFocus(HERO);
     render();
@@ -470,14 +519,18 @@ window.LM_UI = (function () {
 
   function onEngine() {
     var tr = tracking();
-    if (tr.status === "arrived" && (M.hasArrived() || D.pointById(tr.pointId).dynamic)) {
+    /* 荷物が着いていて、こちらも着いていたら受渡し。
+       追従ピン（歩いて向かう先が無い）ときは、こちらは always 着いている。 */
+    if (tr.status === "arrived" && (M.headingTo() ? M.hasArrived() : true)) {
       E.startHandover(HERO);
     }
     if (tr.status === "received" && state !== ST.done) {
       state = ST.done;
+      setFastForward(false);
       render();
     } else {
       renderStatus();
+      renderFF();
     }
     renderLog();
     renderToolCalls();
@@ -535,7 +588,7 @@ window.LM_UI = (function () {
 
   /* ---------- init ---------- */
   function init() {
-    M.mount($("map"), { onPick: onPickPoint, onArrive: onArrive });
+    M.mount($("map"), { onPick: onPickPoint, onArrive: onArrive, onView: renderFF });
     M.setFocus(HERO);
     M.setPickable(false);
     E.subscribe(onEngine);
@@ -580,9 +633,14 @@ window.LM_UI = (function () {
 
     render();
 
+    var ff = $("ffBtn");
+    if (ff) ff.addEventListener("click", function () { setFastForward(!fastForward); });
+    var re = $("reBtn");
+    if (re) re.addEventListener("click", function () { M.recenter(); renderFF(); });
+
     var last = performance.now();
     (function frame(now) {
-      var dt = Math.min(0.12, (now - last) / 1000);
+      var dt = Math.min(0.12, (now - last) / 1000) * rate();
       last = now;
       E.tick(dt);
       M.update(E.state, dt);

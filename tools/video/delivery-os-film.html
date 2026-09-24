@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DELIVERY OS — film source</title>
+<!--
+  動画の元。1コマずつ描くためのページで、サイトからは参照していない。
+
+  window.seek(t) に秒を渡すと、その時刻の絵になる（実時間では動かさない）。
+  こうしておくと、何度描き直しても同じコマが出る。
+  書き出しは tools/video/render.py。
+-->
+<style>
+  :root {
+    --bg: #0a0c12;
+    --ink: #e8ecf4;
+    --dim: #98a3b7;
+    --faint: #5c6679;
+    --b1: #5b8cff;
+    --b2: #2dd4bf;
+    --b3: #a78bfa;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --line: #1e2433;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 720px; height: 1280px; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "DejaVu Sans", "Liberation Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #stage { position: relative; width: 720px; height: 1280px; overflow: hidden; }
+
+  .glow {
+    position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.35;
+    pointer-events: none;
+  }
+  #g1 { width: 560px; height: 560px; left: -140px; top: -120px; background: #1b3a7a; }
+  #g2 { width: 520px; height: 520px; right: -160px; bottom: -120px; background: #10564f; }
+
+  .scene { position: absolute; inset: 0; opacity: 0; }
+
+  .cap {
+    position: absolute; left: 64px; right: 64px;
+    font-size: 54px; line-height: 1.18; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .cap.sm { font-size: 40px; font-weight: 600; }
+  .sub {
+    position: absolute; left: 64px; right: 64px;
+    font-size: 26px; line-height: 1.5; color: var(--dim); font-weight: 400;
+  }
+  .grad {
+    background: linear-gradient(100deg, var(--b1), var(--b2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  svg { position: absolute; inset: 0; width: 720px; height: 1280px; }
+
+  .tag {
+    position: absolute; display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 999px;
+    font-size: 24px; font-weight: 600;
+    border: 1px solid var(--line); background: #121826; color: var(--dim);
+  }
+  .tag.bad { border-color: #5c2b2b; background: #1d1417; color: var(--danger); }
+  .tag.good { border-color: #1d4f47; background: #0f1f20; color: var(--b2); }
+
+  .bignum {
+    position: absolute; left: 64px; right: 64px;
+    font-size: 96px; font-weight: 800; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .layer {
+    position: absolute; left: 64px; right: 64px;
+    padding: 26px 30px; border-radius: 22px;
+    border: 1px solid var(--line); background: #10151f;
+  }
+  .layer b { display: block; font-size: 30px; font-weight: 700; margin-bottom: 8px; }
+  .layer span { font-size: 23px; color: var(--dim); line-height: 1.45; }
+
+  .wordmark {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-size: 30px; font-weight: 800; letter-spacing: 0.34em;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="glow" id="g1"></div>
+  <div class="glow" id="g2"></div>
+
+  <!-- ============ 1. 不在 ============ -->
+  <section class="scene" id="s1">
+    <div class="cap" style="top:150px">Nobody was home.</div>
+    <svg viewBox="0 0 720 1280">
+      <!-- 道 -->
+      <rect x="0" y="880" width="720" height="86" fill="#141a26"/>
+      <line x1="0" y1="923" x2="720" y2="923" stroke="#2a3346" stroke-width="4" stroke-dasharray="34 26"/>
+      <!-- 家 -->
+      <g id="s1house">
+        <rect x="250" y="620" width="220" height="250" rx="10" fill="#1a2231" stroke="#3a4762" stroke-width="3"/>
+        <path d="M232 622 L360 520 L488 622 Z" fill="#20293b" stroke="#3a4762" stroke-width="3"/>
+        <rect x="330" y="740" width="60" height="130" rx="5" fill="#0e1421" stroke="#2f3a52" stroke-width="3"/>
+        <rect x="286" y="666" width="52" height="46" rx="5" fill="#0e1421" stroke="#2f3a52" stroke-width="3"/>
+        <rect x="382" y="666" width="52" height="46" rx="5" fill="#0e1421" stroke="#2f3a52" stroke-width="3"/>
+      </g>
+      <!-- 配送車 -->
+      <g id="s1van">
+        <rect x="-70" y="-34" width="140" height="68" rx="12" fill="#5b8cff"/>
+        <rect x="-70" y="-34" width="46" height="40" rx="10" fill="#8fb0ff"/>
+        <circle cx="-38" cy="38" r="14" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+        <circle cx="40" cy="38" r="14" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+      </g>
+      <!-- 荷物 -->
+      <g id="s1box">
+        <rect x="-26" y="-26" width="52" height="52" rx="7" fill="#c9a227"/>
+        <rect x="-26" y="-6" width="52" height="10" fill="#8f7318"/>
+      </g>
+    </svg>
+    <div class="tag bad" id="s1slip" style="left:410px; top:690px">Sorry we missed you</div>
+  </section>
+
+  <!-- ============ 2. 何度も戻る ============ -->
+  <section class="scene" id="s2">
+    <div class="cap" style="top:150px">So it goes back.<br>And comes again.</div>
+    <svg viewBox="0 0 720 1280">
+      <path id="s2arc" d="M150 760 Q 360 560 570 760" fill="none"
+            stroke="#2c3550" stroke-width="5" stroke-dasharray="14 14"/>
+      <rect x="96" y="756" width="108" height="92" rx="12" fill="#151c2a" stroke="#28324a" stroke-width="3"/>
+      <text x="150" y="812" text-anchor="middle" font-size="26" fill="#98a3b7"
+            font-family="DejaVu Sans">depot</text>
+      <rect x="516" y="756" width="108" height="92" rx="12" fill="#151c2a" stroke="#28324a" stroke-width="3"/>
+      <text x="570" y="812" text-anchor="middle" font-size="26" fill="#98a3b7"
+            font-family="DejaVu Sans">home</text>
+      <g id="s2box">
+        <rect x="-24" y="-24" width="48" height="48" rx="7" fill="#c9a227"/>
+        <rect x="-24" y="-5" width="48" height="10" fill="#8f7318"/>
+      </g>
+    </svg>
+    <div class="bignum" id="s2num" style="top:940px">0</div>
+    <div class="sub" id="s2numlabel" style="top:1056px">
+      parcels a year in Japan are carried twice<br>because no one was there the first time
+    </div>
+  </section>
+
+  <!-- ============ 3. 固定の一点にしか行けない ============ -->
+  <section class="scene" id="s3">
+    <div class="cap" style="top:140px">It can only go to<br>one fixed place.</div>
+    <svg viewBox="0 0 720 1280">
+      <g id="s3grid"></g>
+      <g id="s3pin">
+        <path d="M360 760 C 338 720 326 702 326 682 A 34 34 0 1 1 394 682 C 394 702 382 720 360 760 Z"
+              fill="#f87171" stroke="#0a0c12" stroke-width="5"/>
+        <circle cx="360" cy="680" r="13" fill="#0a0c12"/>
+      </g>
+    </svg>
+    <div class="sub" id="s3sub" style="top:900px; text-align:center">
+      Your address. Whether or not you are in it.
+    </div>
+  </section>
+
+  <!-- ============ 4. 人は動く ============ -->
+  <section class="scene" id="s4">
+    <div class="cap" style="top:140px">People don't stay<br>in one place.</div>
+    <svg viewBox="0 0 720 1280">
+      <g id="s4grid"></g>
+      <g id="s4pin" opacity="0.4">
+        <path d="M200 720 C 184 692 175 678 175 664 A 25 25 0 1 1 225 664 C 225 678 216 692 200 720 Z"
+              fill="#5a6172" stroke="#0a0c12" stroke-width="4"/>
+        <circle cx="200" cy="663" r="9" fill="#0a0c12"/>
+      </g>
+      <path id="s4gap" d="M200 720 L 200 720" stroke="#f87171" stroke-width="4" stroke-dasharray="12 12"/>
+      <g id="s4me">
+        <circle cx="0" cy="0" r="34" fill="#5b8cff" opacity="0.16"/>
+        <circle cx="0" cy="0" r="14" fill="#5b8cff" stroke="#0a0c12" stroke-width="4"/>
+      </g>
+    </svg>
+    <div class="tag bad" id="s4gaplabel" style="left:250px; top:860px">too far to be there</div>
+  </section>
+
+  <!-- ============ 5. 荷物のほうが動く ============ -->
+  <section class="scene" id="s5">
+    <svg viewBox="0 0 720 1280">
+      <g id="s5grid"></g>
+      <path id="s5route" d="M-40 1180 L 430 1180 L 430 990" fill="none"
+            stroke="#2dd4bf" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <g id="s5me">
+        <circle cx="236" cy="980" r="34" fill="#5b8cff" opacity="0.16"/>
+        <circle cx="236" cy="980" r="14" fill="#5b8cff" stroke="#0a0c12" stroke-width="4"/>
+      </g>
+      <g id="s5pin">
+        <path d="M430 930 C 410 896 398 880 398 862 A 32 32 0 1 1 462 862 C 462 880 450 896 430 930 Z"
+              fill="#2dd4bf" stroke="#0a0c12" stroke-width="5"/>
+        <circle cx="430" cy="860" r="12" fill="#0a0c12"/>
+      </g>
+      <g id="s5van">
+        <rect x="-52" y="-26" width="104" height="52" rx="10" fill="#5b8cff"/>
+        <rect x="-52" y="-26" width="34" height="30" rx="8" fill="#8fb0ff"/>
+        <circle cx="-28" cy="30" r="11" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+        <circle cx="30" cy="30" r="11" fill="#0e1421" stroke="#3b465e" stroke-width="4"/>
+      </g>
+    </svg>
+    <div class="cap" style="top:130px">So let the parcel<br><span class="grad">come to you.</span></div>
+    <div class="tag good" id="s5tag" style="left:64px; top:300px">On 2nd St &nbsp;·&nbsp; 20:05 &nbsp;·&nbsp; 3 min away</div>
+    <div class="sub" id="s5sub" style="top:374px">
+      Not a station, not a store, not your door.<br>Just a spot on the street, where the van pulls over.
+    </div>
+  </section>
+
+  <!-- ============ 6. OS ============ -->
+  <section class="scene" id="s6">
+    <div class="cap" style="top:132px">Packages<br><span class="grad">adapt to people.</span></div>
+    <div class="layer" id="l1" style="top:400px">
+      <b>AI agent</b><span>Decides inside the boundaries you set — and asks when it is outside them.</span>
+    </div>
+    <div class="layer" id="l2" style="top:590px">
+      <b>Optimisation engine</b><span>Scores every option: when, where, what it costs, how likely it is to work.</span>
+    </div>
+    <div class="layer" id="l3" style="top:780px">
+      <b>Delivery network</b><span>Carriers, lockers, stores, couriers — the ones that already exist.</span>
+    </div>
+    <div class="wordmark grad" id="s6mark" style="top:1010px">DELIVERY OS</div>
+    <div class="sub" id="s6sub" style="top:1078px; text-align:center">
+      Not another carrier.<br>An operating system on top of the ones we have.
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- 時間の道具 ---------- */
+function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+function easeOut(x) { return 1 - Math.pow(1 - x, 3); }
+function lerp(a, b, k) { return a + (b - a) * k; }
+/* 入って、しばらく居て、出る */
+function band(t, inA, inB, outA, outB) {
+  return Math.min(easeOut(seg(t, inA, inB)), 1 - ease(seg(t, outA, outB)));
+}
+function $(id) { return document.getElementById(id); }
+function set(id, o) {
+  var el = $(id);
+  if (!el) return;
+  if (o.opacity !== undefined) el.style.opacity = o.opacity;
+  if (o.x !== undefined || o.y !== undefined || o.s !== undefined) {
+    var tr = "translate(" + (o.x || 0) + "px," + (o.y || 0) + "px)";
+    if (o.s !== undefined) tr += " scale(" + o.s + ")";
+    el.style.transform = tr;
+  }
+}
+function svgMove(id, x, y, s) {
+  var el = $(id);
+  if (!el) return;
+  el.setAttribute("transform", "translate(" + x + " " + y + ")" + (s ? " scale(" + s + ")" : ""));
+}
+
+/* ---------- 街区の格子（3〜5場面で共有） ---------- */
+function buildGrid(id, seed) {
+  var g = $(id);
+  if (!g || g.dataset.built) return;
+  var ns = "http://www.w3.org/2000/svg";
+  var html = "";
+  for (var y = 380; y <= 1240; y += 108) {
+    html += '<line x1="-20" y1="' + y + '" x2="740" y2="' + y + '" stroke="#1b2231" stroke-width="10"/>';
+  }
+  for (var x = 60; x <= 700; x += 120) {
+    html += '<line x1="' + x + '" y1="360" x2="' + x + '" y2="1260" stroke="#1b2231" stroke-width="10"/>';
+  }
+  g.innerHTML = html;
+  g.dataset.built = "1";
+}
+
+/* ---------- 各場面 ---------- */
+var T = {
+  s1: [0.0, 5.2],
+  s2: [5.2, 10.4],
+  s3: [10.4, 15.2],
+  s4: [15.2, 20.4],
+  s5: [20.4, 27.6],
+  s6: [27.6, 35.0]
+};
+var DURATION = 35.0;
+
+function seek(t) {
+  buildGrid("s3grid");
+  buildGrid("s4grid");
+  buildGrid("s5grid");
+
+  /* 背景のにじみは、ゆっくり呼吸させる */
+  $("g1").style.opacity = 0.3 + 0.08 * Math.sin(t * 0.7);
+  $("g2").style.opacity = 0.28 + 0.08 * Math.cos(t * 0.55);
+
+  /* ---- 1. 不在 ---- */
+  var a = T.s1;
+  $("s1").style.opacity = band(t, a[0], a[0] + 0.5, a[1] - 0.6, a[1]);
+  var v1 = easeOut(seg(t, 0.3, 1.8));          // 車が来る
+  var v2 = ease(seg(t, 3.9, 5.0));             // 車が去る
+  svgMove("s1van", lerp(-170, 190, v1) + lerp(0, 980, v2), 900);
+  var bx = easeOut(seg(t, 1.9, 2.7));          // 荷物を運ぶ
+  var bback = ease(seg(t, 3.4, 4.2));          // 荷物を持ち帰る
+  var boxX = lerp(215, 346, bx) - lerp(0, 131, bback);
+  var boxY = lerp(900, 852, bx) + lerp(0, 48, bback);
+  svgMove("s1box", boxX, boxY);
+  $("s1box").setAttribute("opacity", seg(t, 1.9, 2.1));
+  set("s1slip", { opacity: band(t, 2.9, 3.4, 4.6, 5.0), y: lerp(14, 0, easeOut(seg(t, 2.9, 3.4))) });
+  set("s1", {});
+  $("s1house").setAttribute("opacity", 1);
+
+  /* ---- 2. 何度も戻る ---- */
+  a = T.s2;
+  $("s2").style.opacity = band(t, a[0], a[0] + 0.5, a[1] - 0.6, a[1]);
+  var path = document.getElementById("s2arc");
+  var len = path.getTotalLength();
+  var trips = seg(t, a[0] + 0.3, a[0] + 3.6) * 3;       // 3往復
+  var phase = trips % 1;
+  var fwd = Math.floor(trips) % 2 === 0;
+  var p = path.getPointAtLength((fwd ? phase : 1 - phase) * len);
+  svgMove("s2box", p.x, p.y);
+  $("s2box").setAttribute("opacity", band(t, a[0] + 0.2, a[0] + 0.5, a[1] - 1.0, a[1] - 0.5));
+  var n = Math.round(easeOut(seg(t, a[0] + 0.8, a[0] + 3.8)) * 400000000);
+  $("s2num").textContent = n.toLocaleString("en-US");
+  set("s2num", { opacity: band(t, a[0] + 0.8, a[0] + 1.2, a[1] - 0.6, a[1]) });
+  set("s2numlabel", { opacity: band(t, a[0] + 1.6, a[0] + 2.2, a[1] - 0.6, a[1]) });
+
+  /* ---- 3. 固定の一点 ---- */
+  a = T.s3;
+  $("s3").style.opacity = band(t, a[0], a[0] + 0.5, a[1] - 0.6, a[1]);
+  var drop = easeOut(seg(t, a[0] + 0.5, a[0] + 1.3));
+  $("s3pin").setAttribute("transform", "translate(0 " + lerp(-260, 0, drop) + ")");
+  $("s3pin").setAttribute("opacity", drop);
+  set("s3sub", { opacity: band(t, a[0] + 1.8, a[0] + 2.4, a[1] - 0.6, a[1]) });
+  $("s3grid").setAttribute("opacity", lerp(0.25, 1, easeOut(seg(t, a[0], a[0] + 1.2))));
+
+  /* ---- 4. 人は動く ---- */
+  a = T.s4;
+  $("s4").style.opacity = band(t, a[0], a[0] + 0.5, a[1] - 0.6, a[1]);
+  var walk = easeOut(seg(t, a[0] + 0.4, a[0] + 3.4));
+  var mx = lerp(200, 560, walk), my = lerp(700, 1010, walk);
+  svgMove("s4me", mx, my);
+  $("s4gap").setAttribute("d", "M200 700 L " + mx + " " + my);
+  $("s4gap").setAttribute("opacity", 0.9 * seg(t, a[0] + 1.4, a[0] + 2.2));
+  set("s4gaplabel", { opacity: band(t, a[0] + 2.4, a[0] + 3.0, a[1] - 0.6, a[1]) });
+
+  /* ---- 5. 荷物のほうが動く ---- */
+  a = T.s5;
+  $("s5").style.opacity = band(t, a[0], a[0] + 0.5, a[1] - 0.6, a[1]);
+  var pinDrop = easeOut(seg(t, a[0] + 0.7, a[0] + 1.5));
+  $("s5pin").setAttribute("transform", "translate(0 " + lerp(-240, 0, pinDrop) + ")");
+  $("s5pin").setAttribute("opacity", pinDrop);
+  var rp = document.getElementById("s5route");
+  var rlen = rp.getTotalLength();
+  var draw = easeOut(seg(t, a[0] + 1.5, a[0] + 3.4));
+  rp.setAttribute("stroke-dasharray", rlen);
+  rp.setAttribute("stroke-dashoffset", rlen * (1 - draw));
+  var vanT = easeOut(seg(t, a[0] + 1.7, a[0] + 4.4));
+  var vp = rp.getPointAtLength(vanT * rlen);
+  svgMove("s5van", vp.x, vp.y);
+  $("s5van").setAttribute("opacity", seg(t, a[0] + 1.6, a[0] + 1.9));
+  set("s5tag", { opacity: band(t, a[0] + 4.2, a[0] + 4.8, a[1] - 0.6, a[1]),
+                 y: lerp(16, 0, easeOut(seg(t, a[0] + 4.2, a[0] + 4.8))) });
+  set("s5sub", { opacity: band(t, a[0] + 5.0, a[0] + 5.6, a[1] - 0.6, a[1]) });
+
+  /* ---- 6. OS ---- */
+  a = T.s6;
+  $("s6").style.opacity = band(t, a[0], a[0] + 0.6, DURATION - 0.5, DURATION);
+  [["l1", 0.9], ["l2", 1.3], ["l3", 1.7]].forEach(function (pair) {
+    var k = easeOut(seg(t, a[0] + pair[1], a[0] + pair[1] + 0.8));
+    set(pair[0], { opacity: k, y: lerp(26, 0, k) });
+  });
+  set("s6mark", { opacity: easeOut(seg(t, a[0] + 3.0, a[0] + 3.8)) });
+  set("s6sub", { opacity: easeOut(seg(t, a[0] + 3.6, a[0] + 4.4)) });
+}
+
+window.seek = seek;
+window.DURATION = DURATION;
+seek(0);
+</script>
+</body>
+</html>
