@@ -153,12 +153,7 @@ window.PROFILE = {
           href: "./pitch/",
           note: { ja: "課題・市場・ビジネスモデル", en: "Problem, market, business model" }
         },
-        {
-          label: { ja: "事業計画ドキュメント", en: "Business plan docs" },
-          href: "./plan/",
-          note: { ja: "論点と検証計画", en: "Open questions & validation" }
-        }
-      ]
+]
     }
   ],
 
