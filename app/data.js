@@ -76,13 +76,13 @@ window.LM_DATA = (function () {
   var POINTS = [
     {
       id: "home_door",
-      name: { ja: "自宅ドア前（置き配）", en: "My front door (leave it)" },
+      name: { ja: "自宅配送", en: "Home delivery" },
       kind: { ja: "自宅", en: "Home" },
       icon: "home",
       caps: ["ambient"],
       xy: [150, 44],
       labelAbove: true,
-      label: { ja: "自宅ドア前", en: "Front door" },
+      label: { ja: "自宅", en: "Home" },
       route: [[20, 200], [20, 130], [150, 130], [150, 44]],
       note: {
         ja: "いまの標準。不在でも届くが、盗難・破損・プライバシーの露出が残る。",
@@ -93,12 +93,12 @@ window.LM_DATA = (function () {
     },
     {
       id: "home_locker",
-      name: { ja: "マンション宅配ロッカー", en: "Building parcel locker" },
+      name: { ja: "建物のロビーのロッカー", en: "Building lobby locker" },
       kind: { ja: "自宅", en: "Home" },
       icon: "locker",
       caps: ["ambient", "secure"],
       xy: [188, 72],
-      label: { ja: "宅配ロッカー", en: "Building locker" },
+      label: { ja: "ロビー", en: "Lobby" },
       route: [[20, 200], [20, 130], [150, 130], [150, 72], [188, 72]],
       note: {
         ja: "常温のみ・数が足りない。満杯だと即座に再配達へ戻る。",
@@ -109,12 +109,12 @@ window.LM_DATA = (function () {
     },
     {
       id: "konbini",
-      name: { ja: "コンビニ受取（24h・冷蔵あり）", en: "Convenience store (24h, chilled)" },
+      name: { ja: "街角のストア", en: "Corner store" },
       kind: { ja: "地域Hub", en: "Local hub" },
       icon: "store",
       caps: ["ambient", "chilled", "identity", "attended", "secure"],
       xy: [252, 130],
-      label: { ja: "コンビニ", en: "Konbini" },
+      label: { ja: "ストア", en: "Store" },
       route: [[20, 200], [20, 130], [252, 130]],
       note: {
         ja: "既存インフラをそのまま地域Hubに使える。冷凍は基本不可。",
@@ -124,13 +124,13 @@ window.LM_DATA = (function () {
     },
     {
       id: "station_locker",
-      name: { ja: "駅前オープンロッカー", en: "Open locker at the station" },
+      name: { ja: "モンゴメリー駅のロッカー", en: "Montgomery St Station locker" },
       kind: { ja: "地域Hub", en: "Local hub" },
       icon: "locker",
       caps: ["ambient", "chilled", "frozen", "secure"],
       xy: [318, 62],
       labelAbove: true,
-      label: { ja: "駅ロッカー", en: "Station locker" },
+      label: { ja: "モンゴメリー駅", en: "Montgomery" },
       route: [[20, 200], [20, 130], [318, 130], [318, 62]],
       note: {
         ja: "冷凍対応の3温度帯ロッカー。通勤経路上なら受取コストはほぼゼロ。",
@@ -159,13 +159,13 @@ window.LM_DATA = (function () {
       /* 地図に差した受取ピン。固定の住所ではないので dynamic 扱い。
          ピンを動かすと map.js が setPin() を呼び、この地点の名前・ETAを書き換える。 */
       id: "moving_me",
-      name: { ja: "いまいる自分の場所（ピン追従）", en: "Wherever I am (the pin follows me)" },
+      name: { ja: "いまいる場所まで配達", en: "Brought to where I am" },
       kind: { ja: "ピン", en: "Pin" },
       icon: "person",
       caps: ["ambient", "chilled", "frozen", "identity", "signature", "dynamic"],
       xy: null,
       dynamic: true,
-      label: { ja: "受取ピン", en: "Pin" },
+      label: { ja: "自分", en: "Me" },
       note: {
         ja: "住所ではなく「人」に届ける。地図にピンを差すか、歩いている自分に追従させる。",
         en: "Deliver to a person, not an address. Drop a pin on the map, or let it follow you as you walk."
@@ -174,12 +174,12 @@ window.LM_DATA = (function () {
     },
     {
       id: "friend",
-      name: { ja: "友人宅へ委任（暗証番号共有）", en: "Delegate to a friend (shared code)" },
+      name: { ja: "近所の友人に委任", en: "A neighbour takes it in" },
       kind: { ja: "委任", en: "Delegated" },
       icon: "delegate",
       caps: ["ambient", "chilled", "attended"],
       xy: [250, 200],
-      label: { ja: "友人宅", en: "Friend" },
+      label: { ja: "近所", en: "Neighbour" },
       route: [[20, 200], [250, 200]],
       note: {
         ja: "受取権限を他人に一時委譲する。誰に何を渡したかの記録が必須。",
@@ -218,7 +218,7 @@ window.LM_DATA = (function () {
         en: "Freezer stock dropped below two meals, so the agent reordered"
       },
       temp: "frozen",
-      value: 4280,
+      value: 28,
       needs: ["frozen"],
       requiresIdentity: false,
       delegable: true,
@@ -237,7 +237,7 @@ window.LM_DATA = (function () {
         en: "Repeat prescription after a remote consult, triggered at five days of stock left"
       },
       temp: "ambient",
-      value: 3200,
+      value: 22,
       needs: ["identity"],
       requiresIdentity: true,
       delegable: false,
@@ -260,7 +260,7 @@ window.LM_DATA = (function () {
         en: "Consumption rate implied five days left, so the agent reordered"
       },
       temp: "ambient",
-      value: 980,
+      value: 7,
       needs: [],
       requiresIdentity: false,
       delegable: true,
@@ -276,7 +276,7 @@ window.LM_DATA = (function () {
       orderedBy: "human",
       agentReason: null,
       temp: "ambient",
-      value: 68000,
+      value: 450,
       needs: ["secure"],
       requiresIdentity: false,
       delegable: false,
@@ -366,7 +366,7 @@ window.LM_DATA = (function () {
       id: "high_value",
       title: { ja: "高額品の扱い", en: "High value goods" },
       test: function (p, pt) {
-        if (p.value < 50000) return null;
+        if (p.value < 500) return null;
         // 施錠されている / 人が常駐している / 本人確認ができる のいずれかが必要
         var guarded = ["secure", "attended", "identity"].some(function (c) {
           return pt.caps.indexOf(c) !== -1;
@@ -375,8 +375,8 @@ window.LM_DATA = (function () {
           return {
             verdict: "deny",
             reason: {
-              ja: "5万円以上の荷物を無施錠・無人の場所に置くことは保険条件を満たしません",
-              en: "Leaving goods over ¥50,000 unlocked and unattended breaks the insurance terms"
+              ja: "$500以上の荷物を無施錠・無人の場所に置くことは保険条件を満たしません",
+              en: "Leaving goods over $500 unlocked and unattended breaks the insurance terms"
             }
           };
         }
@@ -696,7 +696,7 @@ window.LM_DATA = (function () {
     var mm = findPoint("moving_me");
     mm.eta_min = next.etaMin;
     if (next.kind === "me") {
-      mm.name = { ja: "いまいる自分の場所（ピン追従）", en: "Wherever I am (the pin follows me)" };
+      mm.name = { ja: "いまいる場所まで配達", en: "Brought to where I am" };
       mm.label = { ja: "自分", en: "Me" };
       mm.note = {
         ja: "住所ではなく「人」に届ける。歩き続けても、そのときいる場所がそのまま受取地点になる。",

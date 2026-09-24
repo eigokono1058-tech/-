@@ -10,7 +10,7 @@ window.LM_POLICY = (function () {
 
   var DEFAULTS = {
     preferred: "home_door",          // 既定の受取先
-    maxExtraCostJpy: 300,            // これ以内なら黙って払う
+    maxExtraCostJpy: 3,            // これ以内なら黙って払う
     maxRouteDeviationMin: 30,        // 動線からの逸脱の上限（徒歩＋待ちの分）
     autoChange: true,                // エージェントによる自動変更を許可する
     autoPay: true,                   // 上限内の追加料金を自動で払う
@@ -18,7 +18,7 @@ window.LM_POLICY = (function () {
     quietFromMin: 23 * 60,           // 静かにしてほしい時間帯のはじまり
     quietToMin: 7 * 60,              // 〃 おわり
     shareLocation: "during_pickup",  // never | during_pickup | always
-    explicitOverJpy: 50000,          // これ以上の荷物は必ず本人が承認する
+    explicitOverJpy: 500,          // これ以上の荷物は必ず本人が承認する
     undoWindowSec: 300               // 事後通知の取り消し猶予
   };
 
@@ -102,7 +102,7 @@ window.LM_POLICY = (function () {
         }
       ],
       confirm: [
-        { ja: "追加料金が ¥" + p.maxExtraCostJpy + " を超える", en: "More than ¥" + p.maxExtraCostJpy + " extra" },
+        { ja: "追加料金が $" + p.maxExtraCostJpy + " を超える", en: "More than $" + p.maxExtraCostJpy + " extra" },
         {
           ja: "帰り道から " + p.maxRouteDeviationMin + "分以上 外れる",
           en: "More than " + p.maxRouteDeviationMin + " minutes off your route"
@@ -115,8 +115,8 @@ window.LM_POLICY = (function () {
       ],
       explicit: [
         {
-          ja: "¥" + p.explicitOverJpy.toLocaleString() + " 以上の荷物",
-          en: "Parcels over ¥" + p.explicitOverJpy.toLocaleString()
+          ja: "$" + p.explicitOverJpy.toLocaleString() + " 以上の荷物",
+          en: "Parcels over $" + p.explicitOverJpy.toLocaleString()
         },
         { ja: "医薬品・本人確認が必要な荷物", en: "Medicine and ID-required parcels" },
         { ja: "他人への受取委任", en: "Delegating receipt to someone else" },
@@ -141,9 +141,9 @@ window.LM_POLICY = (function () {
 
     if (typeof raw.preferred === "string" && window.LM_DATA &&
         window.LM_DATA.pointById(raw.preferred)) p.preferred = raw.preferred;
-    p.maxExtraCostJpy = clampInt(raw.maxExtraCostJpy, 0, 5000, DEFAULTS.maxExtraCostJpy);
+    p.maxExtraCostJpy = clampInt(raw.maxExtraCostJpy, 0, 50, DEFAULTS.maxExtraCostJpy);
     p.maxRouteDeviationMin = clampInt(raw.maxRouteDeviationMin, 0, 120, DEFAULTS.maxRouteDeviationMin);
-    p.explicitOverJpy = clampInt(raw.explicitOverJpy, 0, 1000000, DEFAULTS.explicitOverJpy);
+    p.explicitOverJpy = clampInt(raw.explicitOverJpy, 0, 10000, DEFAULTS.explicitOverJpy);
     p.undoWindowSec = clampInt(raw.undoWindowSec, 30, 3600, DEFAULTS.undoWindowSec);
     p.quietFromMin = clampInt(raw.quietFromMin, 0, 1439, DEFAULTS.quietFromMin);
     p.quietToMin = clampInt(raw.quietToMin, 0, 1439, DEFAULTS.quietToMin);

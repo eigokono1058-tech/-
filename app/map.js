@@ -40,17 +40,19 @@ window.LM_MAP = (function () {
 
   /* ---------- 道路（描画とスナップの両方に使う） ---------- */
   var ROADS = [
-    { pts: [[0, 62], [360, 62]], major: true, name: { ja: "北通り", en: "Kita St." } },
-    { pts: [[0, 130], [360, 130]], major: true, name: { ja: "中央通り", en: "Chuo Ave." } },
-    { pts: [[0, 200], [360, 200]], major: true, name: { ja: "南通り", en: "Minami St." } },
-    { pts: [[20, 0], [20, 240]], major: true, name: { ja: "物流通り", en: "Depot Rd." } },
-    { pts: [[58, 0], [58, 240]], major: true, name: { ja: "オフィス前通り", en: "Office Rd." } },
-    { pts: [[150, 0], [150, 240]], major: true, name: { ja: "さくら通り", en: "Sakura St." } },
-    { pts: [[252, 0], [252, 240]], major: true, name: { ja: "コンビニ通り", en: "Konbini St." } },
-    { pts: [[318, 0], [318, 240]], major: true, name: { ja: "駅前通り", en: "Station Rd." } },
-    { pts: [[110, 0], [110, 240]], name: { ja: "西の路地", en: "West Lane" } },
-    { pts: [[200, 0], [200, 240]], name: { ja: "中の路地", en: "Mid Lane" } },
-    { pts: [[285, 0], [285, 240]], name: { ja: "東の路地", en: "East Lane" } },
+    { pts: [[-20, -46], [380, -46]], major: true, name: { ja: "ブッシュ通り", en: "Bush St" } },
+    { pts: [[-20, 62], [380, 62]], major: true, name: { ja: "パイン通り", en: "Pine St" } },
+    { pts: [[-20, 130], [380, 130]], major: true, name: { ja: "マーケット通り", en: "Market St" } },
+    { pts: [[-20, 200], [380, 200]], major: true, name: { ja: "ハワード通り", en: "Howard St" } },
+    { pts: [[-20, 282], [380, 282]], major: true, name: { ja: "ブライアント通り", en: "Bryant St" } },
+    { pts: [[20, -90], [20, 330]], major: true, name: { ja: "エンバカデロ", en: "Embarcadero" } },
+    { pts: [[58, -90], [58, 330]], major: true, name: { ja: "バッテリー通り", en: "Battery St" } },
+    { pts: [[150, -90], [150, 330]], major: true, name: { ja: "モンゴメリー通り", en: "Montgomery St" } },
+    { pts: [[252, -90], [252, 330]], major: true, name: { ja: "カーニー通り", en: "Kearny St" } },
+    { pts: [[318, -90], [318, 330]], major: true, name: { ja: "駅前通り", en: "Station Rd." } },
+    { pts: [[110, -90], [110, 330]], name: { ja: "西の路地", en: "West Lane" } },
+    { pts: [[200, -90], [200, 330]], name: { ja: "中の路地", en: "Mid Lane" } },
+    { pts: [[285, -90], [285, 330]], name: { ja: "東の路地", en: "East Lane" } },
     { pts: [[0, 96], [360, 96]], name: { ja: "けやき小路", en: "Keyaki Lane" } },
     { pts: [[0, 165], [360, 165]], name: { ja: "南小路", en: "Minami Lane" } }
   ];
@@ -245,7 +247,7 @@ window.LM_MAP = (function () {
   function mount(target, h) {
     svg = target;
     hooks = h || {};
-    svg.setAttribute("viewBox", "0 -40 " + W + " " + (H + 80));
+    svg.setAttribute("viewBox", "0 -95 " + W + " " + (H + 190));
     svg.innerHTML = "";
 
     var defs = el("defs");
@@ -261,10 +263,15 @@ window.LM_MAP = (function () {
     /* 街区（ブロック） */
     var blocks = el("g", { class: "m-blocks" });
     [
+      /* 画面の上下が空かないよう、表示領域の外まで街区を続ける */
+      [8, -76, 100, 40], [122, -76, 88, 40], [224, -76, 76, 40], [312, -76, 40, 40],
+      [8, -22, 60, 22], [82, -22, 128, 22], [224, -22, 128, 22],
       [8, 8, 100, 36], [122, 8, 88, 36], [224, 8, 60, 36], [298, 8, 54, 36],
       [8, 76, 36, 40], [58, 76, 76, 40], [148, 76, 62, 40], [224, 76, 128, 40],
       [8, 144, 92, 46], [116, 144, 100, 46], [232, 144, 120, 46],
-      [40, 212, 130, 22], [186, 212, 166, 22]
+      [40, 212, 130, 22], [186, 212, 166, 22],
+      [8, 250, 110, 34], [134, 250, 96, 34], [246, 250, 106, 34],
+      [8, 296, 150, 24], [174, 296, 178, 24]
     ].forEach(function (b) {
       blocks.appendChild(el("rect", { x: b[0], y: b[1], width: b[2], height: b[3], rx: 3, class: "m-block" }));
     });

@@ -44,7 +44,11 @@ window.LM_UI = (function () {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function yen(n) { return "¥" + Number(n).toLocaleString(); }
+  /* サンフランシスコの想定なのでドル。端数があるときだけ小数を出す */
+  function yen(n) {
+    var v = Number(n);
+    return "$" + (v % 1 === 0 ? v.toLocaleString() : v.toFixed(2));
+  }
   function parcel() { return D.parcelById(HERO); }
   function tracking() { return E.tracking(HERO); }
   function reduced() {
@@ -396,7 +400,7 @@ window.LM_UI = (function () {
       '<div class="done-check" aria-hidden="true">✓</div>' +
       "<b>" + esc(t(S.completed)) + "</b>" +
       '<span class="done-where">' + esc(t(pt.name)) + " · " + esc(destTime()) + "</span>" +
-      '<div class="facts">' + fact(t(S.fee) + " " + yen(480 + extra)) +
+      '<div class="facts">' + fact(t(S.fee) + " " + yen(4.8 + extra)) +
       (extra ? fact("+" + yen(extra)) : fact(t(S.free))) + "</div>" +
       '<p class="done-note">' + esc(t(S.chargedNote)) + "</p></div>" + againRow()
     );

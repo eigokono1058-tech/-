@@ -135,9 +135,9 @@ window.LM_AGENT = (function () {
     }
     if (parcel.value >= P.explicitOverJpy) {
       return level("explicit", "high_value",
-        { ja: "¥" + parcel.value.toLocaleString() + " の荷物（本人承認は ¥" +
+        { ja: "$" + parcel.value.toLocaleString() + " の荷物（本人承認は $" +
               P.explicitOverJpy.toLocaleString() + " 以上）",
-          en: "¥" + parcel.value.toLocaleString() + " parcel (you approve anything over ¥" +
+          en: "$" + parcel.value.toLocaleString() + " parcel (you approve anything over $" +
               P.explicitOverJpy.toLocaleString() + ")" }, checks);
     }
     if (chosen.pointId === "friend") {
@@ -148,8 +148,8 @@ window.LM_AGENT = (function () {
     /* --- 方針の外に出るもの --- */
     var costOk = chosen.extraCost <= P.maxExtraCostJpy;
     chk({ ja: "追加料金", en: "Extra cost" },
-        { ja: "¥" + chosen.extraCost + "（上限 ¥" + P.maxExtraCostJpy + "）",
-          en: "¥" + chosen.extraCost + " (limit ¥" + P.maxExtraCostJpy + ")" }, costOk);
+        { ja: "$" + chosen.extraCost + "（上限 $" + P.maxExtraCostJpy + "）",
+          en: "$" + chosen.extraCost + " (limit $" + P.maxExtraCostJpy + ")" }, costOk);
 
     var devMin = chosen.walkMin;
     var devOk = devMin <= P.maxRouteDeviationMin;
@@ -178,8 +178,8 @@ window.LM_AGENT = (function () {
 
     if (!costOk) {
       return level("confirm", "cost_over_policy",
-        { ja: "追加料金 ¥" + chosen.extraCost + " が方針の上限 ¥" + P.maxExtraCostJpy + " を超える",
-          en: "¥" + chosen.extraCost + " extra is above your ¥" + P.maxExtraCostJpy + " limit" }, checks);
+        { ja: "追加料金 $" + chosen.extraCost + " が方針の上限 $" + P.maxExtraCostJpy + " を超える",
+          en: "$" + chosen.extraCost + " extra is above your $" + P.maxExtraCostJpy + " limit" }, checks);
     }
     if (!devOk) {
       return level("confirm", "detour_over_policy",
@@ -329,8 +329,8 @@ window.LM_AGENT = (function () {
       ja += "追加料金はかかりません。";
       en += " It costs nothing extra.";
     } else {
-      ja += "追加料金は ¥" + d.to.extraCost + " です。";
-      en += " It costs ¥" + d.to.extraCost + " extra.";
+      ja += "追加料金は $" + d.to.extraCost + " です。";
+      en += " It costs $" + d.to.extraCost + " extra.";
     }
     if (d.to.walkMin > 0) {
       ja += "徒歩 +" + d.to.walkMin + "分。";

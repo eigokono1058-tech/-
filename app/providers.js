@@ -14,13 +14,13 @@ window.LM_PROVIDERS = (function () {
   /* ---------- 今日のユーザー ----------------------------------------------
      カレンダーと推定動線。MVPでは常時GPS追跡は持たない（意図的に持たない）。 */
   var USER = {
-    area: { ja: "品川エリア", en: "Shinagawa area" },
+    area: { ja: "SoMa（サンフランシスコ）", en: "SoMa, San Francisco" },
     calendar: [
       { fromMin: 9 * 60, toMin: 19 * 60 + 30, label: { ja: "勤務", en: "Work" } }
     ],
     route: [
       { ja: "オフィス", en: "Office" },
-      { ja: "品川駅", en: "Shinagawa Station" },
+      { ja: "モンゴメリー駅", en: "Montgomery St Station" },
       { ja: "自宅", en: "Home" }
     ],
     homeEtaMin: 22 * 60 + 40            // 22:40 帰宅見込み
@@ -43,9 +43,9 @@ window.LM_PROVIDERS = (function () {
     station_locker: { provider: "locker_net",   earliestMin: 20 * 60 + 25, extraCost: 0,   walkMin: 7,  detourKm: 0.3, onRoute: true },
     konbini:        { provider: "konbini_net",  earliestMin: 21 * 60 + 5,  extraCost: 0,   walkMin: 11, detourKm: 0.6, onRoute: true },
     office:         { provider: "office_desk",  earliestMin: 19 * 60 + 20, extraCost: 0,   walkMin: 2,  detourKm: 0,   onRoute: true },
-    moving_me:      { provider: "courier_bike", earliestMin: 20 * 60 + 5,  extraCost: 180, walkMin: 3,  detourKm: 2.8, onRoute: true },
+    moving_me:      { provider: "courier_bike", earliestMin: 20 * 60 + 5,  extraCost: 1.8, walkMin: 3,  detourKm: 2.8, onRoute: true },
     friend:         { provider: "carrier_a",    earliestMin: 21 * 60 + 40, extraCost: 0,   walkMin: 14, detourKm: 1.2, onRoute: false },
-    indoor:         { provider: "robot_ops",    earliestMin: 23 * 60 + 30, extraCost: 400, walkMin: 0,  detourKm: 0,   onRoute: true }
+    indoor:         { provider: "robot_ops",    earliestMin: 23 * 60 + 30, extraCost: 4, walkMin: 0,  detourKm: 0,   onRoute: true }
   };
 
   /* 例外シナリオ用の差し替え。
@@ -54,10 +54,10 @@ window.LM_PROVIDERS = (function () {
   var SURGE = {
     station_locker: { full: true },
     konbini: {
-      earliestMin: 20 * 60 + 10, extraCost: 450, walkMin: 25, detourKm: 1.8,
-      label: { ja: "コンビニ（1.8km先の店舗）", en: "Convenience store (1.8 km away)" }
+      earliestMin: 20 * 60 + 10, extraCost: 4.5, walkMin: 25, detourKm: 1.8,
+      label: { ja: "1.8km先のストア", en: "Corner store 1.8 km away" }
     },
-    moving_me: { extraCost: 620 }
+    moving_me: { extraCost: 6.2 }
   };
 
   var PROVIDER_NAMES = {
