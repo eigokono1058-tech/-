@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — ポリシーエンジン / 受取グラント / 受渡し状態機械
+   DELIVERY OS — ポリシーエンジン / 受取グラント / 受渡し状態機械
    Policy engine, receipt grants and the handover state machine.
    UIから独立。状態が変わるたびに subscribe() したコールバックを呼ぶ。
    ログは {ja, en} の両方を持つので、あとから言語を切り替えても読める。
@@ -172,7 +172,7 @@ window.LM_ENGINE = (function () {
       grant_id: rid("rdg"),
       version: "0.3-draft",
       issued_at: clock(state.simMinutes),
-      issuer: { subject: "user:me", via: "policy_engine@lastmeters", autonomy_level: "L" + state.autonomy },
+      issuer: { subject: "user:me", via: "policy_engine@deliveryos", autonomy_level: "L" + state.autonomy },
       grantee: {
         type: point.dynamic ? "delivery_vehicle" : "delivery_robot",
         id: "wm-tky-" + hash8(parcel.id + point.id).slice(0, 4),
@@ -203,7 +203,7 @@ window.LM_ENGINE = (function () {
         "locate:subject_after_handover"
       ].filter(function (x) { return scope.indexOf(x) === -1; }),
       revocable: true,
-      audit_sink: "chain_of_custody@lastmeters"
+      audit_sink: "chain_of_custody@deliveryos"
     };
   }
 

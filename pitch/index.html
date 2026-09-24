@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>LAST METERS — Receiving infrastructure for the age of AI agents</title>
+<title>DELIVERY OS — Receiving infrastructure for the age of AI agents</title>
 <meta name="description" content="AIエージェントが発注まで自動化しても、荷物は物理的に届く。受取を人の在宅からシステムの権限管理に置き換える構想。 / Even when AI agents order everything, goods still arrive physically. Moving receipt from a human being home to a system managing permissions.">
 <meta name="theme-color" content="#0a0c12">
-<meta property="og:title" content="LAST METERS — Receiving infrastructure for the age of AI agents">
+<meta property="og:title" content="DELIVERY OS — Receiving infrastructure for the age of AI agents">
 <meta property="og:description" content="Delivery can be automated. Receiving still assumes someone is home. This is about the last few meters.">
 <link rel="icon" href="../assets/favicon.svg">
 <link rel="stylesheet" href="../assets/css/site.css">
@@ -123,6 +123,7 @@
 <div class="aurora"></div>
 <div class="grid-lines"></div>
 <div class="top-controls">
+  <a class="home-btn" href="../" aria-label="Back to profile" title="Profile">⌂</a>
   <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
   <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </div>
@@ -131,7 +132,7 @@
 
   <!-- ===== HERO ===== -->
   <header class="hero-p">
-    <span class="codename">LAST METERS</span>
+    <span class="codename">DELIVERY OS</span>
     <div data-l="ja">
       <h1>AIが発注する時代、<br>ボトルネックは「受取」になる。</h1>
       <p class="lede">
@@ -539,7 +540,7 @@
         <video controls preload="metadata" playsinline>
           <source src="../assets/video/last-meters-en.mp4" type="video/mp4">
         </video>
-        <figcaption>AI-first Last Meters — English narration, 2:24</figcaption>
+        <figcaption>AI-first Dynamic Delivery Orchestration OS — English narration, 2:24</figcaption>
       </figure>
       <figure class="vid" style="margin:0">
         <video controls preload="metadata" playsinline>
@@ -553,85 +554,19 @@
     </div>
   </section>
 
-  <!-- ===== WHAT'S MISSING ===== -->
+  <!-- ===== 行き先 ===== -->
   <section>
-    <h2 class="sec">
-      <span data-l="ja">8. まだ検証できていないこと</span>
-      <span data-l="en">8. What is still unproven</span>
-    </h2>
-    <p class="sec-note">
-      <span data-l="ja">この構想の弱点を先に出す。ここが埋まらないと事業は成立しない。</span>
-      <span data-l="en">The weak points, up front. Without these, there is no business.</span>
-    </p>
-
-    <div class="gap-list">
-      <div class="gap-item"><span class="gn">P0</span><span>
-        <span data-l="ja"><b>再配達1件の実コストが分からない。</b>成功報酬の単価が決まらない。いま使っている「300円」は仮定にすぎない。<br><span class="faint">→ 配送事業者に「社内では何円で計算していますか」を直接聞く</span></span>
-        <span data-l="en"><b>Nobody has told me what one redelivery actually costs.</b> Without it there is no price for a success fee — the ¥300 in my model is a guess.<br><span class="faint">→ Ask carriers directly: "what number do you use internally?"</span></span>
-      </span></div>
-      <div class="gap-item"><span class="gn">P0</span><span>
-        <span data-l="ja"><b>受取先を動的に変えると再配達が何%減るのか分からない。</b>効果がなければ払う理由がない。<br><span class="faint">→ 既存の「受取場所変更」機能の利用率データを取る</span></span>
-        <span data-l="en"><b>I do not know how much dynamic destinations actually reduce redelivery.</b> No effect, no reason to pay.<br><span class="faint">→ Get usage data on carriers' existing "change pickup location" features</span></span>
-      </span></div>
-      <div class="gap-item"><span class="gn">P0</span><span>
-        <span data-l="ja"><b>削減効果の測り方に合意できるか分からない。</b>測れない改善には誰も払わない。</span>
-        <span data-l="en"><b>I do not know whether we can agree on how to measure the reduction.</b> Nobody pays for an improvement they cannot measure.</span>
-      </span></div>
-      <div class="gap-item"><span class="gn">P1</span><span>
-        <span data-l="ja"><b>「移動中の自分に届く」が魅力か気持ち悪いか分からない。</b>位置共有の拒否感が強ければ、目玉機能が折れる。<br><span class="faint">→ デモの検証タブで実測中</span></span>
-        <span data-l="en"><b>Delivery to a moving person may read as magic or as creepy.</b> Strong resistance to location sharing breaks the flagship feature.<br><span class="faint">→ Being measured right now in the demo's feedback tab</span></span>
-      </span></div>
-      <div class="gap-item"><span class="gn">P1</span><span>
-        <span data-l="ja"><b>法務が未整理。</b>医薬品の受取代替（薬機法）、位置情報の第三者提供（個情法）、受取委任の法的性質、AI自動発注の責任。</span>
-        <span data-l="en"><b>The legal work is not done.</b> Medicine handover under pharmaceutical law, sharing location with a carrier under privacy law, the legal nature of delegated receipt, and liability for AI-placed orders.</span>
-      </span></div>
-      <div class="gap-item"><span class="gn">P1</span><span>
-        <span data-l="ja"><b>キャリアが横断プラットフォームに乗るか分からない。</b>自社アプリでの囲い込みと利益相反する。</span>
-        <span data-l="en"><b>Carriers may refuse a cross-carrier platform.</b> It conflicts directly with locking customers into their own app.</span>
-      </span></div>
-    </div>
-
-    <p class="small muted" style="margin-top:16px">
-      <span data-l="ja">撤退条件も決めてある: 45日以内に「再配達1件のコスト」の実数が誰からも出てこなければ、課金根拠が存在しないということなので前提を組み替える。</span>
-      <span data-l="en">There is a kill criterion: if no one can give me a real cost per redelivery within 45 days, then no basis for charging exists and the premise gets rebuilt.</span>
-      <a href="../plan/">
-        <span data-l="ja">詳細は事業計画ドキュメントに分けて書いた。</span>
-        <span data-l="en">The detail lives in the business plan docs.</span>
-      </a>
-    </p>
-  </section>
-
-  <!-- ===== ASK ===== -->
-  <section>
-    <h2 class="sec"><span data-l="ja">9. 聞きたいこと</span><span data-l="en">9. What I want to ask you</span></h2>
-    <p class="sec-note">
-      <span data-l="ja">話しかけてもらえたら、この3つを聞きたいです。</span>
-      <span data-l="en">If we talk, these are the three things I want to know.</span>
-    </p>
-    <div class="stack">
-      <div class="card card-tight"><b>1.</b>
-        <span data-l="ja">荷物を受け取れなくて困ったこと、直近1ヶ月でありましたか？</span>
-        <span data-l="en">In the last month, did you miss a delivery and have it actually cost you something?</span>
-      </div>
-      <div class="card card-tight"><b>2.</b>
-        <span data-l="ja">冷凍食品を家以外で受け取るとしたら、どこなら許容できますか？</span>
-        <span data-l="en">If frozen food had to arrive somewhere other than your home, where would you accept?</span>
-      </div>
-      <div class="card card-tight"><b>3.</b>
-        <span data-l="ja">（物流・不動産の方へ）再配達1件のコスト、社内では何円で計算していますか？</span>
-        <span data-l="en">(If you work in logistics or real estate) what number does your company use for the cost of one redelivery?</span>
-      </div>
-    </div>
-    <div class="cta-row" style="margin-top:22px">
+    <div class="cta-row">
       <a class="btn btn-primary" href="../app/">
-        <span data-l="ja">デモを触って答える</span><span data-l="en">Try the demo and answer</span>
+        <span data-l="ja">デモを触る</span><span data-l="en">Try the demo</span>
       </a>
+      <a class="btn" href="../launchpad/">Launchpad</a>
       <a class="btn" href="../">
-        <span data-l="ja">プロフィール・連絡先</span><span data-l="en">Profile & contact</span></a>
+        <span data-l="ja">プロフィール・連絡先</span><span data-l="en">Profile &amp; contact</span></a>
     </div>
   </section>
 
-  <p class="footer">LAST METERS · draft v0.1 · 2026-09-22</p>
+  <p class="footer">DELIVERY OS · draft v0.1 · 2026-09-22</p>
 </main>
 
 <script src="../assets/js/theme.js"></script>

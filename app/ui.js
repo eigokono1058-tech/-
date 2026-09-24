@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — デモアプリ UI / demo app UI (ja + en)
+   DELIVERY OS — デモアプリ UI / demo app UI (ja + en)
    ========================================================================== */
 window.LM_UI = (function () {
   var D = window.LM_DATA;
@@ -606,9 +606,9 @@ window.LM_UI = (function () {
     thinking: [
       { ja: "予定と現在地を確認しています", en: "Reading your calendar and location", tool: "calendar.busy_windows" },
       { ja: "配送ネットワークを確認しています", en: "Checking the delivery network", tool: "locker.availability" },
-      { ja: "候補を評価しています", en: "Scoring the options", tool: "lastmeters.list_options" },
-      { ja: "方針と権限を照合しています", en: "Checking your policy and permissions", tool: "lastmeters.check_permission" },
-      { ja: "実行しています", en: "Executing", tool: "lastmeters.commit" }
+      { ja: "候補を評価しています", en: "Scoring the options", tool: "deliveryos.list_options" },
+      { ja: "方針と権限を照合しています", en: "Checking your policy and permissions", tool: "deliveryos.check_permission" },
+      { ja: "実行しています", en: "Executing", tool: "deliveryos.commit" }
     ],
     done: { ja: "変更しました", en: "Delivery updated" },
     noneTitle: { ja: "変更していません", en: "Nothing changed" },

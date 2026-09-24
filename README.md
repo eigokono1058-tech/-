@@ -8,7 +8,7 @@ Launchpad セッション: **Product design and UXR**（OpenAIのメンターと
 
 1. QRをかざすと開く **自己紹介サイト**（各SNS・実績サイトへワンタップ）
 2. Launchpadで見せる **ブリーフ**（提出した内容・いまの到達点・メンターに聞く4つの質問）
-3. プロジェクト **LAST METERS** — 日本の不在配送・再配達を減らす物流の受取体験
+3. プロジェクト **DELIVERY OS** — 日本の不在配送・再配達を減らす物流の受取体験
    （動くプロトタイプ・ピッチ・事業計画）
 
 すべて静的ファイル（HTML / CSS / 素のJavaScript）で、ビルド不要・外部ライブラリ依存なしで動く。
@@ -50,7 +50,7 @@ URLに `?lang=en` / `?lang=ja` / `?lang=both` を付ければ指定して開け�
 | 肩書き（日本語） | ITエンジニア / 営業 · 日立製作所 |
 | 肩書き（英語） | IT Engineer / Solution Sales · Hitachi, Ltd. |
 | 実績 | 日立の公開記事 |
-| プロジェクト | LAST METERS（物流の受取体験・動くプロトタイプあり） |
+| プロジェクト | DELIVERY OS（物流の受取体験・動くプロトタイプあり） |
 | GitHub / LinkedIn / Instagram / Facebook | 設定済み |
 | メール・携帯番号 | **公開ページには載せていません**（下記参照） |
 
@@ -180,7 +180,7 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   └── favicon.svg
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
 ├── launchpad/index.html        Launchpadセッション用ブリーフ（当日の中心資料）
-├── pitch/index.html            事業構想1ページ（LAST METERS）
+├── pitch/index.html            事業構想1ページ（DELIVERY OS）
 ├── plan/
 │   ├── index.html              ドキュメントビューア（言語で .md / .en.md を切り替え）
 │   ├── md.js                   最小限のMarkdownレンダラ
@@ -247,7 +247,7 @@ POSTが失敗してもlocalStorageへの保存は必ず行われるので、会�
 ## About this repository (English)
 
 A self-introduction site with a printable QR code, plus the business plan and a working prototype for
-**LAST METERS** — an idea about the receiving side of AI-driven commerce.
+**DELIVERY OS** — an idea about the receiving side of AI-driven commerce.
 
 Everything is static HTML, CSS and plain JavaScript: no build step, no external libraries.
 **Every page is bilingual (Japanese / English)** — the language is detected from the browser, can be

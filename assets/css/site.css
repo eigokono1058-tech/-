@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — shared design system
+   DELIVERY OS — shared design system
    Used by: / (profile hub), /qr/, /pitch/, /app/
    No external dependencies. System fonts only (fast, offline-safe at events).
    ========================================================================== */
@@ -320,3 +320,18 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
 }
+
+/* ホームへ戻るボタン。どのページからでも、いつでもプロフィールに戻れるようにする。
+   デモの奥に入ったときに戻り道が無いと詰まるため、画面に固定で出す。 */
+.home-btn {
+  width: 40px; height: 40px; padding: 0;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 16px; line-height: 1; text-decoration: none;
+  flex: 0 0 auto;
+}
+.home-btn:hover { text-decoration: none; border-color: var(--brand-2); color: var(--brand-2); }

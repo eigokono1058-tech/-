@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAST METERS — デモアプリ専用スタイル（site.css のトークンを継承）
+   DELIVERY OS — デモアプリ専用スタイル（site.css のトークンを継承）
    ========================================================================== */
 :root {
   --map-bg-1: #0d1220;
@@ -41,7 +41,10 @@ body { padding-bottom: 76px; }
   color: var(--brand-2);
   /* 自律レベルの表示が長い言語でも、ブランド名は1行に保つ */
   white-space: nowrap; flex: 0 0 auto;
+  /* 押すとプロフィールに戻る。デモの奥で詰まらないための出口 */
+  text-decoration: none;
 }
+.app-bar .brand:hover { text-decoration: none; color: var(--text); }
 .app-bar .clock {
   font-family: var(--mono); font-size: 13px; font-weight: 700;
   padding: 3px 9px; border-radius: 7px;
