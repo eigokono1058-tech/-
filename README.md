@@ -30,7 +30,6 @@ URLに `?lang=en` / `?lang=ja` / `?lang=both` を付ければ指定して開け�
 |---|---|---|
 | プロフィール（QRの着地先） | [`/`](./index.html) | 名前・実績・各SNSへワンタップで飛ぶハブ |
 | **当日メンターにお伺いしたいこと** | [`/launchpad/`](./launchpad/) | **質問だけ。メインの問いを大きく、そのあとに3つ。説明はピッチ側に置く** |
-| QRキット | [`/qr/`](./qr/) | QRのプレビュー・印刷（名刺91×55mm / A6ポスター）・ダウンロード |
 | ピッチ（事業構想1ページ） | [`/pitch/`](./pitch/) | 課題と、自動化が「到着」までしか進まないこと |
 | デモ（動くプロトタイプ） | [`/app/`](./app/) | 受取先の動的変更・方針にもとづく自動判断・受渡し記録・ツール呼び出しの記録 |
 
@@ -76,7 +75,7 @@ python3 tools/make_avatar.py ~/Desktop/group.jpg --crop 0.51,0.13,0.20,0.45 --pr
 
   できたら `avatar: "assets/img/me.jpg"` を設定する。
   **集合写真をそのまま公開ページに載せないこと**（写っている他の人の同意がない）
-- 名前や肩書きを変えたら、名刺に印刷される文字も変わるので `python3 tools/gen_qr.py` を再実行する
+- URLを変えたら `python3 tools/gen_qr.py` を再実行してQRを作り直す
 
 ### 2. 公開する（GitHub Pages）
 
@@ -101,25 +100,21 @@ python3 tools/gen_qr.py                            # profile-config.js の値を
 python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する場合
 ```
 
-`assets/qr/` の6ファイルが同時に更新される。
+`assets/qr/` が更新される。いま使っているのは2つ。
 
 | ファイル | 用途 |
 |---|---|
-| `profile-qr.svg` | サイト埋め込み用（ベクタ） |
-| `profile-qr.png` | スライド貼り付け用（1080×1080px） |
-| `profile-qr-card.svg` / `-en.svg` | 名刺サイズ（91×55mm）の印刷用カード（日本語 / 英語） |
-| `profile-qr-poster.svg` / `-en.svg` | A6（105×148mm）の卓上ポスター（日本語 / 英語） |
+| `profile-qr.svg` | プロフィールの「QRを表示」が読む（ベクタ） |
+| `profile-qr.png` | スライドに貼る用（1080×1080px） |
 
 誤り訂正レベルは **H（30%）** 固定、クワイエットゾーンは規格どおり4モジュール確保。
-印刷が汚れても暗い会場でも読める。QRが読む先のURLは日英で同じ（サイト側が言語を自動判定する）ので、
-名刺は**日本語版と英語版を両方刷って相手に合わせて渡す**のが楽。
+印刷が汚れても暗い会場でも読める。
 
-### 4. 印刷する
+`gen_qr.py` は名刺サイズ（91×55mm）とA6ポスターの印刷用SVGも日英で作れるが、
+QRキットのページごと削除したので、いまはリポジトリに置いていない。
+刷りたくなったら `tools/gen_qr.py` を実行すれば `assets/qr/` に出てくる。
 
-[`/qr/`](./qr/) を開いて「印刷する」ボタン。名刺・ポスターそれぞれ等倍で印刷される
-（ブラウザの印刷設定で「倍率100%」「余白: 既定」にすること）。
-
-### 5. 当日
+### 4. 当日
 
 - QRの着地先は**プロフィール**。そこから1タップでデモとピッチに飛べる
 - 英語で話す相手には、渡す前に**右上のボタンで EN にしてから**渡す
@@ -167,10 +162,9 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── js/icons.js             インラインSVGアイコン
 │   ├── js/theme.js             配色切り替え
 │   ├── js/i18n.js              言語切り替え（EN / 日本語 / 併記の3モード・?lang=）
-│   ├── qr/                     生成済みQR素材（6種：日英 × 名刺/ポスター + 汎用2種）
+│   ├── qr/                     QR素材（profile-qr.svg はプロフィールの「QRを表示」が使う）
 │   ├── video/                  コンセプト動画（1本。mp4 と表紙のみ）
 │   └── favicon.svg
-├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
 ├── launchpad/index.html        当日メンターにお伺いしたいこと（質問だけ）
 ├── pitch/index.html            事業構想1ページ（DELIVERY OS）
 ├── app/
@@ -241,7 +235,6 @@ switched with the button in the top right, and can be forced with `?lang=en` or 
 | Page | Path | What it is |
 |---|---|---|
 | Profile (where the QR lands) | [`/`](./index.html) | One tap to each social profile and to the project |
-| QR kit | [`/qr/`](./qr/) | Preview, download and print (business card 91×55mm, A6 poster) in both languages |
 | Pitch | [`/pitch/`](./pitch/) | The problem in numbers, the solution, who pays, what is unproven |
 | Demo | [`/app/`](./app/) | Change the destination mid-delivery, watch a policy engine rule on it, issue a scoped receipt grant, break it on purpose |
 
