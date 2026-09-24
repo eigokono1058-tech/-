@@ -57,7 +57,15 @@
     <!-- 地図を指で動かしたときだけ出る -->
     <button class="mapctl is-re" id="reBtn" type="button" hidden></button>
   </div>
-  <div class="sheet2" id="sheet2"></div>
+  <div class="sheet2" id="sheet2">
+    <!-- つまんで下げると地図だけになる。上げると戻る。 -->
+    <button class="grip-bar" id="gripBar" type="button" aria-expanded="true">
+      <span class="grip" aria-hidden="true"></span>
+      <span class="sr-only" data-l="en">Hide or show the panel</span>
+      <span class="sr-only" data-l="ja">パネルを下げる／戻す</span>
+    </button>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
 </section>
 
 <!-- ================= 記録 ================= -->

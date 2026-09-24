@@ -116,8 +116,7 @@ window.LM_MAP = (function () {
   function walkTo(x, y, pointId) {
     var p = personPos();
     if (heading && heading.pointId === pointId) return;
-    var a = SF.toGrid([p.x, p.y]), b = SF.toGrid([x, y]);
-    var pts = [[p.x, p.y], SF.grid(b.along, a.cross), [x, y]];
+    var pts = SF.route([p.x, p.y], [x, y]);
     heading = {
       pts: pts, t: 0, pointId: pointId, arrived: false,
       dur: Math.max(1.5, walkDur(polyLength(pts).total))
@@ -130,12 +129,25 @@ window.LM_MAP = (function () {
 
   /* ---------- 受取ピン（いまは画面に出していないが、
                 「いまいる場所まで配達」の所要時間の計算に使う） ---------- */
+  /* 通りに沿った経路を出すのは毎コマやるには重いので、行き先ごとに覚えておく。
+     16m 刻みで丸めるので、人が歩いても引き直しは時々で済む。 */
+  var routeCache = {};
+  function vanRouteTo(xy) {
+    var k = Math.round(xy[0] / 4) + "," + Math.round(xy[1] / 4);
+    if (!routeCache[k]) {
+      var keys = Object.keys(routeCache);
+      if (keys.length > 60) routeCache = {};
+      routeCache[k] = SF.vanRoute(xy);
+    }
+    return routeCache[k];
+  }
+
   function etaForRoute(route) {
     return Math.max(4, Math.round(polyLength(route).total / 22) + 2);
   }
   function writePin(next) {
     var p = personPos();
-    next.etaMin = etaForRoute(SF.vanRoute([next.x, next.y]));
+    next.etaMin = etaForRoute(vanRouteTo([next.x, next.y]));
     next.walkM = Math.round(dist(p.x, p.y, next.x, next.y) * SF.UNIT_M / 10) * 10;
     D.setPin(next);
     if (hooks.onPin) hooks.onPin(D.PIN);
@@ -218,11 +230,16 @@ window.LM_MAP = (function () {
     if (scale > MAX_SCALE) scale = MAX_SCALE;
     var w = r.width / scale, h = r.height / scale;
 
-    /* 指で動かしていない間だけ、シートで隠れるぶんを上にずらしておく */
+    /* 指で動かしていない間だけ、シートで隠れるぶんを上にずらしておく。
+       シートは下げられるので、隠れている高さは「実際に地図に被っている分」で測る。 */
     var shift = 0;
     if (!view.moved) {
       var sheet = document.getElementById("sheet2");
-      var hidden = sheet ? Math.min(sheet.getBoundingClientRect().height, r.height * 0.7) : 0;
+      var hidden = 0;
+      if (sheet) {
+        var sr = sheet.getBoundingClientRect();
+        hidden = Math.max(0, Math.min(r.bottom - sr.top, r.height * 0.7));
+      }
       shift = (hidden / 2) / scale;
     }
     base = { x: F.x + (F.w - w) / 2, y: F.y + (F.h - h) / 2 + shift, w: w, h: h };
@@ -618,7 +635,7 @@ window.LM_MAP = (function () {
     /* 「いまいる場所まで配達」は、歩いている自分についてくる */
     if (D.PIN.mode === "follow" && dist(D.PIN.x, D.PIN.y, p.x, p.y) > 6) {
       D.PIN.x = p.x; D.PIN.y = p.y;
-      D.PIN.etaMin = etaForRoute(SF.vanRoute([p.x, p.y]));
+      D.PIN.etaMin = etaForRoute(vanRouteTo([p.x, p.y]));
       D.pointById("moving_me").eta_min = D.PIN.etaMin;
       if (hooks.onPin) hooks.onPin(D.PIN);
     } else if (D.PIN.kind === "street") {
@@ -647,7 +664,7 @@ window.LM_MAP = (function () {
       var parcel = D.parcelById(id);
       var color = VEHICLE_COLORS[idx % VEHICLE_COLORS.length];
       var pt = D.pointById(t.pointId);
-      var route = SF.vanRoute(pt.dynamic ? [D.PIN.x, D.PIN.y] : pt.xy);
+      var route = vanRouteTo(pt.dynamic ? [D.PIN.x, D.PIN.y] : pt.xy);
       var active = t.status === "in_transit" || t.status === "arrived" ||
         t.status === "handing_over" || t.status === "blocked";
 

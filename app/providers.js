@@ -42,7 +42,9 @@ window.LM_PROVIDERS = (function () {
     home_locker:    { provider: "building_ops", earliestMin: 23 * 60 + 10, extraCost: 0,   walkMin: 1,  detourKm: 0,   onRoute: true },
     station_locker: { provider: "locker_net",   earliestMin: 20 * 60 + 25, extraCost: 0,   walkMin: 7,  detourKm: 0.3, onRoute: true },
     konbini:        { provider: "konbini_net",  earliestMin: 21 * 60 + 5,  extraCost: 0,   walkMin: 11, detourKm: 0.6, onRoute: true },
-    office:         { provider: "office_desk",  earliestMin: 19 * 60 + 20, extraCost: 0,   walkMin: 2,  detourKm: 0,   onRoute: true },
+    /* 受付は18:00で閉まる。いまは18:02なので、次に預かれるのは翌朝。
+       断るのではなく「ずっと先」として出す（デモを止めないため）。 */
+    office:         { provider: "office_desk",  earliestMin: 33 * 60 + 30, extraCost: 0,   walkMin: 2,  detourKm: 0,   onRoute: false },
     moving_me:      { provider: "courier_bike", earliestMin: 20 * 60 + 5,  extraCost: 1.8, walkMin: 3,  detourKm: 2.8, onRoute: true },
     friend:         { provider: "carrier_a",    earliestMin: 21 * 60 + 40, extraCost: 0,   walkMin: 14, detourKm: 1.2, onRoute: false },
     indoor:         { provider: "robot_ops",    earliestMin: 23 * 60 + 30, extraCost: 4, walkMin: 0,  detourKm: 0,   onRoute: true }
