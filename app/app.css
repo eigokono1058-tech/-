@@ -64,12 +64,18 @@ body.is-app .grid-lines { display: none; }
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
+/* 家の形だけだと何のボタンか伝わらないので、下に HOME と文字を置く */
 .ab-home {
-  width: 30px; height: 30px; flex: 0 0 30px;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  color: var(--text-dim); text-decoration: none; font-size: 15px;
+  width: 40px; flex: 0 0 40px; padding: 4px 0 3px;
+  display: grid; justify-items: center; align-content: center; gap: 2px;
+  border-radius: 10px;
+  color: var(--text-dim); text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease;
+}
+.ab-home svg { width: 15px; height: 15px; display: block; }
+.ab-home span {
+  font-family: var(--mono); font-size: 7.5px; font-weight: 700;
+  letter-spacing: 0.1em; line-height: 1;
 }
 .ab-home:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
 .ab-title {
