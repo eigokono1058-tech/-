@@ -101,6 +101,17 @@ window.LM_UI = (function () {
     },
     failed: { ja: "変更できませんでした", en: "The change did not go through" },
     rolledBack: { ja: "進んだ手続きは戻しました", en: "Everything already done was rolled back" },
+    meetHead: { ja: "何時に落ち合いますか", en: "When should it meet you" },
+    asap: { ja: "最短", en: "Soonest" },
+    meetAt: { ja: "に落ち合う", en: "rendezvous" },
+    youEta: { ja: "あなた", en: "You" },
+    vanEta: { ja: "配送車", en: "The van" },
+    matching: {
+      ja: "あなたの現在地に合わせて、配送車が速さを調整しています",
+      en: "The van is pacing itself to your live position"
+    },
+    retimed: { ja: "合わせ直しました", en: "Re-timed to match you" },
+    detour: { ja: "寄り道する（+15分）", en: "Take a detour (+15 min)" },
     ff: { ja: "早送り", en: "Fast-forward" },
     ffOn: { ja: "早送り中 ×6", en: "Fast-forward ×6" },
     recenter: { ja: "元の位置", en: "Recentre" },
@@ -171,6 +182,7 @@ window.LM_UI = (function () {
 
   function destTime() {
     var tr = tracking();
+    if (tr.meetAtMin != null) return POL.hhmm(Math.round(tr.meetAtMin));
     var opts = PR.options(parcel());
     for (var i = 0; i < opts.length; i++) {
       if (opts[i].pointId === tr.pointId) return POL.hhmm(opts[i].receivableAtMin);
@@ -350,9 +362,20 @@ window.LM_UI = (function () {
 
   function onPickPoint(pointId) {
     if (state !== ST.picking && state !== ST.confirming) return;
+    if (pickedId !== pointId) meetMin = null;
     pickedId = pointId;
     state = ST.confirming;
     render();
+  }
+
+  /* 落ち合う時刻の候補。最短と、その先の切りのいい時刻。 */
+  function meetChoices(opt) {
+    if (!opt) return [];
+    var first = Math.round(opt.receivableAtMin);
+    var out = [{ min: first, label: t(S.asap) }];
+    var step = Math.ceil((first + 10) / 15) * 15;
+    for (var i = 0; i < 2; i++) out.push({ min: step + i * 15, label: "" });
+    return out;
   }
 
   function renderConfirming() {
@@ -362,6 +385,8 @@ window.LM_UI = (function () {
     var ok = ev.verdict !== "deny";
     var why = "";
     if (!ok) ev.findings.forEach(function (f) { if (!why && f.verdict === "deny") why = t(f.reason); });
+    var choices = ok ? meetChoices(opt) : [];
+    if (ok && meetMin == null) meetMin = choices[0].min;
 
     sheet(
       '<div class="pick-card' + (ok ? "" : " is-no") + '">' +
@@ -372,7 +397,15 @@ window.LM_UI = (function () {
           fact(t(S.walk) + " " + opt.walkMin + (ja() ? "分" : "m")) + "</div>"
         : '<p class="pick-no">' + esc(t(S.blocked)) + (why ? " — " + esc(why) : "") + "</p>") +
       "</div>" +
-      (ok ? "" : altList(pickedId)) +
+      (ok
+        ? '<p class="alts-h">' + esc(t(S.meetHead)) + "</p>" +
+          '<div class="times">' + choices.map(function (c) {
+            return '<button class="tchip' + (c.min === meetMin ? " is-on" : "") +
+              '" type="button" data-min="' + c.min + '">' +
+              "<b>" + esc(POL.hhmm(c.min)) + "</b>" +
+              (c.label ? "<span>" + esc(c.label) + "</span>" : "") + "</button>";
+          }).join("") + "</div>"
+        : altList(pickedId)) +
       '<div class="row row-wrap sheet-cta">' +
       '<button class="btn btn-ghost" id="mBack" type="button">' + esc(t(S.cancel)) + "</button>" +
       (ok ? '<button class="btn btn-primary grow" id="mGo" type="button">' +
@@ -382,6 +415,12 @@ window.LM_UI = (function () {
     $("mBack").addEventListener("click", backToIdle);
     var go = $("mGo");
     if (go) go.addEventListener("click", function () { commit(pickedId); });
+    Array.prototype.forEach.call(document.querySelectorAll(".tchip"), function (b) {
+      b.addEventListener("click", function () {
+        meetMin = Number(b.getAttribute("data-min"));
+        render();
+      });
+    });
     if (!ok) bindAlts();
   }
 
@@ -389,6 +428,9 @@ window.LM_UI = (function () {
     state = ST.idle;
     pickedId = null;
     decision = null;
+    meetMin = null; agreedMin = null; retimed = false;
+    E.clearMeetAt(HERO);
+    M.clearDivert(HERO);
     setFastForward(false);
     M.setPickable(false);
     render();
@@ -399,6 +441,17 @@ window.LM_UI = (function () {
     if (ev.verdict === "deny") return;
     M.setPickable(false);
     headTo(pointId);
+    var pt = D.pointById(pointId);
+    /* 道の上に決めたときは、配送車をいまいる場所から向け直す（寄り道） */
+    if (pt && pt.dynamic && D.PIN.kind === "street" && M.divert(HERO, [D.PIN.x, D.PIN.y])) {
+      E.resetProgress(HERO);
+    } else {
+      M.clearDivert(HERO);
+    }
+    if (meetMin != null) {
+      agreedMin = meetMin;
+      E.setMeetAt(HERO, meetMin, true);
+    }
     state = ST.enroute;
     render();
   }
@@ -551,15 +604,59 @@ window.LM_UI = (function () {
   function restart() {
     E.reset(); A.reset(); PR.reset(); M.resetWalk();
     state = ST.idle; decision = null; pickedId = null;
+    meetMin = null; agreedMin = null; retimed = false;
     setFastForward(false);
     M.setPickable(false);
     M.setFocus(HERO);
     render();
   }
 
+  /* ---------- 落ち合う ----------------------------------------------------
+     受取人はGPSで動いている。配送車はその到着に合わせて速さを変える。
+     少し遅れても、ちょうど落ち合えるようにするのがこの画面。 */
+  var meetMin = null;      // 選んだ時刻
+  var agreedMin = null;    // いま合わせている時刻（遅れたら動く）
+  var retimed = false;
+
+  function nowMin() { return Math.floor(E.state.simMinutes); }
+  function youArriveMin() { return Math.round(nowMin() + M.walkMinutesLeft()); }
+
+  /** 受取人の到着が遅れたら、落ち合う時刻をそちらへ動かす */
+  function syncMeet() {
+    if (state !== ST.enroute || agreedMin == null) return;
+    var you = youArriveMin();
+    var want = Math.max(agreedMin, you);
+    if (Math.abs(want - (tracking().meetAtMin || 0)) >= 1) {
+      if (want > agreedMin + 0.5) retimed = true;
+      E.setMeetAt(HERO, want);
+      agreedMin = want;
+      if (state === ST.enroute) renderEnroute();
+    }
+  }
+
   function renderEnroute() {
     var pt = D.pointById(tracking().pointId);
-    sheet(resCard("ok", "→", t(S.waiting), t(pt.name) + " · " + destTime()));
+    var meet = tracking().meetAtMin;
+    if (meet == null) {
+      sheet(resCard("ok", "→", t(S.waiting), t(pt.name) + " · " + destTime()));
+      return;
+    }
+    var you = youArriveMin();
+    sheet(
+      resCard(retimed ? "ask" : "ok", "→",
+        POL.hhmm(meet) + " " + t(S.meetAt), t(pt.name)) +
+      '<div class="etas">' +
+      '<div class="eta"><span>' + esc(t(S.youEta)) + "</span><b>" + esc(POL.hhmm(you)) + "</b></div>" +
+      '<div class="eta"><span>' + esc(t(S.vanEta)) + "</span><b>" + esc(POL.hhmm(meet)) + "</b></div>" +
+      "</div>" +
+      '<p class="meet-note">' + esc(t(retimed ? S.retimed : S.matching)) + "</p>" +
+      '<div class="row sheet-cta"><button class="btn btn-sm btn-ghost grow" id="mDetour" type="button">' +
+      esc(t(S.detour)) + "</button></div>"
+    );
+    var d = $("mDetour");
+    if (d) d.addEventListener("click", function () {
+      if (M.delayWalk(15)) syncMeet();
+    });
   }
 
   function renderDone() {
@@ -713,6 +810,7 @@ window.LM_UI = (function () {
       var c = $("clock");
       if (c) c.textContent = E.now().slice(0, 5);
       tickUndo();
+      syncMeet();
       requestAnimationFrame(frame);
     })(last);
   }

@@ -16,6 +16,7 @@ window.LM_MAP = (function () {
   var SF = window.LM_SF;
 
   var MAX_SCALE = 1.9;     // これ以上は寄らない（大きな画面で拡大しすぎないため）
+  var TAP_SLOP = 14;       // これ以内の指の動きは「タップ」とみなす（px）
 
   function T(v) { return window.LM_I18N ? window.LM_I18N.t(v) : (v && (v.ja || v)) || ""; }
 
@@ -26,6 +27,8 @@ window.LM_MAP = (function () {
   var pickable = false;
   var picked = null;
   var focusParcel = null;
+  var vanPos = null;              // いま配送車がいる場所
+  var routeOverride = {};         // 途中から引き直した道（寄り道）
 
   /* ---------- 幾何 ---------- */
   function polyLength(pts) {
@@ -125,7 +128,29 @@ window.LM_MAP = (function () {
   function stopWalking() { heading = null; }
   function hasArrived() { return !!(heading && heading.arrived); }
   function headingTo() { return heading ? heading.pointId : null; }
-  function resetWalk() { walkT = 0; walkDir = 1; dwell = 0; heading = null; }
+
+  /** 受取人があと何分で着くか（シミュレーション上の分）。
+      配送車はこの数字を見て、落ち合う時刻を合わせ直す。 */
+  function walkMinutesLeft() {
+    if (!heading) return 0;
+    if (heading.arrived) return 0;
+    var simPerSec = (window.LM_ENGINE && LM_ENGINE.state.speed) || 30;
+    return (1 - heading.t) * heading.dur * simPerSec / 60;
+  }
+
+  /** 寄り道して遅れる。歩く道のりはそのままに、かかる時間だけ伸ばす。 */
+  function delayWalk(simMinutes) {
+    if (!heading || heading.arrived) return false;
+    var simPerSec = (window.LM_ENGINE && LM_ENGINE.state.speed) || 30;
+    var addSec = simMinutes * 60 / simPerSec;
+    var remain = (1 - heading.t) * heading.dur;
+    var next = remain + addSec;
+    /* t の進み方を変えずに残り時間だけ伸ばすため、dur と t を引き直す */
+    heading.dur = heading.dur * (1 - heading.t) === 0 ? heading.dur : heading.t * heading.dur + next;
+    heading.t = heading.dur === 0 ? 0 : (heading.dur - next) / heading.dur;
+    return true;
+  }
+  function resetWalk() { walkT = 0; walkDir = 1; dwell = 0; heading = null; routeOverride = {}; }
 
   /* ---------- 受取ピン（いまは画面に出していないが、
                 「いまいる場所まで配達」の所要時間の計算に使う） ---------- */
@@ -142,12 +167,17 @@ window.LM_MAP = (function () {
     return routeCache[k];
   }
 
+  /* 市街地の配送車は平均15km/hほど（＝1分に250m、単位では62.5）。
+     最後に停めて渡す2分を足す。 */
   function etaForRoute(route) {
-    return Math.max(4, Math.round(polyLength(route).total / 22) + 2);
+    return Math.max(3, Math.round(polyLength(route).total / 62.5) + 2);
   }
   function writePin(next) {
     var p = personPos();
-    next.etaMin = etaForRoute(vanRouteTo([next.x, next.y]));
+    /* 配送車はもう荷物を積んで走っている。拠点からではなく、
+       いまいる場所からそのピンまで何分か、で出す。 */
+    var from = vanPos || SF.DEPOT;
+    next.etaMin = etaForRoute(SF.route(from, [next.x, next.y]));
     next.walkM = Math.round(dist(p.x, p.y, next.x, next.y) * SF.UNIT_M / 10) * 10;
     D.setPin(next);
     if (hooks.onPin) hooks.onPin(D.PIN);
@@ -190,6 +220,14 @@ window.LM_MAP = (function () {
       g.classList.toggle("is-picked", picked === g.getAttribute("data-id"));
     });
   }
+  /** 配送中の車を、いまいる場所から新しい目的地へ向け直す */
+  function divert(parcelId, to) {
+    if (!vanPos) return false;
+    routeOverride[parcelId] = SF.route(vanPos, to);
+    return true;
+  }
+  function clearDivert(parcelId) { delete routeOverride[parcelId]; }
+
   /** 一覧の候補から選んだときも、地図の上で同じ場所が光るようにする */
   function pick(pointId) {
     picked = pointId || null;
@@ -321,8 +359,11 @@ window.LM_MAP = (function () {
 
       if (k.length === 1) {
         if (down) {
-          down.moved += Math.abs(dx) + Math.abs(dy);
-          if (down.moved > 8) panning = true;
+          /* 指がどれだけ「離れたか」で見る。途中の細かい揺れを足し上げると、
+             実機では軽く触っただけでも動かした扱いになってしまう。 */
+          down.moved = Math.max(down.moved,
+            Math.hypot(e.clientX - down.x, e.clientY - down.y));
+          if (down.moved > TAP_SLOP) panning = true;
         }
         if (!panning) return;
         e.preventDefault();
@@ -337,7 +378,7 @@ window.LM_MAP = (function () {
       var wasDown = down;
       delete pts[e.pointerId];
       if (!ids().length) pinch = null;
-      if (wasDown && !panning && wasDown.moved <= 8 && Date.now() - wasDown.t < 700) {
+      if (wasDown && !panning && wasDown.moved <= TAP_SLOP && Date.now() - wasDown.t < 900) {
         var p = clientToSvg(e.clientX, e.clientY);
         tapAt(p.x, p.y);
       }
@@ -664,9 +705,9 @@ window.LM_MAP = (function () {
       var parcel = D.parcelById(id);
       var color = VEHICLE_COLORS[idx % VEHICLE_COLORS.length];
       var pt = D.pointById(t.pointId);
-      var route = vanRouteTo(pt.dynamic ? [D.PIN.x, D.PIN.y] : pt.xy);
-      var active = t.status === "in_transit" || t.status === "arrived" ||
-        t.status === "handing_over" || t.status === "blocked";
+      var route = routeOverride[id] || vanRouteTo(pt.dynamic ? [D.PIN.x, D.PIN.y] : pt.xy);
+      var active = t.status === "planning" || t.status === "in_transit" ||
+        t.status === "arrived" || t.status === "handing_over" || t.status === "blocked";
 
       var v = vehicleEls[id];
       if (!v) {
@@ -691,6 +732,7 @@ window.LM_MAP = (function () {
       }));
 
       var pos = pointAt(route, t.progress);
+      if (id === focusParcel) vanPos = [pos.x, pos.y];
       v.setAttribute("transform", "translate(" + r2(pos.x) + " " + r2(pos.y) + ")");
       v.setAttribute("class", "m-van" + (isFocus ? " is-focus" : "") +
         (t.status === "blocked" ? " is-blocked" : ""));
@@ -717,6 +759,11 @@ window.LM_MAP = (function () {
     stopWalking: stopWalking,
     hasArrived: hasArrived,
     headingTo: headingTo,
+    walkMinutesLeft: walkMinutesLeft,
+    delayWalk: delayWalk,
+    divert: divert,
+    clearDivert: clearDivert,
+    vanAt: function () { return vanPos; },
     movePinTo: movePinTo,
     setPinToPoint: setPinToPoint,
     followMe: followMe,
