@@ -168,7 +168,7 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── js/theme.js             配色切り替え
 │   ├── js/i18n.js              言語切り替え（EN / 日本語 / 併記の3モード・?lang=）
 │   ├── qr/                     生成済みQR素材（6種：日英 × 名刺/ポスター + 汎用2種）
-│   ├── video/                  コンセプト動画2本
+│   ├── video/                  コンセプト動画（1本。mp4 / webm / 字幕 / 表紙）
 │   └── favicon.svg
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
 ├── launchpad/index.html        Launchpadセッション用ブリーフ（当日の中心資料）
@@ -187,8 +187,10 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   └── ui.js                   画面描画とインタラクション
 ├── tools/
 │   ├── video/
-│   │   ├── delivery-os-film.html  動画の元（window.seek(秒)で任意の時刻の絵になる）
-│   │   └── render.cjs             1コマずつ撮ってmp4にまとめる
+│   │   ├── film.html              動画の元（window.seek(秒)で任意の時刻の絵になる）
+│   │   ├── narrate.py             Kokoroで読み上げ、実際の長さを .spans.json に書く
+│   │   ├── render.cjs             1コマずつ撮ってmp4/webmにまとめる（字幕も同時に）
+│   │   └── narration.md           読み上げる文の写し（声を差し替えるとき用）
 │   ├── gen_qr.py               QR生成ツール（segnoを使用）
 │   └── make_avatar.py          顔写真をサイト用アバターに整える（Pillowを使用）
 └── demos/nordic-interior/      以前アップロードされていた3Dデモ（退避）
@@ -215,8 +217,10 @@ python3 -m http.server 8000
 ## ⚠️ 注意
 
 - デモは**架空データによる概念検証用シミュレーション**で、実在の配送事業者・車両とは接続していない
-- 動画2本は構想を映像化したもの（このリポジトリを作った環境では再生できるコーデックがなかったため、
-  内容を確認せずファイル名とメタデータのみでキャプションを付けている。文言は必要に応じて直すこと）
+- 動画は1本だけ。プロフィールの冒頭に置いている。元は `tools/video/film.html` で、
+  絵・字幕・読み上げる文はすべてそのファイルの `CUES` 1箇所から作られる
+- 動画に出る数字の出どころは `tools/video/film.html` の先頭コメントに書いてある
+  （年50億個 / 再配達8.3% / ドライバー6万人分。いずれも国土交通省）
 - 英語版はすべて書き下ろし（機械翻訳の直訳ではない）。固有名詞や社名を入れるときは英語側も直すこと
 
 ---

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """動画のナレーションを作る。
 
-    python3 tools/video/narrate.py tools/video/film-75s.html /tmp/nar.wav [声] [速さ]
+    python3 tools/video/narrate.py tools/video/film.html /tmp/nar.wav [声] [速さ]
 
 元のページの window.CUES（字幕）をそのまま読み上げて、字幕と同じ時刻に置く。
 だから音と字幕は必ず合う。
