@@ -815,32 +815,18 @@ window.LM_MAP = (function () {
 
       var v = vehicleEls[id];
       if (!v) {
-        /* 自動運転タクシーが荷物を運んでいる形。横から見た車体に、
-           屋根のセンサー（自動運転の目印）と、載せた荷物を描く。 */
+        /* 受取地点のマーカーと同じ形にそろえる（淡い円 + 細い輪 + 絵文字）。
+           配送車だけ別の形にすると地図の上で浮く。輪の色で荷物を見分ける。 */
         v = el("g", { class: "m-van", "data-id": id });
-        v.appendChild(el("circle", { cx: 0, cy: 0, r: 13, class: "m-van-halo" }));
-        /* 屋根に載せた荷物 */
-        v.appendChild(el("rect", { x: -4.6, y: -10.6, width: 9.2, height: 3.4, rx: 0.9, class: "m-van-load" }));
-        /* 屋根のセンサー */
-        v.appendChild(el("rect", { x: -1.3, y: -12.4, width: 2.6, height: 1.9, rx: 0.9, class: "m-van-lidar" }));
-        /* 車体（前が少し低いタクシーの形） */
-        v.appendChild(el("path", {
-          class: "m-van-body",
-          d: "M-10.5 -1.4 L-9.2 -5.4 Q-8.8 -6.9 -7.2 -6.9 L7.2 -6.9 Q8.8 -6.9 9.2 -5.4 " +
-             "L10.5 -1.4 Q11 -0.2 11 1.4 L11 3.4 Q11 5 9.4 5 L-9.4 5 Q-11 5 -11 3.4 " +
-             "L-11 1.4 Q-11 -0.2 -10.5 -1.4 Z"
-        }));
-        /* 窓 */
-        v.appendChild(el("rect", { x: -6.8, y: -5.2, width: 13.6, height: 3.6, rx: 1.1, class: "m-van-win" }));
-        /* タイヤ */
-        v.appendChild(el("circle", { cx: -5.8, cy: 5.2, r: 2.3, class: "m-van-wheel" }));
-        v.appendChild(el("circle", { cx: 5.8, cy: 5.2, r: 2.3, class: "m-van-wheel" }));
+        v.appendChild(el("circle", { cx: 0, cy: 0, r: 16, class: "m-van-halo" }));
+        v.appendChild(el("circle", { cx: 0, cy: 0, r: 10.5, class: "m-van-dot" }));
+        v.appendChild(el("text", { x: 0, y: 4.2, class: "m-van-ico", "text-anchor": "middle" }, "🚚"));
         layers.vehicles.appendChild(v);
       }
       if (!active) { v.setAttribute("opacity", "0"); return; }
 
       v.setAttribute("opacity", "1");
-      v.querySelector(".m-van-body").setAttribute("fill", color);
+      v.querySelector(".m-van-dot").setAttribute("stroke", color);
       v.querySelector(".m-van-halo").setAttribute("fill", color);
 
       var isFocus = focusParcel === id;
