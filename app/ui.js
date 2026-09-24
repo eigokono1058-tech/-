@@ -107,10 +107,13 @@ window.LM_UI = (function () {
     youEta: { ja: "あなた", en: "You" },
     vanEta: { ja: "配送車", en: "The van" },
     matching: {
-      ja: "あなたの現在地に合わせて、配送車が速さを調整しています",
-      en: "The van is pacing itself to your live position"
+      ja: "同時に着きます。あなたの現在地に合わせて、配送車が速さを調整しています",
+      en: "You arrive together. The van is pacing itself to your live position"
     },
-    retimed: { ja: "合わせ直しました", en: "Re-timed to match you" },
+    retimed: {
+      ja: "遅れたぶん、配送車も合わせ直しました。到着は同時です",
+      en: "You were held up, so the van re-timed. You still arrive together"
+    },
     detour: { ja: "寄り道する（+15分）", en: "Take a detour (+15 min)" },
     ff: { ja: "早送り", en: "Fast-forward" },
     ffOn: { ja: "早送り中 ×6", en: "Fast-forward ×6" },
@@ -369,9 +372,12 @@ window.LM_UI = (function () {
   }
 
   /* 落ち合う時刻の候補。最短と、その先の切りのいい時刻。 */
-  function meetChoices(opt) {
+  function meetChoices(opt, pt) {
     if (!opt) return [];
-    var first = Math.round(opt.receivableAtMin);
+    /* 配送車が着ける時刻と、自分が歩いて着く時刻。遅いほうが「いちばん早く落ち合える時刻」 */
+    var to = pt && pt.dynamic ? [D.PIN.x, D.PIN.y] : (pt && pt.xy);
+    var youMin = to ? Math.floor(E.state.simMinutes) + M.walkEtaTo(to) : 0;
+    var first = Math.round(Math.max(opt.receivableAtMin, youMin));
     var out = [{ min: first, label: t(S.asap) }];
     var step = Math.ceil((first + 10) / 15) * 15;
     for (var i = 0; i < 2; i++) out.push({ min: step + i * 15, label: "" });
@@ -385,7 +391,7 @@ window.LM_UI = (function () {
     var ok = ev.verdict !== "deny";
     var why = "";
     if (!ok) ev.findings.forEach(function (f) { if (!why && f.verdict === "deny") why = t(f.reason); });
-    var choices = ok ? meetChoices(opt) : [];
+    var choices = ok ? meetChoices(opt, pt) : [];
     if (ok && meetMin == null) meetMin = choices[0].min;
 
     sheet(
@@ -621,17 +627,35 @@ window.LM_UI = (function () {
   function nowMin() { return Math.floor(E.state.simMinutes); }
   function youArriveMin() { return Math.round(nowMin() + M.walkMinutesLeft()); }
 
-  /** 受取人の到着が遅れたら、落ち合う時刻をそちらへ動かす */
+  /** 両方を同じ時刻に合わせる。
+      受取人が早すぎるなら歩く速さを落とし、遅れるなら配送車を遅らせる。
+      どちらが遅いほうに合わせるので、ふたりは同時に着く。 */
   function syncMeet() {
     if (state !== ST.enroute || agreedMin == null) return;
-    var you = youArriveMin();
-    var want = Math.max(agreedMin, you);
+    var natural = nowMin() + M.naturalMinutesLeft();   // ふつうに歩いたら着く時刻
+    var want = Math.round(Math.max(agreedMin, natural));
+    if (want > agreedMin + 0.5) { retimed = true; agreedMin = want; }
+
+    /* 先に歩く速さを合わせる。画面に出す数字はそのあとで読む。 */
+    var left = M.walkMinutesLeft();
+    if (left > 0 && Math.abs((nowMin() + left) - want) > 0.4) {
+      M.paceWalk(Math.max(0.1, want - nowMin()));
+    }
     if (Math.abs(want - (tracking().meetAtMin || 0)) >= 1) {
-      if (want > agreedMin + 0.5) retimed = true;
       E.setMeetAt(HERO, want);
-      agreedMin = want;
       if (state === ST.enroute) renderEnroute();
     }
+    paintEtas();
+  }
+
+  /** 到着予定の数字だけを書き換える（シートごと描き直さない） */
+  function paintEtas() {
+    var y = $("etaYou"), v = $("etaVan");
+    if (!y || !v) return;
+    var meet = tracking().meetAtMin;
+    if (meet == null) return;
+    y.textContent = POL.hhmm(youArriveMin());
+    v.textContent = POL.hhmm(Math.round(meet));
   }
 
   function renderEnroute() {
@@ -646,8 +670,8 @@ window.LM_UI = (function () {
       resCard(retimed ? "ask" : "ok", "→",
         POL.hhmm(meet) + " " + t(S.meetAt), t(pt.name)) +
       '<div class="etas">' +
-      '<div class="eta"><span>' + esc(t(S.youEta)) + "</span><b>" + esc(POL.hhmm(you)) + "</b></div>" +
-      '<div class="eta"><span>' + esc(t(S.vanEta)) + "</span><b>" + esc(POL.hhmm(meet)) + "</b></div>" +
+      '<div class="eta"><span>' + esc(t(S.youEta)) + '</span><b id="etaYou">' + esc(POL.hhmm(you)) + "</b></div>" +
+      '<div class="eta"><span>' + esc(t(S.vanEta)) + '</span><b id="etaVan">' + esc(POL.hhmm(Math.round(meet))) + "</b></div>" +
       "</div>" +
       '<p class="meet-note">' + esc(t(retimed ? S.retimed : S.matching)) + "</p>" +
       '<div class="row sheet-cta"><button class="btn btn-sm btn-ghost grow" id="mDetour" type="button">' +
