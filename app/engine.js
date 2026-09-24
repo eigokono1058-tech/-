@@ -247,6 +247,9 @@ window.LM_ENGINE = (function () {
 
     // 既定の受取先（＝いまの宅配のやり方）を試す。通らない荷物がそのまま論点になる。
     D.PARCELS.forEach(function (p) { assign(p.id, p.defaultPoint); });
+    /* 18:02 の時点で、配送車はもう午後の配達の途中。拠点に停まってはいない。
+       街の中を走っているところから始めると、寄り道までの距離も現実的になる。 */
+    D.PARCELS.forEach(function (p) { tracking(p.id).progress = 0.52; });
     emit();
   }
 
@@ -619,9 +622,25 @@ window.LM_ENGINE = (function () {
     var changed = false;
     Object.keys(state.parcels).forEach(function (id) {
       var t = state.parcels[id];
+      /* planning は「まだ受取先の承認が要る」状態だが、荷物自体はもう
+         既定の宛先へ向かって走っている。だから車は動かす（ただし着かせない）。 */
+      if (t.status === "planning") {
+        var ps = Math.max(6, (t.etaMin || 15) * 0.55);
+        t.progress = Math.min(0.92, t.progress + dtSec / ps);
+        return;
+      }
       if (t.status !== "in_transit") return;
-      var totalSec = Math.max(6, (t.etaMin || 15) * 0.55); // 実時間での所要（見やすさ優先）
-      t.progress = Math.min(1, t.progress + dtSec / totalSec);
+      if (t.meetAtMin != null) {
+        /* 落ち合う時刻が決まっているときは、そこにちょうど着くように走る。
+           残りの道のりを、残りの時間で割り切る。早く着きそうなら遅く走る。 */
+        var remain = t.meetAtMin - state.simMinutes;
+        var elapsed = dtSec * state.speed / 60;
+        if (remain <= elapsed) t.progress = 1;
+        else t.progress = Math.min(1, t.progress + (1 - t.progress) * (elapsed / remain));
+      } else {
+        var totalSec = Math.max(6, (t.etaMin || 15) * 0.55); // 実時間での所要（見やすさ優先）
+        t.progress = Math.min(1, t.progress + dtSec / totalSec);
+      }
       if (t.progress >= 1) {
         t.status = "arrived";
         t.holder = "handover";
@@ -634,6 +653,26 @@ window.LM_ENGINE = (function () {
     });
     if (changed) emit();
   }
+
+  /** 落ち合う時刻を決める／更新する。配送車はこの時刻に着くように走る。 */
+  function setMeetAt(parcelId, min, quiet) {
+    var t = tracking(parcelId);
+    var before = t.meetAtMin;
+    t.meetAtMin = min;
+    if (!quiet && before != null && Math.abs(before - min) >= 1) {
+      log("RETIME", parcelId, {
+        ja: "落ち合う時刻を " + clock(before).slice(0, 5) + " → " + clock(min).slice(0, 5) +
+          " に合わせ直した（受取人の到着に追従）",
+        en: "Rendezvous moved " + clock(before).slice(0, 5) + " → " + clock(min).slice(0, 5) +
+          " to match the recipient's arrival"
+      }, { level: "info" });
+      emit();
+    }
+    return t.meetAtMin;
+  }
+  function clearMeetAt(parcelId) { tracking(parcelId).meetAtMin = null; }
+  /** 途中から道を引き直したので、進み具合を最初に戻す */
+  function resetProgress(parcelId) { tracking(parcelId).progress = 0; }
 
   function setAutonomy(level) {
     state.autonomy = level;
@@ -667,6 +706,9 @@ window.LM_ENGINE = (function () {
     injectException: injectException,
     resolveException: resolveException,
     setAutonomy: setAutonomy,
+    setMeetAt: setMeetAt,
+    clearMeetAt: clearMeetAt,
+    resetProgress: resetProgress,
     tick: tick,
     init: initAll,
     reset: reset,

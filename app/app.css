@@ -418,6 +418,38 @@ body.is-app .grid-lines { display: none; }
 .alt-facts { font-size: 12.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 .alt-go { color: var(--text-faint); font-size: 18px; justify-self: end; }
 
+/* 何時に落ち合うかを選ぶ */
+.times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tchip {
+  appearance: none; cursor: pointer;
+  display: grid; gap: 2px; place-items: center;
+  padding: 12px 6px; border-radius: 13px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); font: inherit;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.16s var(--ease);
+}
+.tchip b { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.tchip span { font-size: 10.5px; color: var(--text-faint); }
+.tchip:active { transform: scale(0.97); }
+.tchip.is-on {
+  border-color: var(--brand-1);
+  background: color-mix(in srgb, var(--brand-1) 12%, var(--surface-2));
+}
+.tchip.is-on b { color: var(--brand-1); }
+
+/* 落ち合うまでの、両方の到着予定 */
+.etas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.eta {
+  display: grid; gap: 2px;
+  padding: 12px 14px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--border-soft);
+}
+.eta span { font-size: 11.5px; color: var(--text-faint); }
+.eta b { font-size: 21px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.meet-note {
+  margin: 10px 0 0; font-size: 12px; color: var(--text-faint); line-height: 1.55;
+}
+
 /* 事実の並び。数字は等幅で */
 .facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .fact {

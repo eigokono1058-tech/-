@@ -87,10 +87,13 @@ window.LM_PROVIDERS = (function () {
       var s = SURGE[pointId];
       Object.keys(s).forEach(function (k) { out[k] = s[k]; });
     }
-    /* 道の上にピンを差したときだけ、そこまでの徒歩時間を実際の距離から出す。
-       追従ピン（既定）のままなら触らない。 */
+    /* 道の上にピンを差したときだけ、そこまでの実際の距離から出し直す。
+       配送車はもう荷物を積んで街に出ているので、どの道にでも十数分で寄れる。
+       追従ピン（既定）のままなら触らない＝エージェントの判断は変わらない。 */
     if (pointId === "moving_me" && D.PIN && D.PIN.kind === "street") {
+      var now = (window.LM_ENGINE && LM_ENGINE.state.simMinutes) || out.earliestMin;
       out.walkMin = Math.max(1, Math.round((D.PIN.walkM || 0) / 75));
+      out.earliestMin = Math.round(now + (D.PIN.etaMin || 12));
       out.label = D.PIN.label;
     }
     return out;
