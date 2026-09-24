@@ -131,45 +131,7 @@ window.LM_UI = (function () {
   }
   function yen(n) { return "¥" + Number(n).toLocaleString("en-US"); }
   var VERDICT_ICON = { allow: "✅", conditional: "⚠️", deny: "⛔" };
-  /* DADS Chip Label の色。色だけに意味を持たせないよう、必ず文言も併記する */
-  var VERDICT_COLOR = { allow: "green", conditional: "yellow", deny: "red" };
-  var SEV_COLOR = { low: "blue", medium: "yellow", high: "orange", critical: "red" };
-
-  /** DADS Chip Label を1つ作る */
-  function chip(text, color, style) {
-    return '<span class="dads-chip-label" data-style="' + (style || "outlined") +
-      '" data-color="' + (color || "gray") + '">' + esc(text) + "</span>";
-  }
-
-  /** DADS Notification Banner を1つ作る */
-  var BANNER_ICON = {
-    "info-1": '<circle cx="12" cy="12" r="10" fill="currentcolor"/><circle cx="12" cy="8" r="1" fill="Canvas"/><path d="M11 11h2v6h-2z" fill="Canvas"/>',
-    success: '<circle cx="12" cy="12" r="10" fill="currentcolor"/><path d="m10.6 16.6-4.2-4.2 1.4-1.4 2.8 2.8 5.6-5.6 1.4 1.4-7 7Z" fill="Canvas"/>',
-    warning: '<path d="M12 2 1.5 20.5h21L12 2Zm0 5 7 12.5H5L12 7Zm-1 3.5v4h2v-4h-2Zm0 5.5v2h2v-2h-2Z" fill="currentcolor"/>',
-    error: '<circle cx="12" cy="12" r="10" fill="currentcolor"/><path d="M11 6h2v8h-2z" fill="Canvas"/><circle cx="12" cy="17" r="1.2" fill="Canvas"/>'
-  };
-  var BANNER_LABEL = {
-    "info-1": { ja: "インフォメーション", en: "Information" },
-    success: { ja: "成功", en: "Success" },
-    warning: { ja: "警告", en: "Warning" },
-    error: { ja: "エラー", en: "Error" }
-  };
-  function banner(type, title, bodyHtml, actionsHtml, level) {
-    return '<div class="dads-notification-banner" data-style="standard" data-type="' + type + '">' +
-      "<" + (level || "h3") + ' class="dads-notification-banner__heading">' +
-      '<svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="' +
-      esc(t(BANNER_LABEL[type])) + '">' + BANNER_ICON[type] + "</svg>" +
-      '<span class="dads-notification-banner__heading-text">' + title + "</span></" + (level || "h3") + ">" +
-      '<div class="dads-notification-banner__body">' + bodyHtml + "</div>" +
-      (actionsHtml ? '<div class="dads-notification-banner__actions">' + actionsHtml + "</div>" : "") +
-      "</div>";
-  }
-
-  /** DADS Button を1つ作る */
-  function button(label, act, type, size) {
-    return '<button class="dads-button" data-type="' + (type || "outline") + '" data-size="' + (size || "md") +
-      '" type="button" data-act="' + act + '">' + label + "</button>";
-  }
+  var SEV_CLASS = { low: "pill-info", medium: "pill-warn", high: "pill-danger", critical: "pill-danger" };
 
   /* ---------- JSON highlighter（行単位なので壊れない） ---------- */
   function grantHtml(grant) {
@@ -269,29 +231,23 @@ window.LM_UI = (function () {
     }
 
     box.className = "pin-card" + (ev.verdict === "deny" ? " is-deny" : isSet ? " is-set" : "");
-    /* ドラッグ中も読み上げが追従するよう、状態をライブリージョンとして出す */
-    box.setAttribute("role", "status");
-    box.setAttribute("aria-live", "polite");
     box.innerHTML =
-      '<span class="pc-ico" aria-hidden="true">' + (pin.mode === "follow" ? "🛰" : "📍") + "</span>" +
+      '<span class="pc-ico">' + (pin.mode === "follow" ? "🛰" : "📍") + "</span>" +
       '<span class="pc-main">' +
       '<span class="pc-where">' + esc(where) + "</span>" +
       '<span class="pc-meta">' + esc(meta) + "</span></span>" +
       '<span class="pc-actions">' +
-      '<button class="dads-button" data-type="' + (isSet || ev.verdict === "deny" ? "outline" : "solid-fill") +
-      '" data-size="sm" type="button" data-pin="set"' +
-      (ev.verdict === "deny" || isSet ? ' aria-disabled="true"' : "") + ">" +
+      '<button class="btn btn-sm ' + (isSet || ev.verdict === "deny" ? "" : "btn-primary") +
+      '" type="button" data-pin="set"' +
+      (ev.verdict === "deny" || isSet ? " disabled" : "") + ">" +
       (ev.verdict === "deny" ? t(S.pinDenied) : isSet ? "✓ " + t(S.pinSet) : t(S.pinHere)) + "</button>" +
-      '<button class="dads-button btn-follow' + (pin.mode === "follow" ? " is-on" : "") +
-      '" data-type="outline" data-size="sm" type="button" data-pin="follow" aria-pressed="' +
-      (pin.mode === "follow") + '">⌖ ' +
+      '<button class="btn btn-sm btn-follow' + (pin.mode === "follow" ? " is-on" : "") +
+      '" type="button" data-pin="follow" aria-pressed="' + (pin.mode === "follow") + '">⌖ ' +
       t(pin.mode === "follow" ? S.pinFollowOn : S.pinFollow) + "</button></span>" +
       (why ? '<p class="pc-why">' + why + "</p>" : "");
 
     box.querySelectorAll("[data-pin]").forEach(function (b) {
       b.addEventListener("click", function () {
-        // DADSのButtonは aria-disabled で無効を表すので、押下側で止める
-        if (b.getAttribute("aria-disabled") === "true") return;
         if (b.getAttribute("data-pin") === "follow") {
           M.followMe(pin.mode !== "follow");
           schedulePinCard();
@@ -308,11 +264,11 @@ window.LM_UI = (function () {
     if (!box) return;
     var stuck = D.PARCELS.filter(function (p) { return E.tracking(p.id).status === "planning"; });
     if (!stuck.length) { box.innerHTML = ""; return; }
-    box.innerHTML = banner(
-      "error",
-      esc(stuck.length + t(S.blockedTitle)),
-      "<p>" + stuck.map(function (p) { return esc(t(p.title)); }).join(" / ") + t(S.blockedBody) + "</p>"
-    );
+    box.innerHTML = '<div class="banner" style="margin-bottom:16px">' +
+      "<b>⛔ " + stuck.length + t(S.blockedTitle) + "</b><br>" +
+      '<span class="small">' +
+      stuck.map(function (p) { return esc(t(p.title)); }).join(" / ") +
+      t(S.blockedBody) + "</span></div>";
   }
 
   function renderParcels() {
@@ -323,13 +279,11 @@ window.LM_UI = (function () {
     D.PARCELS.forEach(function (p) {
       var tr = E.tracking(p.id);
       var pt = D.pointById(tr.pointId);
-      var li = document.createElement("li");
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "parcel" + (focus === p.id ? " is-focus" : "");
-      btn.setAttribute("aria-pressed", focus === p.id ? "true" : "false");
       btn.innerHTML =
-        '<span class="parcel-ico" aria-hidden="true">' + p.icon + "</span>" +
+        '<span class="parcel-ico">' + p.icon + "</span>" +
         '<span class="grow">' +
         "<b>" + esc(t(p.title)) + "</b>" +
         '<span class="meta">' +
@@ -345,19 +299,17 @@ window.LM_UI = (function () {
         lastVerdict = null;
         renderAll();
       });
-      li.appendChild(btn);
-      box.appendChild(li);
+      box.appendChild(btn);
       refs.bars[p.id] = btn.querySelector(".bar i");
     });
   }
 
-  /* 状態は色ではなくチップの文言で読ませる（色覚に依存させない） */
   function statusDot(tr) {
     var color = {
-      planning: "gray", in_transit: "blue", arrived: "yellow",
-      handing_over: "light-blue", received: "green", blocked: "red", returned: "red"
+      planning: "var(--text-faint)", in_transit: "var(--brand-1)", arrived: "var(--warn)",
+      handing_over: "var(--brand-2)", received: "var(--ok)", blocked: "var(--danger)", returned: "var(--danger)"
     }[tr.status];
-    return chip(t(S.status[tr.status]), color, "filled-1") + " ";
+    return '<span style="color:' + color + '">● ' + esc(t(S.status[tr.status])) + "</span> ·";
   }
 
   function renderFocusPanel() {
@@ -368,13 +320,13 @@ window.LM_UI = (function () {
     var pt = D.pointById(tr.pointId);
     var html = "";
 
-    html += '<div class="l-cluster" data-justify="between" data-align="start">' +
-      '<div class="l-grow"><h4 class="dads-u-std-18B-160 u-no-margin">' + p.icon + " " + esc(t(p.title)) + "</h4>" +
-      '<p class="u-text-note u-no-margin">' + esc(t(p.merchant)) +
-      (p.orderedBy === "agent" ? " · " + t(S.orderReason) + ": " + esc(t(p.agentReason)) : "") + "</p></div>" +
-      chip(t(S.status[tr.status]), "gray") + "</div>";
+    html += '<div class="row spread" style="margin-bottom:10px">' +
+      "<div><b>" + p.icon + " " + esc(t(p.title)) + "</b>" +
+      '<div class="tiny faint">' + esc(t(p.merchant)) +
+      (p.orderedBy === "agent" ? " · " + t(S.orderReason) + ": " + esc(t(p.agentReason)) : "") + "</div></div>" +
+      '<span class="pill">' + esc(t(S.status[tr.status])) + "</span></div>";
 
-    html += '<dl class="kv u-mt-16 u-mb-16">' +
+    html += '<dl class="kv" style="margin-bottom:12px">' +
       "<dt>" + t(S.destination) + "</dt><dd><b>" + esc(t(pt.name)) + "</b></dd>" +
       "<dt>" + t(S.eta) + "</dt><dd>" + (tr.status === "received" ? "—" :
         Math.max(0, Math.round((1 - tr.progress) * (tr.etaMin || 0))) + t(S.etaUnit)) + "</dd>" +
@@ -384,33 +336,32 @@ window.LM_UI = (function () {
       "</dl>";
 
     if (tr.pendingApproval) {
-      html += banner(
-        "warning",
-        t(S.approvalTitle),
-        "<p>" + (lang() === "en" ? "Autonomy L" + E.state.autonomy : "自律レベル L" + E.state.autonomy) +
-          t(S.approvalBody) + "</p>",
-        button(t(S.approve), "approve", "solid-fill", "md") + button(t(S.reject), "reject", "outline", "md")
-      );
+      html += '<div class="banner" style="margin-bottom:10px"><b>' + t(S.approvalTitle) + "</b><br>" +
+        (lang() === "en" ? "Autonomy L" + E.state.autonomy : "自律レベル L" + E.state.autonomy) +
+        t(S.approvalBody) +
+        '<div class="row" style="margin-top:10px">' +
+        '<button class="btn btn-sm btn-primary" data-act="approve">' + t(S.approve) + "</button>" +
+        '<button class="btn btn-sm" data-act="reject">' + t(S.reject) + "</button></div></div>";
     }
 
     if (tr.exception) {
       var isAuto = tr.exception.resolvedBy === "auto";
-      html += banner(
-        isAuto ? "success" : "error",
-        t(isAuto ? S.autoRecovered : S.escalated) + "：" + esc(t(tr.exception.label)),
-        "<p>" + esc(t(tr.exception.note)) + "</p>",
-        isAuto ? "" :
-          button(t(S.retry), "exc-retry", "outline", "md") +
-          button(t(S.rerouteBtn), "exc-reroute", "outline", "md") +
-          button(t(S.returnBtn), "exc-return", "outline", "md")
-      );
+      html += '<div class="banner ' + (isAuto ? "ok" : "danger") + '" style="margin-bottom:10px">' +
+        "<b>" + t(isAuto ? S.autoRecovered : S.escalated) + "：" + esc(t(tr.exception.label)) + "</b><br>" +
+        esc(t(tr.exception.note)) +
+        (isAuto ? "" :
+          '<div class="row row-wrap" style="margin-top:10px">' +
+          '<button class="btn btn-sm" data-act="exc-retry">' + t(S.retry) + "</button>" +
+          '<button class="btn btn-sm" data-act="exc-reroute">' + t(S.rerouteBtn) + "</button>" +
+          '<button class="btn btn-sm" data-act="exc-return">' + t(S.returnBtn) + "</button></div>") +
+        "</div>";
     }
 
-    html += '<div class="l-cluster u-mt-16">';
-    html += button(t(S.changeDest), "pick", "solid-fill", "md");
-    if (tr.status === "arrived") html += button(t(S.doHandover), "handover", "outline", "md");
-    if (tr.status === "planning") html += button(t(S.aiSuggest), "ai-suggest", "outline", "md");
-    html += button(t(S.seeGrant), "tab-grant", "text", "md");
+    html += '<div class="row row-wrap">';
+    html += '<button class="btn btn-sm btn-primary" data-act="pick">' + t(S.changeDest) + "</button>";
+    if (tr.status === "arrived") html += '<button class="btn btn-sm" data-act="handover">' + t(S.doHandover) + "</button>";
+    if (tr.status === "planning") html += '<button class="btn btn-sm" data-act="ai-suggest">' + t(S.aiSuggest) + "</button>";
+    html += '<button class="btn btn-sm btn-ghost" data-act="tab-grant">' + t(S.seeGrant) + "</button>";
     html += "</div>";
 
     box.innerHTML = html;
@@ -451,15 +402,15 @@ window.LM_UI = (function () {
   function verdictCard(ev, pt, suggested) {
     var html = '<div class="verdict ' + ev.verdict + '">' +
       "<h4>" + VERDICT_ICON[ev.verdict] + " " + esc(t(pt.name)) + "：" + t(S.verdict[ev.verdict]) +
-      (suggested ? " " + chip(t(S.suggested), "blue", "filled-1") : "") + "</h4>";
-    if (!ev.findings.length) html += '<p class="finding">' + t(S.noFindings) + "</p>";
+      (suggested ? ' <span class="pill pill-info">' + t(S.suggested) + "</span>" : "") + "</h4>";
+    if (!ev.findings.length) html += '<div class="finding">' + t(S.noFindings) + "</div>";
     ev.findings.forEach(function (f) {
-      html += '<p class="finding"><b>' + VERDICT_ICON[f.verdict] + " " + esc(t(f.title)) + "</b><br>" +
-        esc(t(f.reason)) + "</p>";
+      html += '<div class="finding"><b>' + VERDICT_ICON[f.verdict] + " " + esc(t(f.title)) + "</b><br>" +
+        esc(t(f.reason)) + "</div>";
     });
     if (ev.conditions.length) {
       html += '<div class="cond-list">' + ev.conditions.map(function (c) {
-        return chip(t(E.conditionLabel(c)), "yellow", "filled-2");
+        return '<span class="pill pill-warn">' + esc(t(E.conditionLabel(c))) + "</span>";
       }).join("") + "</div>";
     }
     return html + "</div>";
@@ -473,8 +424,7 @@ window.LM_UI = (function () {
     var pt = D.pointById(lastVerdict.pointId);
     var html = verdictCard(ev, pt, lastVerdict.suggested);
     if (lastVerdict.suggested && ev.verdict !== "deny") {
-      html += '<div class="l-cluster u-mt-16">' +
-        '<button class="dads-button" data-type="solid-fill" data-size="md" id="applySuggest" type="button">' +
+      html += '<div class="row" style="margin-top:10px"><button class="btn btn-sm btn-primary" id="applySuggest">' +
         t(S.applySuggest) + "</button></div>";
     }
     box.innerHTML = html;
@@ -486,10 +436,10 @@ window.LM_UI = (function () {
     var box = $("excList");
     if (!box) return;
     box.innerHTML = D.EXCEPTIONS.map(function (x) {
-      return '<li><button class="exc" type="button" data-exc="' + x.id + '">' +
-        '<span class="sev">' + chip(t(S.sev[x.severity]), SEV_COLOR[x.severity], "filled-1") + "</span>" +
+      return '<button class="exc" type="button" data-exc="' + x.id + '">' +
+        '<span class="sev pill ' + SEV_CLASS[x.severity] + '">' + t(S.sev[x.severity]) + "</span>" +
         "<b>" + esc(t(x.label)) + "</b>" +
-        '<span class="ed">' + esc(t(x.teaches)) + "</span></button></li>";
+        '<span class="ed">' + esc(t(x.teaches)) + "</span></button>";
     }).join("");
     box.querySelectorAll("[data-exc]").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -506,25 +456,23 @@ window.LM_UI = (function () {
     var p = D.parcelById(focus);
     var tr = E.tracking(focus);
     var body = $("sheetBody");
-    var html = '<div class="sheet-grip" aria-hidden="true"></div>' +
-      '<div class="dads-heading" data-size="20" data-chip style="margin-block-end: calc(8 / 16 * 1rem);">' +
-      '<p class="dads-heading__shoulder">' + t(S.pickTitle) + "</p>" +
-      '<h2 class="dads-heading__heading">' + p.icon + " " + esc(t(p.title)) + "</h2></div>" +
-      '<p class="u-text-support u-mb-16">' + t(S.pickBody) + "</p>" +
+    var html = '<div class="sheet-grip"></div>' +
+      '<div class="eyebrow">' + t(S.pickTitle) + "</div>" +
+      '<h3 style="font-size:17px;margin:6px 0 4px">' + p.icon + " " + esc(t(p.title)) + "</h3>" +
+      '<p class="small muted" style="margin-bottom:14px">' + t(S.pickBody) + "</p>" +
       '<div class="points">';
     D.POINTS.forEach(function (pt) {
       var ev = E.evaluate(p, pt);
-      html += '<button class="point-opt' + (tr.pointId === pt.id ? " is-current" : "") + '" type="button" data-pt="' + pt.id + '"' +
-        (tr.pointId === pt.id ? ' aria-current="true"' : "") + ">" +
-        '<span class="po-ico" aria-hidden="true">' + iconFor(pt) + "</span>" +
-        '<span class="l-grow"><b>' + esc(t(pt.name)) + "</b>" +
+      var cls = ev.verdict === "deny" ? "pill-danger" : ev.verdict === "conditional" ? "pill-warn" : "pill-ok";
+      html += '<button class="point-opt' + (tr.pointId === pt.id ? " is-current" : "") + '" type="button" data-pt="' + pt.id + '">' +
+        '<span class="po-ico">' + iconFor(pt) + "</span>" +
+        '<span class="grow"><b>' + esc(t(pt.name)) + "</b>" +
         '<span class="po-note">' + esc(t(pt.note)) + "</span></span>" +
-        '<span class="po-verdict">' + chip(t(S.verdict[ev.verdict]), VERDICT_COLOR[ev.verdict], "filled-1") + "</span></button>";
+        '<span class="po-verdict pill ' + cls + '">' + t(S.verdict[ev.verdict]) + "</span></button>";
     });
     html += "</div>" +
-      '<div id="sheetVerdict" class="u-mt-16"></div>' +
-      '<div class="l-cluster u-mt-16"><button class="dads-button" data-type="outline" data-size="lg" id="sheetClose" type="button" style="width:100%">' +
-      t(S.close) + "</button></div>";
+      '<div id="sheetVerdict" style="margin-top:14px"></div>' +
+      '<div class="row" style="margin-top:14px"><button class="btn btn-sm grow" id="sheetClose">' + t(S.close) + "</button></div>";
     body.innerHTML = html;
 
     body.querySelectorAll("[data-pt]").forEach(function (b) {
@@ -557,49 +505,44 @@ window.LM_UI = (function () {
     var nowIdx = order.indexOf(tr.holder);
     var html = "";
 
-    html += '<ol class="chain">' + D.CUSTODY_CHAIN.map(function (c) {
+    html += '<div class="chain">' + D.CUSTODY_CHAIN.map(function (c) {
       var myIdx = order.indexOf(c.id);
       var cls = myIdx === nowIdx ? "is-now" : myIdx < nowIdx ? "is-done" : "";
-      return '<li class="chain-step ' + cls + '"' + (myIdx === nowIdx ? ' aria-current="step"' : "") + "><b>" +
-        esc(t(c.label)) + "</b>" + esc(t(c.holderShort)) + "</li>";
-    }).join("") + "</ol>";
+      return '<div class="chain-step ' + cls + '"><b>' + esc(t(c.label)) + "</b>" + esc(t(c.holderShort)) + "</div>";
+    }).join("") + "</div>";
 
     var holderObj = null;
     D.CUSTODY_CHAIN.forEach(function (c) { if (c.id === tr.holder) holderObj = c; });
-    html += '<p class="u-text-support u-mb-24">' + t(S.holderNow) + "：<b>" +
+    html += '<p class="small muted" style="margin-bottom:16px">' + t(S.holderNow) + "：<b>" +
       esc(holderObj ? t(holderObj.holder) : "—") + "</b>（" + t(S.mainRisk) + "：" +
       esc(holderObj ? t(holderObj.risk) : "—") + "）</p>";
 
     if (tr.grant) {
-      html += '<div class="dads-heading" data-size="18"><h3 class="dads-heading__heading">RECEIPT DELEGATION GRANT</h3></div>' +
-        '<p class="u-text-support u-mt-8 u-mb-16">' + t(S.grantIntro) + "</p>" +
-        '<pre class="grant" tabindex="0" role="region" aria-label="Receipt delegation grant (JSON)">' +
-        grantHtml(tr.grant) + "</pre>";
+      html += '<div class="eyebrow">RECEIPT DELEGATION GRANT</div>' +
+        '<p class="small muted" style="margin:6px 0 10px">' + t(S.grantIntro) + "</p>" +
+        '<pre class="grant">' + grantHtml(tr.grant) + "</pre>";
     } else {
-      html += banner("info-1", t(S.grantEmpty), "");
+      html += '<div class="banner" style="margin-bottom:16px">' + t(S.grantEmpty) + "</div>";
     }
 
     var curPoint = D.pointById(tr.pointId);
     var ev = E.evaluate(p, curPoint);
-    html += '<div class="dads-heading u-mt-32" data-size="20" data-chip style="margin-block-end: calc(8 / 16 * 1rem);">' +
-      '<h3 class="dads-heading__heading">' + t(S.rulesTitle) + "（" + D.RULES.length + t(S.rulesCount) + "）</h3></div>" +
-      '<p class="u-text-support u-mb-16">「' + esc(t(p.title)) + "」→ <b>" +
-      esc(t(curPoint.name)) + "</b>" + t(S.rulesLead) + " " +
-      chip(VERDICT_ICON[ev.verdict] + " " + t(S.verdict[ev.verdict]), VERDICT_COLOR[ev.verdict], "filled-1") +
+    html += '<h3 style="font-size:15px;margin:20px 0 8px">' + t(S.rulesTitle) +
+      "（" + D.RULES.length + t(S.rulesCount) + "）</h3>" +
+      '<p class="small muted" style="margin-bottom:10px">「' + esc(t(p.title)) + "」→ <b>" +
+      esc(t(curPoint.name)) + "</b>" + t(S.rulesLead) +
+      '<span class="pill ' + (ev.verdict === "deny" ? "pill-danger" : ev.verdict === "conditional" ? "pill-warn" : "pill-ok") + '">' +
+      VERDICT_ICON[ev.verdict] + " " + t(S.verdict[ev.verdict]) + "</span>" +
       (ev.findings.length ? "" : t(S.noHitAll)) + "</p>";
 
-    /* ルールの判定はDADSのTableで出す（見出しセルと対応がスクリーンリーダーで辿れる） */
-    html += '<div class="dads-table" data-row-hover-highlight tabindex="0" role="region" aria-label="' +
-      esc(t(S.rulesTitle)) + '"><table class="dads-table__table" data-border="hidden" data-cell-border>' +
-      "<tbody>" + D.RULES.map(function (r) {
-        var hit = null;
-        ev.findings.forEach(function (f) { if (f.ruleId === r.id) hit = f; });
-        return '<tr><th class="dads-table__row-header" scope="row">' + esc(t(r.title)) + "</th>" +
-          "<td>" + (hit
-            ? chip(t(S.verdict[hit.verdict]), VERDICT_COLOR[hit.verdict], "filled-1")
-            : chip(t(S.noHit), "gray")) +
-          (hit ? "<br>" + esc(t(hit.reason)) : "") + "</td></tr>";
-      }).join("") + "</tbody></table></div>";
+    html += "<div>" + D.RULES.map(function (r) {
+      var hit = null;
+      ev.findings.forEach(function (f) { if (f.ruleId === r.id) hit = f; });
+      var cls = !hit ? "pill" : hit.verdict === "deny" ? "pill pill-danger" : "pill pill-warn";
+      return '<div class="finding"><b>' + esc(t(r.title)) + '</b> <span class="' + cls + '">' +
+        (hit ? t(S.verdict[hit.verdict]) : t(S.noHit)) + "</span>" +
+        (hit ? "<br>" + esc(t(hit.reason)) : "") + "</div>";
+    }).join("") + "</div>";
 
     box.innerHTML = html;
   }
@@ -607,25 +550,19 @@ window.LM_UI = (function () {
   function renderDial() {
     var box = $("dialBox");
     if (!box) return;
-    /* 自律レベルはDADSのRadioで組む（ラジオグループとして操作・読み上げできる） */
-    box.innerHTML = '<fieldset class="dads-form-control-label" data-size="md">' +
-      '<legend class="dads-u-visually-hidden">' +
-      (lang() === "en" ? "Autonomy level" : "自律レベル") + "</legend>" +
-      D.AUTONOMY.map(function (a) {
-        var on = E.state.autonomy === a.level;
-        return '<label class="dads-radio" data-size="md">' +
-          '<span class="dads-radio__radio">' +
-          '<input class="dads-radio__input" type="radio" name="autonomy" value="' + a.level + '"' +
-          (on ? " checked" : "") + "></span>" +
-          '<span class="dads-radio__label"><b>' + esc(t(a.name)) + "</b>" +
-          (a.recommended ? " " + chip(t(a.short), "green", "filled-1") : "") +
-          (a.tone === "danger" ? " " + chip(t(a.short), "red", "filled-1") : "") +
-          '<span class="exc ed" style="border:0;padding:0;background:none;display:block">' +
-          esc(t(a.desc)) + "</span></span></label>";
-      }).join("") + "</fieldset>";
-    box.querySelectorAll('input[name="autonomy"]').forEach(function (b) {
-      b.addEventListener("change", function () {
-        E.setAutonomy(parseInt(b.value, 10));
+    box.innerHTML = D.AUTONOMY.map(function (a) {
+      var on = E.state.autonomy === a.level;
+      return '<button class="dial-opt' + (on ? " is-on" : "") + (a.tone === "danger" ? " danger" : "") +
+        '" type="button" data-lvl="' + a.level + '">' +
+        '<span class="dial-radio"></span>' +
+        '<span class="grow"><span class="dn">' + esc(t(a.name)) +
+        (a.recommended ? ' <span class="pill pill-ok">' + t(a.short) + "</span>" : "") +
+        (a.tone === "danger" ? ' <span class="pill pill-danger">' + t(a.short) + "</span>" : "") + "</span>" +
+        '<span class="dd">' + esc(t(a.desc)) + "</span></span></button>";
+    }).join("");
+    box.querySelectorAll("[data-lvl]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        E.setAutonomy(parseInt(b.getAttribute("data-lvl"), 10));
         renderAll();
       });
     });
@@ -633,11 +570,8 @@ window.LM_UI = (function () {
     var wbox = $("dialWarn");
     if (wbox) {
       wbox.innerHTML = warn
-        ? '<div class="u-mt-16">' + banner(
-          "error",
-          (lang() === "en" ? "Why L4 is a problem" : "L4の問題"),
-          "<p>" + esc(t(warn)) + "</p>"
-        ) + "</div>"
+        ? '<div class="banner danger" style="margin-top:12px"><b>⚠️ ' +
+          (lang() === "en" ? "Why L4 is a problem" : "L4の問題") + "</b><br>" + esc(t(warn)) + "</div>"
         : "";
     }
   }
@@ -647,39 +581,26 @@ window.LM_UI = (function () {
     var box = $("logBox");
     if (!box) return;
     box.innerHTML = E.state.log.slice(0, 80).map(function (r) {
-      return '<li class="log-row ' + r.level + '">' +
+      return '<div class="log-row ' + r.level + '">' +
         '<span class="lt">' + esc(r.at) + "</span>" +
         '<span><span class="lk">' + esc(r.kind) + "</span>" +
         '<span class="lm">' + esc(t(r.message)) + "</span>" +
         (r.parcelId ? ' <span class="lsig">#' + esc(r.parcelId) + "</span>" : "") +
-        ' <span class="lsig">sig:' + esc(r.sig) + "</span></span></li>";
-    }).join("") || '<li><p class="u-text-support">' + t(S.logEmpty) + "</p></li>";
+        ' <span class="lsig">sig:' + esc(r.sig) + "</span></span></div>";
+    }).join("") || '<p class="muted small">' + t(S.logEmpty) + "</p>";
     var c = $("logCount");
     if (c) c.textContent = E.state.log.length;
   }
 
   /* ---------- tabs ---------- */
-  var TABS = ["flow", "grant", "log", "survey"];
-  function setTab(name, focusPanel) {
-    TABS.forEach(function (x) {
-      var on = x === name;
+  function setTab(name) {
+    ["flow", "grant", "log", "survey"].forEach(function (x) {
       var v = $("view-" + x);
-      if (v) {
-        v.classList.toggle("is-active", on);
-        v.hidden = !on;
-      }
+      if (v) v.classList.toggle("is-active", x === name);
       var b = $("tab-" + x);
-      if (b) {
-        b.setAttribute("aria-selected", on ? "true" : "false");
-        b.setAttribute("aria-current", on ? "page" : "false");
-        b.setAttribute("tabindex", on ? "0" : "-1");
-      }
+      if (b) b.setAttribute("aria-selected", x === name ? "true" : "false");
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (focusPanel) {
-      var panel = $("view-" + name);
-      if (panel) panel.focus();
-    }
     if (name === "survey" && window.LM_SURVEY) window.LM_SURVEY.refresh();
     renderAll();
   }
@@ -704,7 +625,7 @@ window.LM_UI = (function () {
       if (lvl) {
         var a = D.AUTONOMY[E.state.autonomy];
         lvl.textContent = t(a.badge || a.name);
-        lvl.setAttribute("data-color", a.tone === "danger" ? "red" : a.tone === "ok" ? "green" : "blue");
+        lvl.className = "pill lvl " + (a.tone === "danger" ? "pill-danger" : a.tone === "ok" ? "pill-ok" : "pill-info");
       }
     });
   }
@@ -727,28 +648,9 @@ window.LM_UI = (function () {
     E.subscribe(function () { renderAll(); });
     E.init();
 
-    /* DADSのTabはアンカー。キーボードは ← → Home End で移動できるようにする */
-    TABS.forEach(function (x, i) {
+    ["flow", "grant", "log", "survey"].forEach(function (x) {
       var b = $("tab-" + x);
-      if (!b) return;
-      b.setAttribute("tabindex", i === 0 ? "0" : "-1");
-      b.addEventListener("click", function (e) {
-        e.preventDefault();
-        setTab(x);
-        history.replaceState(null, "", "#view-" + x);
-      });
-      b.addEventListener("keydown", function (e) {
-        var next = null;
-        if (e.key === "ArrowRight") next = TABS[(i + 1) % TABS.length];
-        else if (e.key === "ArrowLeft") next = TABS[(i - 1 + TABS.length) % TABS.length];
-        else if (e.key === "Home") next = TABS[0];
-        else if (e.key === "End") next = TABS[TABS.length - 1];
-        else return;
-        e.preventDefault();
-        setTab(next);
-        var el = $("tab-" + next);
-        if (el) el.focus();
-      });
+      if (b) b.addEventListener("click", function () { setTab(x); });
     });
     $("sheet").addEventListener("click", function (e) { if (e.target === $("sheet")) closeSheet(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
@@ -767,16 +669,12 @@ window.LM_UI = (function () {
     try { seen = localStorage.getItem("lm-onboard"); } catch (e) { /* ignore */ }
     if (seen === "1" && ob) ob.hidden = true;
     var start = $("obStart");
-    if (start) {
-      if (ob && !ob.hidden) start.focus();
-      start.addEventListener("click", function () {
-        if (ob) ob.hidden = true;
-        try { localStorage.setItem("lm-onboard", "1"); } catch (e) { /* ignore */ }
-        var first = $("tab-flow");
-        if (first) first.focus();
-      });
-    }
+    if (start) start.addEventListener("click", function () {
+      if (ob) ob.hidden = true;
+      try { localStorage.setItem("lm-onboard", "1"); } catch (e) { /* ignore */ }
+    });
 
+    if (window.LMTheme) window.LMTheme.bind("#themeBtn");
     if (I18N) {
       I18N.mountToggle("#langBtn");
       I18N.onChange(function () {

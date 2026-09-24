@@ -1,94 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ページが見つかりません — LAST METERS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Page not found — LAST METERS</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0017c1">
+<meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="/assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
-<link rel="stylesheet" href="/assets/css/dads/global.css">
-<link rel="stylesheet" href="/assets/css/dads/components.css">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script src="/assets/js/i18n.js"></script>
+<style>
+  .nf { padding: 56px 0 24px; text-align: center; }
+  .nf .code {
+    font-size: 64px; font-weight: 700; line-height: 1;
+    letter-spacing: 0.04em; margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .nf h1 { font-size: 22px; margin-bottom: 8px; }
+  .nf p { max-width: 400px; margin: 0 auto; }
+  .nf-links { margin-top: 26px; text-align: left; }
+  .nf-links a { display: block; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .nf-links a:last-child { border-bottom: 0; }
+  .nf-links .sub { display: block; font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+</style>
 </head>
 <body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
 
-<a class="p-skip-link dads-link" href="#main">
-  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
-</a>
+<main class="wrap">
 
-<header class="p-header">
-  <div class="l-container p-header__inner">
-    <a class="p-header__brand" href="/">
-      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
-        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
-      </svg>
-      <span>LAST METERS</span>
+  <header class="nf">
+    <div class="code" aria-hidden="true">404</div>
+    <h1>
+      <span data-l="ja">ページが見つかりません</span>
+      <span data-l="en">Page not found</span>
+    </h1>
+    <p class="muted small">
+      <span data-l="ja">URLが変わったか、入力に誤りがあるようです。下のリンクから探してみてください。</span>
+      <span data-l="en">The address may have changed, or there is a typo. Try one of the links below.</span>
+    </p>
+  </header>
+
+  <nav class="card nf-links" aria-label="Site map">
+    <a href="/"><b><span data-l="ja">プロフィール</span><span data-l="en">Profile</span></b>
+      <span class="sub"><span data-l="ja">このサイトの入口</span><span data-l="en">Start here</span></span></a>
+    <a href="/app/"><b><span data-l="ja">動くデモ</span><span data-l="en">Live demo</span></b>
+      <span class="sub"><span data-l="ja">地図にピンを差して受取先を変える</span><span data-l="en">Drop a pin to change where a parcel goes</span></span></a>
+    <a href="/pitch/"><b><span data-l="ja">構想</span><span data-l="en">Pitch</span></b>
+      <span class="sub"><span data-l="ja">なにを解こうとしているか</span><span data-l="en">What this is trying to solve</span></span></a>
+    <a href="/plan/"><b><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></b>
+      <span class="sub"><span data-l="ja">計画・未解決の論点・検証計画</span><span data-l="en">Plan, open questions, validation</span></span></a>
+    <a href="/launchpad/"><b>Launchpad</b>
+      <span class="sub"><span data-l="ja">DevDayのセッション用ブリーフ</span><span data-l="en">Brief for the DevDay session</span></span></a>
+    <a href="/qr/"><b><span data-l="ja">QRキット</span><span data-l="en">QR kit</span></b>
+      <span class="sub"><span data-l="ja">名刺・スライド・卓上ポスター</span><span data-l="en">Card, slide and poster</span></span></a>
+  </nav>
+
+  <div class="row" style="justify-content:center;margin-top:22px">
+    <a class="btn btn-primary" href="/">
+      <span data-l="ja">トップへ戻る</span><span data-l="en">Back to home</span>
     </a>
-    <div class="p-header__tools"><span id="langBtn"></span></div>
   </div>
-</header>
 
-<main class="l-main" id="main">
-  <div class="l-container">
+  <p class="tiny faint" style="text-align:center;margin-top:28px">
+    <span data-l="ja">架空のデータによる概念検証用のサイトです。実在の事業者とは接続していません。</span>
+    <span data-l="en">A concept site on fictional data. Nothing here is connected to a real carrier.</span>
+  </p>
 
-    <div class="dads-notification-banner" data-style="standard" data-type="warning">
-      <h1 class="dads-notification-banner__heading">
-        <svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="警告">
-          <path d="M12 2 1.5 20.5h21L12 2Zm0 5 7 12.5H5L12 7Zm-1 3.5v4h2v-4h-2Zm0 5.5v2h2v-2h-2Z" fill="currentcolor"/>
-        </svg>
-        <span class="dads-notification-banner__heading-text">
-          <span data-l="ja">ページが見つかりません（404）</span>
-          <span data-l="en">Page not found (404)</span>
-        </span>
-      </h1>
-      <div class="dads-notification-banner__body">
-        <p>
-          <span data-l="ja">URLが変わったか、入力に誤りがあるようです。下のリンクから探してみてください。</span>
-          <span data-l="en">The address may have changed, or there is a typo. Try one of the links below.</span>
-        </p>
-      </div>
-    </div>
-
-    <nav class="dads-toc u-mt-32" data-border="solid" aria-labelledby="sitemap-heading">
-      <h2 id="sitemap-heading" class="dads-toc__heading">
-        <span data-l="ja">このサイトのページ</span><span data-l="en">Pages on this site</span>
-      </h2>
-      <ul class="dads-list" data-spacing="8">
-        <li><a class="dads-link" href="/"><span data-l="ja">プロフィール（トップ）</span><span data-l="en">Profile (home)</span></a></li>
-        <li><a class="dads-link" href="/app/"><span data-l="ja">動くデモ</span><span data-l="en">Live demo</span></a></li>
-        <li><a class="dads-link" href="/pitch/"><span data-l="ja">構想（ピッチ）</span><span data-l="en">Pitch</span></a></li>
-        <li><a class="dads-link" href="/plan/"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></a></li>
-        <li><a class="dads-link" href="/launchpad/">Launchpad</a></li>
-        <li><a class="dads-link" href="/qr/"><span data-l="ja">QRキット</span><span data-l="en">QR kit</span></a></li>
-      </ul>
-    </nav>
-
-    <div class="l-cluster u-mt-32">
-      <a class="dads-button" data-type="solid-fill" data-size="lg" href="/">
-        <span data-l="ja">トップへ戻る</span><span data-l="en">Back to home</span>
-      </a>
-    </div>
-
-  </div>
 </main>
 
-<footer class="p-footer">
-  <div class="l-container">
-    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
-    <p class="p-footer__note">
-      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
-      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
-    </p>
-  </div>
-</footer>
-
+<script src="/assets/js/theme.js"></script>
 <script>
   if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
+  if (window.LMTheme) window.LMTheme.bind("#themeBtn");
 </script>
 </body>
 </html>

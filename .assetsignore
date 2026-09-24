@@ -19,6 +19,7 @@ node_modules
 .nojekyll
 README.md
 CLAUDE.md
+docs
 tools
 __pycache__
 **/__pycache__

@@ -50,9 +50,7 @@ window.LM_MAP = (function () {
     home: "🏠", locker: "🔐", store: "🏪", office: "🏢",
     person: "🧑", delegate: "🤝", robot: "🤖"
   };
-  /* 配送車の色はDADSのプリミティブカラーから。白地でも白文字でも読める濃さを選ぶ。
-     色だけで荷物を区別させないよう、車体には必ず品目の絵文字も乗せる。 */
-  var VEHICLE_COLORS = ["#0031d8", "#197a4b", "#5c10be", "#c74700"];
+  var VEHICLE_COLORS = ["#5b8cff", "#2dd4bf", "#a78bfa", "#fbbf24"];
 
   /* ---------- geometry ---------- */
   function polyLength(pts) {
@@ -207,8 +205,15 @@ window.LM_MAP = (function () {
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.innerHTML = "";
 
-    /* 装飾のグラデーションは持たない（DADSは面を単色で塗る） */
-    svg.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--map-bg)" }));
+    var defs = el("defs");
+    defs.innerHTML =
+      '<linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="var(--map-bg-1)"/><stop offset="1" stop-color="var(--map-bg-2)"/></linearGradient>' +
+      '<filter id="glow" x="-60%" y="-60%" width="220%" height="220%">' +
+      '<feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+    svg.appendChild(defs);
+
+    svg.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, fill: "url(#mapbg)" }));
 
     /* 街区（ブロック） */
     var blocks = el("g", { class: "m-blocks" });

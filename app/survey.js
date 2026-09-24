@@ -1,15 +1,11 @@
 /* ==========================================================================
    LAST METERS — 需要検証フォーム / demand validation survey (ja + en)
+
    回答はまずサーバー（Cloudflare Workers + D1）へ送り、同時にこの端末の
    localStorage にも残す。サーバーが無い／落ちている／オフラインでも、
    回答は端末に残るので取りこぼさない。集計は、サーバーがあればサーバーの
    全件集計を、無ければこの端末に溜まった分を表示する。
    送信先は window.LM_SURVEY_API（既定 "/api/survey"）。
-
-   フォームはデジタル庁デザインシステムの Form Control Label / Radio /
-   Checkbox / Textarea / Button / Error Text に準拠している。
-   必須項目の未入力は alert() ではなく、公式のエラーテキスト＋aria-invalid＋
-   該当項目へのフォーカス移動で知らせる。
    ========================================================================== */
 window.LM_SURVEY = (function () {
   var KEY = "lm-survey-responses-v1";
@@ -58,64 +54,79 @@ window.LM_SURVEY = (function () {
     { v: "often", l: { ja: "週2回以上", en: "Twice a week or more" } }
   ];
   var INTENT = [
-    { v: 1, l: { ja: "1 使わない", en: "1 No way" } },
-    { v: 2, l: { ja: "2 あまり使わない", en: "2 Probably not" } },
-    { v: 3, l: { ja: "3 どちらとも言えない", en: "3 Neutral" } },
-    { v: 4, l: { ja: "4 使いたい", en: "4 I would use it" } },
-    { v: 5, l: { ja: "5 絶対使う", en: "5 Definitely" } }
+    { ja: "使わない", en: "No way" },
+    { ja: "あまり", en: "Probably not" },
+    { ja: "どちらとも", en: "Neutral" },
+    { ja: "使いたい", en: "I would use it" },
+    { ja: "絶対使う", en: "Definitely" }
   ];
 
   var Q = {
-    q1: { ja: "あなたの立場に一番近いものは？", en: "Which describes you best?" },
+    q1: { ja: "Q1. あなたの立場に一番近いものは？", en: "Q1. Which describes you best?" },
     q1h: {
       ja: "「誰が困っていて、誰が払うのか」を切り分けるための質問です",
       en: "This separates who has the pain from who would pay"
     },
     q2: {
-      ja: "「受取先をあとから自由に切り替えられる」仕組みを使いたいと思いますか？",
-      en: "Would you use a service that lets you change the destination after the parcel ships?"
+      ja: "Q2. 「受取先をあとから自由に切り替えられる」仕組みを使いたいと思いますか？",
+      en: "Q2. Would you use a service that lets you change the destination after the parcel ships?"
     },
-    q2h: { ja: "1（使わない）〜5（絶対使う）", en: "1 (no way) to 5 (definitely)" },
     q3: {
-      ja: "荷物を受け取れない／受け取りづらいことはどのくらいありますか？",
-      en: "How often do you miss or struggle with a delivery?"
+      ja: "Q3. 荷物を受け取れない／受け取りづらいことはどのくらいありますか？",
+      en: "Q3. How often do you miss or struggle with a delivery?"
     },
-    q4: { ja: "どの場面で一番ほしいですか？", en: "Where would you want this most?" },
-    q4h: { ja: "最大3つまで選べます", en: "Pick up to three" },
-    q5: { ja: "この機能に月額いくらまで払えますか？", en: "What would you pay per month?" },
+    q4: { ja: "Q4. どの場面で一番ほしいですか？", en: "Q4. Where would you want this most?" },
+    q4h: { ja: "最大3つまで", en: "Pick up to three" },
+    q5: { ja: "Q5. この機能に月額いくらまで払えますか？", en: "Q5. What would you pay per month?" },
     q5h: {
       ja: "個人が払わない前提なら「0円」「使わない」を選んでください（それも重要なデータです）",
       en: "If you would never pay, say so — that answer is just as useful"
     },
-    q6: { ja: "不安・引っかかる点", en: "What worries you?" },
-    q6h: { ja: "いくつでも選べます", en: "Pick as many as apply" },
+    q6: { ja: "Q6. 不安・引っかかる点（複数選択可）", en: "Q6. What worries you? (multiple)" },
     q7: {
-      ja: "自由記述（このアイデアへの一言、こう使いたい、ここが致命的、など）",
-      en: "Anything else — how you would use it, or what kills it for you"
+      ja: "Q7. 自由記述（このアイデアへの一言、こう使いたい、ここが致命的、など）",
+      en: "Q7. Anything else — how you would use it, or what kills it for you"
     },
-    q7h: {
+    q7p: {
       ja: "例：冷凍だけは絶対に確実に受け取りたい。ただし位置情報を常時共有するのは無理。",
       en: "e.g. I only care about frozen food arriving safely — but I would never share my location all day."
     },
-    required: { ja: "※必須", en: "required" },
-    optional: { ja: "※任意", en: "optional" },
-    errRole: { ja: "＊立場を選んでください。", en: "＊Please choose which describes you." },
-    errIntent: { ja: "＊使いたいかどうかを選んでください。", en: "＊Please rate whether you would use it." },
     submit: { ja: "回答を送る", en: "Submit" },
     localNote: {
       ja: "回答はこの端末のブラウザ内に保存されます（サーバーには送信されません）。イベント後に「書き出し」からCSV/JSONで回収してください。",
       en: "Answers are stored in this browser only (nothing is sent to a server). Export them as CSV/JSON after the event."
     },
+    required: {
+      ja: "Q1（立場）とQ2（使いたいか）は必須です。",
+      en: "Q1 (who you are) and Q2 (would you use it) are required."
+    },
     thanks: { ja: "ありがとうございます。", en: "Thank you." },
     saved: { ja: "回答をこの端末に保存しました。", en: "Your answer is saved on this device." },
     notSaved: {
-      ja: "この端末では保存できませんでした（プライベートモードの可能性があります）。",
+      ja: "※この端末では保存できませんでした（プライベートモードの可能性）。",
       en: "Could not save on this device (private browsing?)."
     },
     again: { ja: "もう1件入力する", en: "Add another response" },
     empty: {
       ja: "まだ回答がありません。イベントで人に触ってもらって、このページに数字が溜まっていく状態をつくってください。",
       en: "No responses yet. Hand the demo to people at the event and let the numbers pile up here."
+    },
+    nResp: { ja: "回答数", en: "Responses" },
+    avgIntent: { ja: "利用意向 平均（5点満点）", en: "Mean intent (out of 5)" },
+    top2: { ja: "「使いたい」以上", en: "Rated 4 or 5" },
+    payers: { ja: "有料でも払うと回答", en: "Would pay something" },
+    byRole: { ja: "立場別の利用意向（平均）", en: "Mean intent by role" },
+    byScene: { ja: "刺さる場面（選択された回数）", en: "Where it lands (times picked)" },
+    byWtp: { ja: "支払意思額", en: "Willingness to pay" },
+    byFear: { ja: "不安の内訳", en: "Concerns" },
+    recent: { ja: "直近のコメント", en: "Recent comments" },
+    intentShort: { ja: "意向", en: "intent" },
+    expCsv: { ja: "CSVで書き出す", en: "Export CSV" },
+    expJson: { ja: "JSONで書き出す", en: "Export JSON" },
+    clear: { ja: "全消去", en: "Delete all" },
+    confirmClear: {
+      ja: "保存されている回答をすべて消します。書き出しは済んでいますか？",
+      en: "This deletes every stored response. Have you exported them?"
     },
     fromServer: {
       ja: "全端末の合計を表示しています（サーバー集計）。",
@@ -136,29 +147,12 @@ window.LM_SURVEY = (function () {
     exportNote: {
       ja: "※「書き出し」はこの端末に保存された分だけです。全端末ぶんは /api/survey/export から取得してください。",
       en: "Export covers this device only. For every device, use /api/survey/export."
-    },
-    nResp: { ja: "回答数", en: "Responses" },
-    avgIntent: { ja: "利用意向 平均（5点満点）", en: "Mean intent (out of 5)" },
-    top2: { ja: "「使いたい」以上", en: "Rated 4 or 5" },
-    payers: { ja: "有料でも払うと回答", en: "Would pay something" },
-    byRole: { ja: "立場別の利用意向（平均）", en: "Mean intent by role" },
-    byScene: { ja: "刺さる場面（選択された回数）", en: "Where it lands (times picked)" },
-    byWtp: { ja: "支払意思額", en: "Willingness to pay" },
-    byFear: { ja: "不安の内訳", en: "Concerns" },
-    recent: { ja: "直近のコメント", en: "Recent comments" },
-    intentShort: { ja: "意向", en: "intent" },
-    expCsv: { ja: "CSVで書き出す", en: "Export CSV" },
-    expJson: { ja: "JSONで書き出す", en: "Export JSON" },
-    clear: { ja: "全消去", en: "Delete all" },
-    confirmClear: {
-      ja: "保存されている回答をすべて消します。書き出しは済んでいますか？",
-      en: "This deletes every stored response. Have you exported them?"
     }
   };
 
   var answers = { role: null, intent: null, freq: null, scenes: [], wtp: null, fears: [], note: "" };
-  var showErrors = false;
 
+  /* ---------- サーバー連携 ---------- */
   /* 送信先。同じドメインのWorkerが受ける。null にすると端末保存のみになる。 */
   var API = window.LM_SURVEY_API !== undefined ? window.LM_SURVEY_API : "/api/survey";
   var serverStats = null;   // サーバーから取れた集計（取れなければ null）
@@ -166,251 +160,17 @@ window.LM_SURVEY = (function () {
 
   /* 端末を区別するだけのランダム値。個人とは結びつかない。 */
   function clientId() {
-    var KEY = "lm-client-id";
+    var KEY_C = "lm-client-id";
     try {
-      var v = localStorage.getItem(KEY);
+      var v = localStorage.getItem(KEY_C);
       if (!v) {
         v = "c_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-        localStorage.setItem(KEY, v);
+        localStorage.setItem(KEY_C, v);
       }
       return v;
     } catch (e) { return null; }
   }
 
-  /* ---------- storage ---------- */
-  function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) { return []; }
-  }
-  function save(list) {
-    try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; }
-  }
-  function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-  function $(id) { return document.getElementById(id); }
-
-  /* ---------- DADSのフォーム部品 ---------- */
-  /** ラジオ／チェックボックスのグループ（fieldset + legend が正しい組み方） */
-  function group(opts) {
-    var type = opts.type;              // "radio" | "checkbox"
-    var name = opts.name;
-    var items = opts.items;
-    var isOn = opts.isOn;
-    var describedBy = [];
-    if (opts.support) describedBy.push(name + "-support");
-    if (opts.error) describedBy.push(name + "-error");
-
-    var h = '<fieldset class="dads-form-control-label" data-size="sm"' +
-      (describedBy.length ? ' aria-describedby="' + describedBy.join(" ") + '"' : "") + ">" +
-      '<legend class="dads-form-control-label__label">' + esc(t(opts.label)) +
-      '<span class="dads-form-control-label__requirement" data-required="' + (opts.required ? "true" : "false") + '">' +
-      t(opts.required ? Q.required : Q.optional) + "</span></legend>";
-    if (opts.support) {
-      h += '<p id="' + name + '-support" class="dads-form-control-label__support-text">' + esc(t(opts.support)) + "</p>";
-    }
-    if (opts.error) {
-      h += '<p id="' + name + '-error" class="dads-form-control-label__error-text">' + esc(t(opts.error)) + "</p>";
-    }
-    h += '<div class="s-options">' + items.map(function (it) {
-      var on = isOn(it.v);
-      var cls = type === "radio" ? "dads-radio" : "dads-checkbox";
-      return '<label class="' + cls + '" data-size="sm">' +
-        '<span class="' + cls + "__" + type + '">' +
-        '<input class="' + cls + '__input" type="' + type + '" name="' + name + '" value="' + esc(it.v) + '"' +
-        (on ? " checked" : "") + (opts.error ? ' aria-invalid="true"' : "") + ">" +
-        "</span>" +
-        '<span class="' + cls + '__label">' + esc(t(it.l)) + "</span></label>";
-    }).join("") + "</div></fieldset>";
-    return h;
-  }
-
-  function renderForm() {
-    var box = $("surveyForm");
-    if (!box) return;
-
-    var roleError = showErrors && !answers.role ? Q.errRole : null;
-    var intentError = showErrors && !answers.intent ? Q.errIntent : null;
-
-    var h = '<div class="s-questions">';
-
-    h += group({
-      type: "radio", name: "role", label: Q.q1, support: Q.q1h, required: true,
-      items: ROLES, isOn: function (v) { return answers.role === v; }, error: roleError
-    });
-
-    h += group({
-      type: "radio", name: "intent", label: Q.q2, support: Q.q2h, required: true,
-      items: INTENT, isOn: function (v) { return answers.intent === v; }, error: intentError
-    });
-
-    h += group({
-      type: "radio", name: "freq", label: Q.q3,
-      items: FREQ, isOn: function (v) { return answers.freq === v; }
-    });
-
-    h += group({
-      type: "checkbox", name: "scene", label: Q.q4, support: Q.q4h,
-      items: SCENES, isOn: function (v) { return answers.scenes.indexOf(v) !== -1; }
-    });
-
-    h += group({
-      type: "radio", name: "wtp", label: Q.q5, support: Q.q5h,
-      items: WTP, isOn: function (v) { return answers.wtp === v; }
-    });
-
-    h += group({
-      type: "checkbox", name: "fear", label: Q.q6, support: Q.q6h,
-      items: FEARS, isOn: function (v) { return answers.fears.indexOf(v) !== -1; }
-    });
-
-    h += '<div class="dads-form-control-label" data-size="sm">' +
-      '<label class="dads-form-control-label__label" for="note">' + esc(t(Q.q7)) +
-      '<span class="dads-form-control-label__requirement" data-required="false">' + t(Q.optional) + "</span></label>" +
-      '<p id="note-support" class="dads-form-control-label__support-text">' + esc(t(Q.q7h)) + "</p>" +
-      '<div><span class="dads-textarea">' +
-      '<textarea id="note" class="dads-textarea__textarea" rows="4" aria-describedby="note-support">' +
-      esc(answers.note) + "</textarea></span></div></div>";
-
-    h += "</div>" +
-      '<div class="l-cluster u-mt-24">' +
-      '<button class="dads-button" data-type="solid-fill" data-size="lg" id="surveySubmit" type="button">' +
-      esc(t(Q.submit)) + "</button></div>" +
-      '<p class="u-text-note u-mt-16">' + esc(t(Q.localNote)) + "</p>";
-
-    box.innerHTML = h;
-    bindForm(box);
-  }
-
-  /* #surveyForm は再描画しても同じ要素が残るので、委譲するリスナは一度だけ張る。
-     毎回張ると1クリックで2回処理され、チェックが入らなくなる。 */
-  var delegated = false;
-  function bindForm(box) {
-    var sub = $("surveySubmit");
-    if (sub) sub.addEventListener("click", submit);
-    if (delegated) return;
-    delegated = true;
-
-    box.addEventListener("change", function (e) {
-      var el = e.target;
-      if (el.name === "role") answers.role = el.value;
-      else if (el.name === "intent") answers.intent = parseInt(el.value, 10);
-      else if (el.name === "freq") answers.freq = el.value;
-      else if (el.name === "wtp") answers.wtp = parseInt(el.value, 10);
-      else if (el.name === "scene") toggle(answers.scenes, el.value, 3, box);
-      else if (el.name === "fear") toggle(answers.fears, el.value, 99, box);
-    });
-    box.addEventListener("input", function (e) {
-      if (e.target.id === "note") answers.note = e.target.value;
-    });
-  }
-
-  /** 上限つきの複数選択。上限を超えたら古いものから外す（画面の状態も合わせる） */
-  function toggle(arr, v, max, box) {
-    var i = arr.indexOf(v);
-    if (i === -1) {
-      if (arr.length >= max) arr.shift();
-      arr.push(v);
-    } else {
-      arr.splice(i, 1);
-    }
-    if (box) {
-      box.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
-        if (input.name !== "scene" && input.name !== "fear") return;
-        var list = input.name === "scene" ? answers.scenes : answers.fears;
-        input.checked = list.indexOf(input.value) !== -1;
-      });
-    }
-  }
-
-  function submit() {
-    if (!answers.role || !answers.intent) {
-      showErrors = true;
-      renderForm();
-      var first = document.querySelector('input[name="' + (answers.role ? "intent" : "role") + '"]');
-      if (first) {
-        first.focus();
-        if (first.scrollIntoView) first.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
-    showErrors = false;
-
-    var rec = {
-      id: "r_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      at: new Date().toISOString(),
-      lang: I18N ? I18N.lang : "ja",
-      role: answers.role,
-      intent: answers.intent,
-      freq: answers.freq,
-      scenes: answers.scenes.slice(),
-      wtp: answers.wtp,
-      fears: answers.fears.slice(),
-      note: answers.note,
-      autonomyAtAnswer: window.LM_ENGINE ? window.LM_ENGINE.state.autonomy : null
-    };
-    // 端末には必ず残す（サーバーが落ちていても回答を失わないため）
-    var list = load();
-    list.push(rec);
-    var ok = save(list);
-
-    // サーバーにも送る。失敗しても端末の分が残るので、ここでは止めない。
-    if (API) {
-      try {
-        fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: rec.id,
-            at: rec.at,
-            clientId: clientId(),
-            lang: rec.lang,
-            role: rec.role,
-            intent: rec.intent,
-            freq: rec.freq,
-            scenes: rec.scenes,
-            wtp: rec.wtp,
-            fears: rec.fears,
-            note: rec.note,
-            autonomy: rec.autonomyAtAnswer,
-            source: location.pathname
-          }),
-          keepalive: true
-        }).then(function () {
-          fetchStats().then(renderStats);
-        }).catch(function () { serverDown = true; });
-      } catch (e) { serverDown = true; }
-    }
-
-    answers = { role: null, intent: null, freq: null, scenes: [], wtp: null, fears: [], note: "" };
-    var box = $("surveyForm");
-    box.innerHTML =
-      '<div class="dads-notification-banner" data-style="standard" data-type="' + (ok ? "success" : "warning") + '">' +
-      '<h3 class="dads-notification-banner__heading">' +
-      '<svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="' +
-      (ok ? "成功" : "警告") + '">' +
-      (ok
-        ? '<circle cx="12" cy="12" r="10" fill="currentcolor"/><path d="m10.6 16.6-4.2-4.2 1.4-1.4 2.8 2.8 5.6-5.6 1.4 1.4-7 7Z" fill="Canvas"/>'
-        : '<path d="M12 2 1.5 20.5h21L12 2Zm0 5 7 12.5H5L12 7Zm-1 3.5v4h2v-4h-2Zm0 5.5v2h2v-2h-2Z" fill="currentcolor"/>') +
-      "</svg>" +
-      '<span class="dads-notification-banner__heading-text">' + esc(t(Q.thanks)) + "</span></h3>" +
-      '<div class="dads-notification-banner__body"><p>' + esc(t(ok ? Q.saved : Q.notSaved)) + "</p></div>" +
-      '<div class="dads-notification-banner__actions">' +
-      '<button class="dads-button" data-type="outline" data-size="md" id="againBtn" type="button">' +
-      esc(t(Q.again)) + "</button></div></div>";
-    var again = $("againBtn");
-    if (again) {
-      again.addEventListener("click", function () { renderForm(); });
-      again.focus();
-    }
-    renderStats();
-  }
-
-  /* ---------- 集計 ---------- */
   /** サーバー側の全件集計を取りに行く。取れなければ端末の集計にフォールバックする。 */
   function fetchStats() {
     if (!API || serverDown) return Promise.resolve(null);
@@ -465,76 +225,263 @@ window.LM_SURVEY = (function () {
         return list.filter(function (x) { return (x.fears || []).indexOf(v) !== -1; }).length;
       },
       wtpCount: function (v) { return list.filter(function (x) { return x.wtp === v; }).length; },
-      notes: list.filter(function (r) { return r.note && r.note.trim(); }).slice(-8).reverse()
-        .map(function (r) { return { role: r.role, intent: r.intent, note: r.note }; })
+      notes: list.filter(function (r) { return r.note && r.note.trim(); }).slice(-6).reverse()
     };
   }
 
+  /* ---------- storage ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+  function save(list) {
+    try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; }
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------- form ---------- */
+  function radioGroup(name, items, current, parse) {
+    return '<div class="opts">' + items.map(function (it) {
+      var on = parse ? current === it.v : current === it.v;
+      return '<label class="opt' + (on ? " is-on" : "") + '">' +
+        '<input type="radio" name="' + name + '" value="' + it.v + '"' + (on ? " checked" : "") + ">" +
+        "<span>" + esc(t(it.l)) + "</span></label>";
+    }).join("") + "</div>";
+  }
+  function checkGroup(name, items, current) {
+    return '<div class="opts">' + items.map(function (it) {
+      var on = current.indexOf(it.v) !== -1;
+      return '<label class="opt' + (on ? " is-on" : "") + '">' +
+        '<input type="checkbox" name="' + name + '" value="' + it.v + '"' + (on ? " checked" : "") + ">" +
+        "<span>" + esc(t(it.l)) + "</span></label>";
+    }).join("") + "</div>";
+  }
+
+  function renderForm() {
+    var box = $("surveyForm");
+    if (!box) return;
+    var h = "";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q1) +
+      '<span class="qhint">' + t(Q.q1h) + "</span></span>" +
+      radioGroup("role", ROLES, answers.role) + "</div>";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q2) + "</span>" +
+      '<div class="scale">' + INTENT.map(function (l, i) {
+        return '<button type="button" data-intent="' + (i + 1) + '" class="' + (answers.intent === i + 1 ? "is-on" : "") + '">' +
+          (i + 1) + '<span class="sl">' + esc(t(l)) + "</span></button>";
+      }).join("") + "</div></div>";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q3) + "</span>" +
+      radioGroup("freq", FREQ, answers.freq) + "</div>";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q4) +
+      '<span class="qhint">' + t(Q.q4h) + "</span></span>" +
+      checkGroup("scene", SCENES, answers.scenes) + "</div>";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q5) +
+      '<span class="qhint">' + t(Q.q5h) + "</span></span>" +
+      radioGroup("wtp", WTP, answers.wtp) + "</div>";
+
+    h += '<div class="q"><span class="qlabel">' + t(Q.q6) + "</span>" +
+      checkGroup("fear", FEARS, answers.fears) + "</div>";
+
+    h += '<div class="q"><label for="note">' + t(Q.q7) + "</label>" +
+      '<textarea id="note" placeholder="' + esc(t(Q.q7p)) + '">' + esc(answers.note) + "</textarea></div>";
+
+    h += '<div class="row"><button class="btn btn-primary grow" id="surveySubmit" type="button">' +
+      t(Q.submit) + "</button></div>" +
+      '<p class="tiny faint" style="margin-top:10px">' + t(Q.localNote) + "</p>";
+
+    box.innerHTML = h;
+    bindForm(box);
+  }
+
+  function bindForm(box) {
+    box.addEventListener("change", function (e) {
+      var el = e.target;
+      if (el.name === "role") answers.role = el.value;
+      else if (el.name === "freq") answers.freq = el.value;
+      else if (el.name === "wtp") answers.wtp = parseInt(el.value, 10);
+      else if (el.name === "scene") toggle(answers.scenes, el.value, 3);
+      else if (el.name === "fear") toggle(answers.fears, el.value, 99);
+      syncOn(box);
+    });
+    box.addEventListener("input", function (e) {
+      if (e.target.id === "note") answers.note = e.target.value;
+    });
+    box.querySelectorAll("[data-intent]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        answers.intent = parseInt(b.getAttribute("data-intent"), 10);
+        box.querySelectorAll("[data-intent]").forEach(function (o) { o.className = o === b ? "is-on" : ""; });
+      });
+    });
+    var sub = $("surveySubmit");
+    if (sub) sub.addEventListener("click", submit);
+  }
+
+  function toggle(arr, v, max) {
+    var i = arr.indexOf(v);
+    if (i === -1) {
+      if (arr.length >= max) arr.shift();
+      arr.push(v);
+    } else { arr.splice(i, 1); }
+  }
+
+  function syncOn(box) {
+    box.querySelectorAll(".opt").forEach(function (lab) {
+      var input = lab.querySelector("input");
+      if (!input) return;
+      var on = input.type === "radio"
+        ? (input.name === "role" ? answers.role === input.value
+          : input.name === "freq" ? answers.freq === input.value
+            : answers.wtp === parseInt(input.value, 10))
+        : (input.name === "scene" ? answers.scenes.indexOf(input.value) !== -1
+          : answers.fears.indexOf(input.value) !== -1);
+      input.checked = on;
+      lab.classList.toggle("is-on", on);
+    });
+  }
+
+  function submit() {
+    if (!answers.role || !answers.intent) {
+      alert(t(Q.required));
+      return;
+    }
+    var rec = {
+      id: "r_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      at: new Date().toISOString(),
+      lang: I18N ? I18N.lang : "ja",
+      role: answers.role,
+      intent: answers.intent,
+      freq: answers.freq,
+      scenes: answers.scenes.slice(),
+      wtp: answers.wtp,
+      fears: answers.fears.slice(),
+      note: answers.note,
+      autonomyAtAnswer: window.LM_ENGINE ? window.LM_ENGINE.state.autonomy : null
+    };
+    // 端末には必ず残す（サーバーが落ちていても回答を失わないため）
+    var list = load();
+    list.push(rec);
+    var ok = save(list);
+
+    // サーバーにも送る。失敗しても端末の分が残るので、ここでは止めない。
+    if (API) {
+      try {
+        fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: rec.id,
+            at: rec.at,
+            clientId: clientId(),
+            lang: rec.lang,
+            role: rec.role,
+            intent: rec.intent,
+            freq: rec.freq,
+            scenes: rec.scenes,
+            wtp: rec.wtp,
+            fears: rec.fears,
+            note: rec.note,
+            autonomy: rec.autonomyAtAnswer,
+            source: location.pathname
+          }),
+          keepalive: true
+        }).then(function () {
+          fetchStats().then(renderStats);
+        }).catch(function () { serverDown = true; });
+      } catch (e) { serverDown = true; }
+    }
+
+    answers = { role: null, intent: null, freq: null, scenes: [], wtp: null, fears: [], note: "" };
+    var box = $("surveyForm");
+    box.innerHTML = '<div class="banner ok"><b>' + t(Q.thanks) + "</b><br>" +
+      (ok ? t(Q.saved) : t(Q.notSaved)) +
+      '</div><div class="row" style="margin-top:12px">' +
+      '<button class="btn btn-sm" id="againBtn" type="button">' + t(Q.again) + "</button></div>";
+    $("againBtn").addEventListener("click", renderForm);
+    renderStats();
+  }
+
+  /* ---------- stats ---------- */
   function renderStats() {
     var box = $("surveyStats");
     if (!box) return;
     var list = load();
-    var useServer = !!(serverStats && serverStats.total);
-    if (!useServer && !list.length) {
-      box.innerHTML = '<p class="u-text-support">' + esc(t(Q.empty)) + "</p>";
+
+    /* サーバーの集計があればそちらを出す（全端末の合計）。
+       無ければこの端末に溜まった分を出す。どちらを見ているかは必ず明示する。 */
+    var S = serverStats ? fromServer(serverStats) : fromLocal(list);
+    if (!S.total) {
+      box.innerHTML = '<p class="muted small">' + t(Q.empty) + "</p>";
       return;
     }
-    var d = useServer ? fromServer(serverStats) : fromLocal(list);
-    var avg = d.avg, top2 = d.top2, payers = d.payers;
 
-    var h = '<p class="u-text-note u-mb-16">' +
-      (useServer
-        ? esc(t(Q.fromServer)) + (list.length ? " " + esc(t(Q.alsoLocal)).replace("{n}", list.length) : "")
-        : esc(t(API && serverDown ? Q.fromLocalOffline : Q.fromLocal))) + "</p>";
+    var srcLine;
+    if (serverStats) {
+      srcLine = t(Q.fromServer);
+      if (list.length) srcLine += " " + t(Q.alsoLocal).replace("{n}", list.length);
+    } else {
+      srcLine = serverDown ? t(Q.fromLocalOffline) : t(Q.fromLocal);
+    }
+    var h = '<p class="tiny faint" style="margin:0 0 10px">' + esc(srcLine) + "</p>";
 
-    h += '<ul class="s-stats">' +
-      stat(d.total, t(Q.nResp)) +
-      stat(avg.toFixed(2), t(Q.avgIntent)) +
-      stat(Math.round(top2) + "%", t(Q.top2)) +
-      stat(Math.round(payers) + "%", t(Q.payers)) +
-      "</ul>";
+    h += '<div class="stat-grid" style="margin-bottom:14px">' +
+      '<div class="stat"><div class="sv">' + S.total + '</div><div class="sk">' + t(Q.nResp) + "</div></div>" +
+      '<div class="stat"><div class="sv">' + S.avg.toFixed(2) + '</div><div class="sk">' + t(Q.avgIntent) + "</div></div>" +
+      '<div class="stat"><div class="sv">' + Math.round(S.top2) + '%</div><div class="sk">' + t(Q.top2) + "</div></div>" +
+      '<div class="stat"><div class="sv">' + Math.round(S.payers) + '%</div><div class="sk">' + t(Q.payers) + "</div></div>" +
+      "</div>";
 
     h += barGroup(t(Q.byRole), ROLES.map(function (r) {
-      var g = d.roleAvg(r.v);
+      var a = S.roleAvg(r.v);
       return {
-        label: t(r.l).replace(/（.*/, ""),
-        value: g.avg, max: 5,
-        display: g.n ? g.avg.toFixed(1) + " (n=" + g.n + ")" : "—"
+        label: t(r.l).replace(/（.*/, "").slice(0, 16),
+        value: a.avg, max: 5,
+        display: a.n ? a.avg.toFixed(1) + " (n=" + a.n + ")" : "—"
       };
     }));
 
     h += barGroup(t(Q.byScene), SCENES.map(function (s) {
-      var c = d.sceneCount(s.v);
-      return { label: t(s.l), value: c, max: d.total, display: String(c) };
+      var c = S.sceneCount(s.v);
+      return { label: t(s.l).slice(0, 16), value: c, max: S.total, display: String(c) };
     }).sort(function (a, b) { return b.value - a.value; }));
 
     h += barGroup(t(Q.byWtp), WTP.map(function (w) {
-      var c = d.wtpCount(w.v);
-      return { label: t(w.l), value: c, max: d.total, display: String(c) };
+      var c = S.wtpCount(w.v);
+      return { label: t(w.l).slice(0, 16), value: c, max: S.total, display: String(c) };
     }));
 
     h += barGroup(t(Q.byFear), FEARS.map(function (f) {
-      var c = d.fearCount(f.v);
-      return { label: t(f.l), value: c, max: d.total, display: String(c) };
+      var c = S.fearCount(f.v);
+      return { label: t(f.l).slice(0, 16), value: c, max: S.total, display: String(c) };
     }).sort(function (a, b) { return b.value - a.value; }));
 
-    var notes = d.notes;
+    var notes = S.notes;
     if (notes.length) {
-      h += '<h3 class="dads-u-std-17B-170 u-mt-24 u-mb-8">' + esc(t(Q.recent)) + "</h3>" +
-        '<ul class="s-notes">' + notes.map(function (r) {
-          var roleL = "";
-          ROLES.forEach(function (x) { if (x.v === r.role) roleL = t(x.l); });
-          return '<li class="p-card" data-tone="quiet"><p class="u-text-note u-no-margin">' +
-            esc(roleL) + " · " + esc(t(Q.intentShort)) + " " + r.intent + "/5</p>" +
-            "<p class='u-mt-8 u-no-margin'>" + esc(r.note) + "</p></li>";
-        }).join("") + "</ul>";
+      h += '<h4 style="font-size:14px;margin:18px 0 8px">' + t(Q.recent) + "</h4>";
+      h += notes.map(function (r) {
+        var roleL = "";
+        ROLES.forEach(function (x) { if (x.v === r.role) roleL = t(x.l); });
+        return '<div class="card card-tight" style="margin-bottom:8px"><div class="tiny faint">' +
+          esc(roleL) + " · " + t(Q.intentShort) + " " + r.intent + '/5</div><div class="small">' +
+          esc(r.note) + "</div></div>";
+      }).join("");
     }
 
-    h += '<div class="l-cluster u-mt-24">' +
-      '<button class="dads-button" data-type="outline" data-size="md" id="expCsv" type="button">' + esc(t(Q.expCsv)) + "</button>" +
-      '<button class="dads-button" data-type="outline" data-size="md" id="expJson" type="button">' + esc(t(Q.expJson)) + "</button>" +
-      '<button class="dads-button" data-type="text" data-size="md" id="clearAll" type="button">' + esc(t(Q.clear)) + "</button></div>" +
-      '<p class="u-text-note u-mt-8">' + esc(t(Q.exportNote)) + "</p>";
+    h += '<div class="row row-wrap" style="margin-top:16px">' +
+      '<button class="btn btn-sm" id="expCsv" type="button">' + t(Q.expCsv) + "</button>" +
+      '<button class="btn btn-sm" id="expJson" type="button">' + t(Q.expJson) + "</button>" +
+      '<button class="btn btn-sm btn-ghost" id="clearAll" type="button">' + t(Q.clear) + "</button></div>" +
+      '<p class="tiny faint" style="margin:8px 0 0">' + esc(t(Q.exportNote)) + "</p>";
 
     box.innerHTML = h;
     $("expCsv").addEventListener("click", exportCsv);
@@ -546,23 +493,17 @@ window.LM_SURVEY = (function () {
     });
   }
 
-  function stat(value, label) {
-    return '<li class="s-stat"><span class="s-stat__value">' + esc(value) + "</span>" +
-      '<span class="s-stat__label">' + esc(label) + "</span></li>";
-  }
-
-  /* 棒グラフは色に意味を持たせず、数値を必ず併記する（色覚に依存させない） */
   function barGroup(title, rows) {
-    return '<h3 class="dads-u-std-17B-170 u-mt-24 u-mb-8">' + esc(title) + "</h3>" +
-      '<ul class="s-bars">' + rows.map(function (r) {
+    return '<h4 style="font-size:14px;margin:18px 0 8px">' + esc(title) + "</h4>" +
+      '<div class="bars">' + rows.map(function (r) {
         var pct = r.max ? Math.max(0, Math.min(100, (r.value / r.max) * 100)) : 0;
-        return '<li class="s-bar"><span class="s-bar__label">' + esc(r.label) + "</span>" +
-          '<span class="s-bar__track"><span class="s-bar__fill" style="width:' + pct.toFixed(1) + '%"></span></span>' +
-          '<span class="s-bar__value">' + esc(r.display) + "</span></li>";
-      }).join("") + "</ul>";
+        return '<div class="barline"><span class="faint">' + esc(r.label) + "</span>" +
+          '<span class="bt"><i style="width:' + pct.toFixed(1) + '%"></i></span>' +
+          '<span class="tiny">' + esc(r.display) + "</span></div>";
+      }).join("") + "</div>";
   }
 
-  /* ---------- 書き出し ---------- */
+  /* ---------- export ---------- */
   function download(name, text, type) {
     var blob = new Blob([text], { type: type + ";charset=utf-8" });
     var a = document.createElement("a");
@@ -597,10 +538,12 @@ window.LM_SURVEY = (function () {
   return {
     init: function () {
       renderForm();
-      renderStats();
-      fetchStats().then(renderStats);
+      renderStats();                              // まず端末の分をすぐ出す
+      fetchStats().then(function (j) {            // サーバーが応えたら全端末合計に差し替える
+        if (j) renderStats();
+      });
     },
-    refresh: function () { renderStats(); fetchStats().then(renderStats); },
+    refresh: function () { renderStats(); },
     relang: function () { renderForm(); renderStats(); },
     count: function () { return load().length; }
   };

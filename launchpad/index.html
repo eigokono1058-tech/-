@@ -1,222 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Launchpad Brief — Eigo (Ayden) Kono</title>
 <meta name="description" content="Launchpad brief for OpenAI DevDay 2026 (Product design and UXR): a more flexible delivery experience for Japan, a working prototype that is probably too big, and the questions I want help with.">
-<meta name="theme-color" content="#0017c1">
+<meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="../assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
-<link rel="stylesheet" href="../assets/css/dads/global.css">
-<link rel="stylesheet" href="../assets/css/dads/components.css">
 <link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/i18n.js"></script>
 <style>
-  /* ----------------------------------------------------------------------
-     このページ固有のレイアウトのみ。色・文字・角丸はDADSトークンから取る。
-     ---------------------------------------------------------------------- */
-  .blk { margin-block-start: calc(48 / 16 * 1rem); }
-  .blk:first-of-type { margin-block-start: calc(32 / 16 * 1rem); }
-  .meta-row { display: flex; flex-wrap: wrap; gap: calc(8 / 16 * 1rem); margin-block-start: calc(16 / 16 * 1rem); }
+  :root { --maxw: 760px; }
 
-  /* 応募時に提出した文章（原文のまま引用する） */
+  .brief-head { padding: 56px 0 10px; }
+  .brief-head h1 { font-size: clamp(25px, 6vw, 34px); letter-spacing: -0.02em; margin: 12px 0 10px; text-wrap: balance; }
+  .session-chip {
+    display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--brand-2);
+  }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+  section.blk { padding: 28px 0; border-top: 1px solid var(--border-soft); }
+  section.blk:first-of-type { border-top: 0; }
+  h2.sec {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-faint); margin: 0 0 12px;
+  }
+  h3.q { font-size: 18px; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  p { font-size: 14.5px; color: var(--text-dim); line-height: 1.75; }
+  .lede { font-size: 16px; color: var(--text); }
+
   .submitted {
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-inline-start: calc(8 / 16 * 1rem) solid var(--color-key-900);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-key-50);
+    padding: 16px 18px; border-radius: var(--radius);
+    border-left: 3px solid var(--brand-1);
+    background: color-mix(in srgb, var(--brand-1) 9%, transparent);
   }
-  .submitted + .submitted { margin-block-start: calc(12 / 16 * 1rem); }
   .submitted .tag {
-    display: block;
-    margin-block-end: calc(8 / 16 * 1rem);
-    font-family: var(--font-family-mono);
-    font-weight: bold;
-    font-size: calc(14 / 16 * 1rem);
-    line-height: 1.5;
-    letter-spacing: 0.1em;
-    color: var(--color-key-1000);
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--brand-1); display: block; margin-bottom: 8px;
   }
-  .submitted p { margin: 0; color: var(--color-neutral-solid-gray-900); }
+  .submitted p { color: var(--text); margin: 0; }
+  .submitted + .submitted { margin-top: 10px; }
 
-  /* メンターに聞きたいこと */
   .qcard {
-    margin-block-end: calc(16 / 16 * 1rem);
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
+    padding: 18px; border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    margin-bottom: 12px;
   }
-  @media (min-width: 48em) { .qcard { padding: calc(24 / 16 * 1rem); } }
-  .qcard.is-key { border-color: var(--color-key-900); border-width: calc(2 / 16 * 1rem); }
-  .qnum {
-    font-family: var(--font-family-mono);
-    font-weight: bold;
-    font-size: calc(14 / 16 * 1rem);
-    line-height: 1.5;
-    letter-spacing: 0.1em;
-    color: var(--color-key-900);
+  .qcard.is-key {
+    border-color: color-mix(in srgb, var(--brand-2) 40%, var(--border));
+    background:
+      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 11%, transparent), transparent 62%),
+      color-mix(in srgb, var(--surface) 90%, transparent);
   }
-  h3.q {
-    margin: calc(8 / 16 * 1rem) 0;
-    font-weight: bold;
-    font-size: calc(20 / 16 * 1rem);
-    line-height: 1.5;
-    letter-spacing: 0.02em;
-    text-wrap: balance;
-  }
+  .qnum { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--brand-2); }
   .qwhy {
-    margin-block-start: calc(16 / 16 * 1rem);
-    padding-block-start: calc(12 / 16 * 1rem);
-    border-block-start: 1px dashed var(--color-neutral-solid-gray-420);
-    color: var(--color-neutral-solid-gray-700);
-    font-size: calc(14 / 16 * 1rem);
-    line-height: 1.7;
+    margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);
+    font-size: 13px; color: var(--text-faint);
   }
-  .qwhy b { color: var(--color-neutral-solid-gray-900); }
+  .qwhy b { color: var(--text-dim); }
 
-  /* できていること / できていないこと */
-  .status { display: grid; gap: calc(12 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
-  .status li {
-    display: grid;
-    grid-template-columns: calc(24 / 16 * 1rem) 1fr;
-    gap: calc(12 / 16 * 1rem);
-    align-items: start;
+  .status { display: grid; gap: 7px; }
+  .status div {
+    display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+    font-size: 14px; color: var(--text-dim); align-items: start;
   }
-  .status .yes { color: var(--color-semantic-success-2); font-weight: bold; }
-  .status .no { color: var(--color-semantic-error-2); font-weight: bold; }
+  .status .yes { color: var(--ok); font-weight: 700; }
+  .status .no { color: var(--danger); font-weight: 700; }
 
-  /* 4つの数字 */
-  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 48em) { .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 620px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
   .kpi {
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
+    padding: 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 82%, transparent);
   }
-  .kpi .kv {
-    font-weight: bold;
-    font-size: calc(28 / 16 * 1rem);
-    line-height: 1.5;
-    letter-spacing: 0.01em;
-    color: var(--color-neutral-solid-gray-900);
-  }
-  .kpi .kv small { font-size: calc(16 / 16 * 1rem); color: var(--color-neutral-solid-gray-700); }
-  .kpi .kl {
-    margin-block-start: calc(4 / 16 * 1rem);
-    color: var(--color-neutral-solid-gray-700);
-    font-size: calc(14 / 16 * 1rem);
-    line-height: 1.5;
-  }
+  .kpi .kv { font-size: 23px; font-weight: 650; line-height: 1.05; letter-spacing: -0.02em; }
+  .kpi .kv small { font-size: 0.52em; font-weight: 600; color: var(--text-dim); margin-left: 2px; }
+  .kpi .kl { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; line-height: 1.4; }
 
-  /* 日本の前提 */
-  .cons { display: grid; gap: calc(12 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 48em) { .cons { grid-template-columns: 1fr 1fr; } }
+  .cons { display: grid; gap: 8px; }
+  @media (min-width: 620px) { .cons { grid-template-columns: 1fr 1fr; } }
   .con {
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface); font-size: 13.5px;
   }
-  .con b { display: block; margin-block-end: calc(4 / 16 * 1rem); font-size: calc(16 / 16 * 1rem); }
+  .con b { display: block; font-size: 13px; margin-bottom: 3px; }
 
-  /* 当日の読み上げ原稿 */
   .script {
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-inline-start: calc(8 / 16 * 1rem) solid var(--color-primitive-purple-800);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-primitive-purple-50);
-    line-height: 1.75;
+    padding: 16px 18px; border-radius: var(--radius);
+    border-left: 3px solid var(--brand-3);
+    background: color-mix(in srgb, var(--brand-3) 9%, transparent);
+    font-size: 15px; line-height: 1.8; color: var(--text);
   }
-  .script + .script { margin-block-start: calc(12 / 16 * 1rem); }
-  .script .pause { color: var(--color-primitive-purple-1000); font-weight: bold; }
-  .script .faint { color: var(--color-neutral-solid-gray-700); }
+  .script .pause { color: var(--brand-3); font-weight: 700; }
+  .script + .script { margin-top: 10px; }
 
-  /* 残す / 削る / 試す */
-  .cut-list { display: grid; gap: calc(8 / 16 * 1rem); margin: 0; padding: 0; list-style: none; }
+  .cut-list { display: grid; gap: 8px; }
   .cut {
-    display: grid;
-    grid-template-columns: calc(64 / 16 * 1rem) 1fr;
-    gap: calc(12 / 16 * 1rem);
-    align-items: start;
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(12 / 16 * 1rem) calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
+    display: grid; grid-template-columns: auto 1fr; gap: 10px;
+    padding: 11px 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface); font-size: 13.5px;
   }
+  .cut .n { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-faint); }
 
   @media print {
-    .noprint { display: none !important; }
+    .aurora, .grid-lines, .top-controls, .noprint { display: none !important; }
     body { background: #fff; }
+    :root { --text: #000; --text-dim: #222; --text-faint: #555; --surface: #fff; --border: #ccc; }
   }
 </style>
 </head>
 <body>
-
-<a class="p-skip-link dads-link noprint" href="#main">
-  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
-</a>
-
-<header class="p-header noprint">
-  <div class="l-container p-header__inner" data-width="prose">
-    <a class="p-header__brand" href="../">
-      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
-        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
-      </svg>
-      <span>LAST METERS<span class="p-header__sub">Launchpad brief</span></span>
-    </a>
-    <div class="p-header__tools"><span id="langBtn"></span></div>
-  </div>
-</header>
-
-<div class="l-container noprint" data-width="prose" style="padding-block-start: calc(16 / 16 * 1rem);">
-  <nav class="dads-breadcrumb" aria-labelledby="breadcrumb-label">
-    <span id="breadcrumb-label" class="dads-u-visually-hidden">現在位置 / You are here</span>
-    <p class="dads-breadcrumb__list">
-      <span class="dads-breadcrumb__item">
-        <a class="dads-breadcrumb__link" href="../"><span data-l="ja">ホーム</span><span data-l="en">Home</span></a>
-        <span class="dads-breadcrumb__separator">
-          <svg class="dads-breadcrumb__separator-icon" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-            <path d="M4.5 11L4 10.5L8 6.5L4 2.5L4.5 2L9 6.5L4.5 11Z" fill="currentcolor"/>
-          </svg>
-        </span>
-      </span>
-      <span class="dads-breadcrumb__item" aria-current="page">Launchpad brief</span>
-    </p>
-  </nav>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls noprint">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </div>
 
-<main class="l-main" id="main">
-  <div class="l-container" data-width="prose">
+<main class="wrap">
 
-
-  <div class="dads-heading" data-size="32" data-chip>
-    <p class="dads-heading__shoulder">LAUNCHPAD BRIEF · PRODUCT DESIGN &amp; UXR</p>
-    <h1 class="dads-heading__heading">I built the prototype. Now I need to cut it down to a product.</h1>
-  </div>
-  <div class="u-mt-16">
-    <p class="dads-u-std-18N-160">
+  <header class="brief-head">
+    <div class="session-chip">
+      <span>LAUNCHPAD BRIEF</span><span>·</span><span>PRODUCT DESIGN &amp; UXR</span>
+    </div>
+    <h1>I built the prototype. Now I need to cut it down to a product.</h1>
+    <p class="lede">
       <span data-l="en">I am exploring a more flexible way to receive parcels in Japan. I already built a working
         prototype — and I am fairly sure it is three products wide and zero products deep. I want help choosing
         what to keep, and help figuring out how to validate it honestly.</span>
       <span data-l="ja">日本での、もっと柔軟な荷物の受け取り方を検討しています。すでに動くプロトタイプを作りましたが、たぶん「横に3製品ぶん広くて、縦に1製品ぶんもない」状態です。何を残すかの判断と、正直な検証のやり方を相談したいです。</span>
     </p>
     <div class="meta-row">
-      <span class="dads-chip-label" data-style="outlined" data-color="gray">Eigo “Ayden” Kono</span>
-      <span class="dads-chip-label" data-style="outlined" data-color="gray">Hitachi, Ltd. · Tokyo</span>
-      <span class="dads-chip-label" data-style="filled-1" data-color="blue">OpenAI DevDay · Sep 29, 2026</span>
+      <span class="pill">Eigo “Ayden” Kono</span>
+      <span class="pill">Hitachi, Ltd. · Tokyo</span>
+      <span class="pill pill-info">OpenAI DevDay · Sep 29, 2026</span>
     </div>
-  </div>
+  </header>
 
   <!-- ============ WHAT I SUBMITTED ============ -->
-  <section class="blk" aria-labelledby="what-i-told-you-when-i-applied">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="what-i-told-you-when-i-applied" class="dads-heading__heading">What I told you when I applied</h2></div>
+  <section class="blk">
+    <h2 class="sec">What I told you when I applied</h2>
     <div class="submitted">
       <span class="tag">WHAT ARE YOU BUILDING?</span>
       <p>
@@ -234,54 +160,54 @@
         experience that both customers and delivery providers would actually use.
       </p>
     </div>
-    <p class="u-text-support" class="u-mt-16">
+    <p class="small faint" style="margin-top:12px">
       <span data-l="en">Everything below is the detail behind those two paragraphs.</span>
       <span data-l="ja">以下はこの2段落の中身です。応募時に書いた内容と食い違わないようにしています。</span>
     </p>
-    <div class="l-cluster u-mt-16">
-      <a class="dads-button" data-type="outline" data-size="sm" href="../assets/video/last-meters-en.mp4" target="_blank" rel="noopener">
+    <div class="row row-wrap" style="margin-top:10px">
+      <a class="btn btn-sm" href="../assets/video/last-meters-en.mp4" target="_blank" rel="noopener">
         ▶ <span data-l="en">Or watch the 2-minute film</span><span data-l="ja">2分の動画で見る</span>
       </a>
-      <a class="dads-button" data-type="text" data-size="sm" href="../">
+      <a class="btn btn-sm btn-ghost" href="../">
         <span data-l="en">It is on my profile page too</span><span data-l="ja">プロフィールページにも置いています</span>
       </a>
     </div>
   </section>
 
   <!-- ============ THE PROBLEM, BRIEFLY ============ -->
-  <section class="blk" aria-labelledby="the-problem-in-four-numbers">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="the-problem-in-four-numbers" class="dads-heading__heading">The problem, in four numbers</h2></div>
-    <ul class="kpis"
-      <li class="kpi">
+  <section class="blk">
+    <h2 class="sec">The problem, in four numbers</h2>
+    <div class="kpis">
+      <div class="kpi">
         <div class="kv">5.0<small>bn</small></div>
         <div class="kl">
           <span data-l="en">parcels handled per year in Japan</span>
           <span data-l="ja">日本の宅配便取扱個数（年間）</span>
         </div>
-      </li>
-      <li class="kpi">
+      </div>
+      <div class="kpi">
         <div class="kv">8.3<small>%</small></div>
         <div class="kl">
           <span data-l="en">still redelivered (Oct 2025) — about 400m parcels</span>
           <span data-l="ja">再配達率（2025年10月）。約4億個</span>
         </div>
-      </li>
-      <li class="kpi">
+      </div>
+      <div class="kpi">
         <div class="kv">90<small>k</small></div>
         <div class="kl">
           <span data-l="en">drivers’ worth of labour lost to redelivery per year</span>
           <span data-l="ja">再配達に費やされる労働時間（ドライバー約9万人分）</span>
         </div>
-      </li>
-      <li class="kpi">
+      </div>
+      <div class="kpi">
         <div class="kv">34<small>%</small></div>
         <div class="kl">
           <span data-l="en">projected freight capacity shortfall by FY2030</span>
           <span data-l="ja">2030年度に不足する輸送能力の見通し</span>
         </div>
-      </li>
-    </ul>
-    <p class="u-text-support" class="u-mt-16">
+      </div>
+    </div>
+    <p class="small faint" style="margin-top:12px">
       <span data-l="en">Sources: Japan’s Ministry of Land, Infrastructure, Transport and Tourism. The rate is
         falling — but mostly because parcels moved to the doorstep, which does nothing for chilled, frozen,
         medicine or high-value items.</span>
@@ -290,8 +216,8 @@
   </section>
 
   <!-- ============ WHAT I BUILT ============ -->
-  <section class="blk" aria-labelledby="what-i-have-already-built">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="what-i-have-already-built" class="dads-heading__heading">What I have already built</h2></div>
+  <section class="blk">
+    <h2 class="sec">What I have already built</h2>
     <p>
       <span data-l="en">A working prototype you can open on your phone right now. It simulates a parcel in
         transit and lets you move where it lands — a station locker, a convenience store, your office, a friend,
@@ -299,40 +225,40 @@
         returns the reason when it is not.</span>
       <span data-l="ja">いますぐスマホで開ける動くプロトタイプです。配送中の荷物の受取先を差し替えられます。駅のロッカー、コンビニ、勤務先、友人、そして帰宅途中の自分自身。移動先が許されるかどうかをポリシーエンジンが判定し、だめなときは理由を返します。</span>
     </p>
-    <div class="l-cluster u-mt-16 u-mb-24">
-      <a class="dads-button" data-type="solid-fill" data-size="md" href="../app/">
+    <div class="row row-wrap" style="margin:14px 0 18px">
+      <a class="btn btn-primary" href="../app/">
         <span data-l="en">Open the prototype</span><span data-l="ja">プロトタイプを開く</span>
       </a>
-      <a class="dads-button" data-type="text" data-size="md" href="../pitch/">
+      <a class="btn btn-ghost" href="../pitch/">
         <span data-l="en">The longer pitch</span><span data-l="ja">長めのピッチ</span>
       </a>
     </div>
-    <ul class="status"
-      <li><span class="yes">✓</span><span>
+    <div class="status">
+      <div><span class="yes">✓</span><span>
         <span data-l="en">8 ways to receive, a rules engine, scoped time-boxed permissions, an exception
           simulator, and a built-in survey.</span>
         <span data-l="ja">8種類の受取方法、ルールエンジン、最小スコープ・時限付きの受取権限、例外シミュレータ、内蔵アンケート。</span>
-      </span></li>
-      <li><span class="no">✗</span><span>
+      </span></div>
+      <div><span class="no">✗</span><span>
         <span data-l="en">That list is my problem, not my achievement. It is a platform, and I cannot ship a
           platform alone.</span>
         <span data-l="ja">この一覧は成果ではなく問題です。これは基盤であって、一人で出せるものではありません。</span>
-      </span></li>
-      <li><span class="no">✗</span><span>
+      </span></div>
+      <div><span class="no">✗</span><span>
         <span data-l="en">Zero conversations with a delivery company. I do not know what one redelivery costs
           them, and that number decides whether any of this is a business.</span>
         <span data-l="ja">配送事業者との会話がゼロです。再配達1件のコストを知らないのに、その数字が事業になるかを決めます。</span>
-      </span></li>
-      <li><span class="no">✗</span><span>
+      </span></div>
+      <div><span class="no">✗</span><span>
         <span data-l="en">No real users yet. The survey exists; nobody has filled it in.</span>
         <span data-l="ja">実ユーザーがまだいません。アンケートはありますが、誰も回答していません。</span>
-      </span></li>
-    </ul>
+      </span></div>
+    </div>
   </section>
 
   <!-- ============ THE QUESTIONS ============ -->
-  <section class="blk" aria-labelledby="what-i-want-your-help-with">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="what-i-want-your-help-with" class="dads-heading__heading">What I want your help with</h2></div>
+  <section class="blk">
+    <h2 class="sec">What I want your help with</h2>
 
     <div class="qcard is-key">
       <div class="qnum">Q1 · VALIDATION</div>
@@ -420,82 +346,82 @@
   </section>
 
   <!-- ============ MY OWN GUESS ============ -->
-  <section class="blk" aria-labelledby="my-own-current-guess-tell-me-if-it-is-wr">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="my-own-current-guess-tell-me-if-it-is-wr" class="dads-heading__heading">My own current guess (tell me if it is wrong)</h2></div>
-    <ul class="cut-list"
-      <li class="cut"><span class="n">KEEP</span><span>
+  <section class="blk">
+    <h2 class="sec">My own current guess (tell me if it is wrong)</h2>
+    <div class="cut-list">
+      <div class="cut"><span class="n">KEEP</span><span>
         <span data-l="en">One item type where failure actually hurts: <b>chilled and frozen groceries</b>. You
           cannot leave them at a door, so the problem is real and unsolved.</span>
         <span data-l="ja">失敗が本当に痛む品目を1つ：<b>冷蔵・冷凍食品</b>。置き配にできないので、課題が実在していて未解決です。</span>
-      </span></li>
-      <li class="cut"><span class="n">KEEP</span><span>
+      </span></div>
+      <div class="cut"><span class="n">KEEP</span><span>
         <span data-l="en">One place that already exists: <b>a temperature-controlled locker on a commute</b>.
           No new hardware, no new building access.</span>
         <span data-l="ja">すでに存在する場所を1つ：<b>通勤経路上の温度帯対応ロッカー</b>。新しい機器も建物への立ち入り権限も要りません。</span>
-      </span></li>
-      <li class="cut"><span class="n">CUT</span><span>
+      </span></div>
+      <div class="cut"><span class="n">CUT</span><span>
         <span data-l="en">Delivery to a moving person, delegation to friends, robot handover, indoor delivery,
           the autonomy levels, the whole permission model. All of it is interesting. None of it is v1.</span>
         <span data-l="ja">移動中の人への配送、友人への委任、ロボットとの受渡し、屋内搬入、自律レベル、権限モデル全体。どれも面白いですが、v1ではありません。</span>
-      </span></li>
-      <li class="cut"><span class="n">TEST</span><span>
+      </span></div>
+      <div class="cut"><span class="n">TEST</span><span>
         <span data-l="en">Whether anyone will walk 3 extra minutes for a parcel they could have had at home
           tomorrow. That single behaviour decides everything.</span>
         <span data-l="ja">明日自宅で受け取れる荷物のために、3分多く歩く人がいるか。この1つの行動がすべてを決めます。</span>
-      </span></li>
-    </ul>
+      </span></div>
+    </div>
   </section>
 
   <!-- ============ CONSTRAINTS ============ -->
-  <section class="blk" aria-labelledby="context-you-may-not-have-about-japan">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="context-you-may-not-have-about-japan" class="dads-heading__heading">Context you may not have about Japan</h2></div>
-    <ul class="cons"
-      <li class="con">
+  <section class="blk">
+    <h2 class="sec">Context you may not have about Japan</h2>
+    <div class="cons">
+      <div class="con">
         <b>Handoff is cultural, not just regulatory</b>
         <span data-l="en">Direct handoff has been the norm for security reasons. Unattended delivery is now
           standard but many people still dislike it.</span>
         <span data-l="ja">対面での受け渡しは防犯上の理由で長く標準でした。置き配は制度化されましたが、抵抗のある人はまだ多いです。</span>
-      </li>
-      <li class="con">
+      </div>
+      <div class="con">
         <b>Carriers are already at the limit</b>
         <span data-l="en">Driver shortage plus a projected 34% capacity shortfall by 2030 means reducing
           redelivery is now a continuity problem, not a cost-saving nice-to-have.</span>
         <span data-l="ja">ドライバー不足に加え、2030年に輸送能力が34%不足する見通しです。再配達削減はコスト削減ではなく事業継続の問題になっています。</span>
-      </li>
-      <li class="con">
+      </div>
+      <div class="con">
         <b>Each carrier has its own app</b>
         <span data-l="en">Changing a pickup location is already possible — per carrier, in silos. A cross-carrier
           layer is the opportunity and also the political problem.</span>
         <span data-l="ja">受取場所の変更は各社のアプリで既に可能ですが、会社ごとに分断されています。横断できることが機会であり、同時に政治的な難所です。</span>
-      </li>
-      <li class="con">
+      </div>
+      <div class="con">
         <b>Lockers already exist at scale</b>
         <span data-l="en">A carrier-neutral open locker network is already at roughly 6,000 locations. I do not
           need to build boxes.</span>
         <span data-l="ja">キャリア横断のオープンロッカーが既に約6,000カ所あります。箱を作る必要はありません。</span>
-      </li>
-    </ul>
+      </div>
+    </div>
   </section>
 
   <!-- ============ WHAT I'LL DO WITH IT ============ -->
-  <section class="blk" aria-labelledby="what-i-will-do-with-your-answer">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="what-i-will-do-with-your-answer" class="dads-heading__heading">What I will do with your answer</h2></div>
-    <ul class="status"
-      <li><span class="yes">1</span><span>
+  <section class="blk">
+    <h2 class="sec">What I will do with your answer</h2>
+    <div class="status">
+      <div><span class="yes">1</span><span>
         <span data-l="en">Cut the prototype down to whatever we agree ships first — within the week.</span>
         <span data-l="ja">合意した「最初に出すもの」までプロトタイプを削ります。その週のうちに。</span>
-      </span></li>
-      <li><span class="yes">2</span><span>
+      </span></div>
+      <div><span class="yes">2</span><span>
         <span data-l="en">Run the validation test you suggest, and send you the result — including if it fails.</span>
         <span data-l="ja">提案された検証を実行し、結果を送ります。失敗した場合もそのまま送ります。</span>
-      </span></li>
-      <li><span class="yes">3</span><span>
+      </span></div>
+      <div><span class="yes">3</span><span>
         <span data-l="en">Get the cost of one redelivery from an actual carrier. That is my single biggest
           unknown.</span>
         <span data-l="ja">再配達1件のコストを、実際の配送事業者から取ってきます。これが最大の未知です。</span>
-      </span></li>
-    </ul>
-    <p class="u-text-support" class="u-mt-16">
+      </span></div>
+    </div>
+    <p class="small faint" style="margin-top:14px;margin-bottom:0">
       <span data-l="en">If you are another builder in this group: I would like to talk to anyone working on
         two-sided products where one side is an operations team. The design problem looks identical from
         where I sit.</span>
@@ -504,9 +430,9 @@
   </section>
 
   <!-- ============ SPOKEN SCRIPT ============ -->
-  <section class="blk noprint" aria-labelledby="spoken-script-for-me">
-    <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);"><h2 id="spoken-script-for-me" class="dads-heading__heading">Spoken script (for me)</h2></div>
-    <p class="u-text-support">
+  <section class="blk noprint">
+    <h2 class="sec">Spoken script (for me)</h2>
+    <p class="small faint">
       <span data-l="en">Read once before the session. Slashes are breath marks.</span>
       <span data-l="ja">セッション前に一度音読する用。スラッシュは息継ぎの位置。</span>
     </p>
@@ -552,43 +478,30 @@
   </section>
 
   <section class="blk">
-    <div class="l-cluster">
-      <a class="dads-button" data-type="solid-fill" data-size="lg" href="../">
+    <div class="row row-wrap">
+      <a class="btn btn-primary" href="../">
         <span data-l="en">Profile &amp; contact</span><span data-l="ja">プロフィール・連絡先</span>
       </a>
-      <a class="dads-button" data-type="outline" data-size="md" href="../app/">
+      <a class="btn" href="../app/">
         <span data-l="en">The prototype</span><span data-l="ja">プロトタイプ</span>
       </a>
-      <a class="dads-button" data-type="text" data-size="md" href="../plan/">
+      <a class="btn btn-ghost" href="../plan/">
         <span data-l="en">Open questions</span><span data-l="ja">足りないもの一覧</span>
       </a>
-      <button class="dads-button noprint" data-type="text" data-size="md" id="printBtn" type="button">
+      <button class="btn btn-ghost noprint" id="printBtn" type="button">
         <span data-l="en">Print</span><span data-l="ja">印刷</span>
       </button>
     </div>
   </section>
 
-  </div>
+  <p class="footer">
+    Launchpad brief · Product design &amp; UXR · OpenAI DevDay, September 29, 2026 · Fort Mason, San Francisco
+  </p>
 </main>
 
-<footer class="p-footer">
-  <div class="l-container" data-width="prose">
-    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
-    <ul class="p-footer__links noprint">
-      <li><a class="dads-utility-link" href="../"><span class="dads-utility-link__label"><span data-l="ja">ホーム</span><span data-l="en">Home</span></span></a></li>
-      <li><a class="dads-utility-link" href="../app/"><span class="dads-utility-link__label"><span data-l="ja">デモ</span><span data-l="en">Demo</span></span></a></li>
-      <li><a class="dads-utility-link" href="../pitch/"><span class="dads-utility-link__label"><span data-l="ja">構想</span><span data-l="en">Pitch</span></span></a></li>
-      <li><a class="dads-utility-link" href="../plan/"><span class="dads-utility-link__label"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></span></a></li>
-    </ul>
-    <p class="p-footer__note">Launchpad brief · Product design &amp; UXR · OpenAI DevDay, September 29, 2026 · Fort Mason, San Francisco</p>
-    <p class="p-footer__note">
-      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
-      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
-    </p>
-  </div>
-</footer>
-
+<script src="../assets/js/theme.js"></script>
 <script>
+  if (window.LMTheme) window.LMTheme.bind("#themeBtn");
   if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
   var pb = document.getElementById("printBtn");
   if (pb) pb.addEventListener("click", function () { window.print(); });

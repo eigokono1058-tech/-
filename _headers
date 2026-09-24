@@ -21,9 +21,6 @@
 /assets/qr/*
   Cache-Control: public, max-age=86400
 
-/assets/css/dads/*
-  Cache-Control: public, max-age=86400
-
 # HTMLは毎回確認させる（内容を直したらすぐ反映したいため）
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
