@@ -186,6 +186,9 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── map.js                  地図の描画（自前SVG・外部タイル不要）
 │   └── ui.js                   画面描画とインタラクション
 ├── tools/
+│   ├── video/
+│   │   ├── delivery-os-film.html  動画の元（window.seek(秒)で任意の時刻の絵になる）
+│   │   └── render.cjs             1コマずつ撮ってmp4にまとめる
 │   ├── gen_qr.py               QR生成ツール（segnoを使用）
 │   └── make_avatar.py          顔写真をサイト用アバターに整える（Pillowを使用）
 └── demos/nordic-interior/      以前アップロードされていた3Dデモ（退避）
