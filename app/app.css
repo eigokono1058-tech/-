@@ -592,3 +592,7 @@ textarea { min-height: 84px; resize: vertical; }
 /* 地点名が長くても、カードが横に伸びて画面を押し出さないようにする */
 .dec-move, .dec-reason, .dec-note, .why-row, .pol-sum li { overflow-wrap: anywhere; }
 .dec-fact { min-width: 0; }
+
+/* 配送完了。支払いの操作は出さない（カードから自動で引き落とされる前提） */
+.dec-done { border-left-width: 3px; }
+.dec-done .dec-head b { font-size: 15px; }
