@@ -1,0 +1,30 @@
+# Cloudflare Workers の静的アセットに付けるヘッダー
+# 注意: ここのルールは Worker が生成するレスポンス（/api/*）には適用されない。
+#       APIのヘッダーは worker/index.js 側で付けている。
+
+/*
+  # クリックジャッキング防止（このサイトを他所のiframeに埋めさせない）
+  X-Frame-Options: DENY
+  # MIMEタイプの推測を止める
+  X-Content-Type-Options: nosniff
+  # 外部サイトへ遷移するとき、パスまで渡さない
+  Referrer-Policy: strict-origin-when-cross-origin
+  # 使っていない端末機能は明示的に切る
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  # 読み込み先を絞る。フォントはGoogle Fonts、通信は自分のAPIのみ。
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+
+# 中身が変わらないものは長めにキャッシュしてよい
+/assets/video/*
+  Cache-Control: public, max-age=604800
+
+/assets/qr/*
+  Cache-Control: public, max-age=86400
+
+# HTMLは毎回確認させる（内容を直したらすぐ反映したいため）
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# workers.dev の仮URLは検索結果に出さない（独自ドメイン側だけを見せる）
+https://:subdomain.workers.dev/*
+  X-Robots-Tag: noindex

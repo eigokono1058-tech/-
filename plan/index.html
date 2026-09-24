@@ -1,143 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>事業計画 — LAST METERS</title>
 <meta name="description" content="LAST METERS の事業計画・未解決論点・検証計画。AIエージェント前提の受取インフラ構想のドキュメント。">
-<meta name="theme-color" content="#0017c1">
+<meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="../assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
-<link rel="stylesheet" href="../assets/css/dads/global.css">
-<link rel="stylesheet" href="../assets/css/dads/components.css">
 <link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/i18n.js"></script>
 <style>
-  /* Markdownから出力されたDADSコンポーネントの縦リズムだけ整える */
-  .md > .md-heading { margin-block: calc(40 / 16 * 1rem) calc(12 / 16 * 1rem); }
-  .md > .md-heading:first-child { margin-block-start: 0; }
-  .md > .md-heading[data-size="20"],
-  .md > .md-heading[data-size="18"] { margin-block-start: calc(28 / 16 * 1rem); }
-  .md > .dads-list { margin-block: 0 calc(16 / 16 * 1rem); }
-  .md > .md-table { margin-block: calc(16 / 16 * 1rem) calc(24 / 16 * 1rem); }
-  .md > .md-quote { margin-block: calc(20 / 16 * 1rem); }
-  .md > .md-divider { margin-block: calc(32 / 16 * 1rem); }
-  .md > .md-pre {
-    margin-block: calc(16 / 16 * 1rem);
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-solid-gray-50);
-    overflow-x: auto;
+  :root { --maxw: 760px; }
+  .doc-bar {
+    position: sticky; top: 0; z-index: 30;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-soft);
   }
-  .md code:not(pre code) {
-    border-radius: calc(4 / 16 * 1rem);
-    padding: 0 calc(4 / 16 * 1rem);
-    background-color: var(--color-neutral-solid-gray-100);
-    color: var(--color-neutral-solid-gray-900);
+  .doc-bar-inner { display: flex; gap: 6px; padding: 10px 0; overflow-x: auto; }
+  .doc-tab {
+    flex: 0 0 auto; padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-dim); font: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
   }
-  .md strong { font-weight: bold; color: var(--color-neutral-solid-gray-900); }
-  /* 表はスマホで潰さず横スクロールさせる（列が細くなると読めなくなるため） */
-  .md-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .md-table .dads-table__table { min-width: calc(620 / 16 * 1rem); }
-  .md-table:focus-visible {
-    outline: calc(4 / 16 * 1rem) solid var(--color-neutral-black);
-    outline-offset: calc(2 / 16 * 1rem);
+  .doc-tab[aria-selected="true"] { border-color: var(--brand-2); color: var(--text); background: color-mix(in srgb, var(--brand-2) 12%, var(--surface)); }
+
+  .md { padding: 26px 0 48px; }
+  .md h1 { font-size: 27px; margin: 0 0 14px; letter-spacing: -0.02em; }
+  .md h2 { font-size: 20px; margin: 36px 0 12px; padding-top: 8px; letter-spacing: -0.015em; }
+  .md h3 { font-size: 16px; margin: 26px 0 10px; }
+  .md h4 { font-size: 14px; margin: 20px 0 8px; color: var(--text-dim); }
+  .md p { font-size: 14.5px; color: var(--text-dim); line-height: 1.75; }
+  .md ul, .md ol { font-size: 14.5px; color: var(--text-dim); padding-left: 1.4em; line-height: 1.75; }
+  .md li { margin-bottom: 5px; }
+  .md li ul { margin-top: 5px; font-size: 13.5px; }
+  .md strong { color: var(--text); font-weight: 650; }
+  .md code {
+    font-family: var(--mono); font-size: 0.86em;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    padding: 1px 5px; border-radius: 5px; color: var(--brand-2);
   }
-  .p-doc-nav { display: flex; gap: calc(8 / 16 * 1rem); flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+  .md pre.md-pre {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px; overflow-x: auto;
+    font-size: 12px; line-height: 1.6; color: var(--text-dim);
+  }
+  .md pre.md-pre code { background: none; border: 0; padding: 0; color: inherit; font-size: 12px; }
+  .md blockquote.md-quote {
+    margin: 18px 0; padding: 14px 16px;
+    border-left: 3px solid var(--brand-2);
+    background: color-mix(in srgb, var(--brand-2) 8%, transparent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 14.5px; color: var(--text);
+  }
+  .md hr { margin: 32px 0; }
+  /* 表はスマホで潰さず、横スクロールさせる（列が細くなると読めなくなるため） */
+  .md-tblwrap {
+    overflow-x: auto; margin: 14px 0 18px;
+    border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+    -webkit-overflow-scrolling: touch;
+  }
+  .md-tbl { border-collapse: collapse; font-size: 13px; min-width: 620px; width: 100%; }
+  .md-tbl th, .md-tbl td {
+    text-align: left; padding: 9px 10px;
+    border-bottom: 1px solid var(--border-soft); vertical-align: top;
+  }
+  .md-tbl th {
+    font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-faint); font-weight: 700; white-space: nowrap;
+    border-bottom-color: var(--border);
+  }
+  .md-tbl td { color: var(--text-dim); }
+  .md-tbl tr:hover td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .md-tbl code { white-space: nowrap; }
+
+  .loading { padding: 40px 0; color: var(--text-faint); font-size: 14px; }
 </style>
 </head>
 <body>
-
-<a class="p-skip-link dads-link" href="#main">
-  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
-</a>
-
-<header class="p-header">
-  <div class="l-container p-header__inner" data-width="prose">
-    <a class="p-header__brand" href="../">
-      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
-        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
-      </svg>
-      <span>LAST METERS<span class="p-header__sub"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></span></span>
-    </a>
-    <div class="p-header__tools"><span id="langBtn"></span></div>
-  </div>
-</header>
-
-<div class="l-container" data-width="prose" style="padding-block-start: calc(16 / 16 * 1rem);">
-  <nav class="dads-breadcrumb" aria-labelledby="breadcrumb-label">
-    <span id="breadcrumb-label" class="dads-u-visually-hidden">現在位置 / You are here</span>
-    <p class="dads-breadcrumb__list">
-      <span class="dads-breadcrumb__item">
-        <a class="dads-breadcrumb__link" href="../"><span data-l="ja">ホーム</span><span data-l="en">Home</span></a>
-        <span class="dads-breadcrumb__separator">
-          <svg class="dads-breadcrumb__separator-icon" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-            <path d="M4.5 11L4 10.5L8 6.5L4 2.5L4.5 2L9 6.5L4.5 11Z" fill="currentcolor"/>
-          </svg>
-        </span>
-      </span>
-      <span class="dads-breadcrumb__item" aria-current="page">
-        <span data-l="ja">事業計画</span><span data-l="en">Business plan</span>
-      </span>
-    </p>
-  </nav>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </div>
 
-<main class="l-main" id="main">
-  <div class="l-container" data-width="prose">
-
-    <nav class="dads-toc" data-border="solid" aria-labelledby="doc-nav-heading">
-      <h2 id="doc-nav-heading" class="dads-toc__heading">
-        <span data-l="ja">ドキュメント</span><span data-l="en">Documents</span>
-      </h2>
-      <ul class="p-doc-nav" role="tablist">
-        <li>
-          <button class="dads-button" data-type="solid-fill" data-size="sm" role="tab" data-doc="business-plan" aria-selected="true" type="button">
-            <span data-l="ja">事業計画</span><span data-l="en">Business plan</span>
-          </button>
-        </li>
-        <li>
-          <button class="dads-button" data-type="outline" data-size="sm" role="tab" data-doc="open-questions" aria-selected="false" type="button">
-            <span data-l="ja">足りないもの</span><span data-l="en">Open questions</span>
-          </button>
-        </li>
-        <li>
-          <button class="dads-button" data-type="outline" data-size="sm" role="tab" data-doc="validation-plan" aria-selected="false" type="button">
-            <span data-l="ja">検証計画</span><span data-l="en">Validation plan</span>
-          </button>
-        </li>
-      </ul>
-    </nav>
-
-    <article class="md u-mt-32" id="doc" aria-live="polite" aria-busy="true">
-      <p class="u-text-support">…</p>
-    </article>
-
+<div class="doc-bar">
+  <div class="wrap">
+    <div class="doc-bar-inner" role="tablist" aria-label="Documents">
+      <button class="doc-tab" role="tab" data-doc="business-plan" aria-selected="true">
+        <span data-l="ja">事業計画</span><span data-l="en">Business plan</span>
+      </button>
+      <button class="doc-tab" role="tab" data-doc="open-questions" aria-selected="false">
+        <span data-l="ja">足りないもの</span><span data-l="en">Open questions</span>
+      </button>
+      <button class="doc-tab" role="tab" data-doc="validation-plan" aria-selected="false">
+        <span data-l="ja">検証計画</span><span data-l="en">Validation plan</span>
+      </button>
+      <a class="doc-tab" href="../pitch/" style="text-decoration:none">
+        <span data-l="ja">ピッチ ↗</span><span data-l="en">Pitch ↗</span>
+      </a>
+      <a class="doc-tab" href="../app/" style="text-decoration:none">
+        <span data-l="ja">デモ ↗</span><span data-l="en">Demo ↗</span>
+      </a>
+    </div>
   </div>
+</div>
+
+<main class="wrap">
+  <article class="md" id="doc">
+    <p class="loading">…</p>
+  </article>
+  <p class="footer"><a href="../">
+    <span data-l="ja">← プロフィールに戻る</span><span data-l="en">← Back to profile</span>
+  </a></p>
 </main>
 
-<footer class="p-footer">
-  <div class="l-container" data-width="prose">
-    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
-    <ul class="p-footer__links">
-      <li><a class="dads-utility-link" href="../"><span class="dads-utility-link__label"><span data-l="ja">ホーム</span><span data-l="en">Home</span></span></a></li>
-      <li><a class="dads-utility-link" href="../app/"><span class="dads-utility-link__label"><span data-l="ja">デモ</span><span data-l="en">Demo</span></span></a></li>
-      <li><a class="dads-utility-link" href="../pitch/"><span class="dads-utility-link__label"><span data-l="ja">構想</span><span data-l="en">Pitch</span></span></a></li>
-      <li><a class="dads-utility-link" href="../launchpad/"><span class="dads-utility-link__label">Launchpad</span></a></li>
-    </ul>
-    <p class="p-footer__note">
-      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
-      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
-    </p>
-  </div>
-</footer>
-
+<script src="../assets/js/theme.js"></script>
 <script src="md.js"></script>
 <script>
   (function () {
+    if (window.LMTheme) window.LMTheme.bind("#themeBtn");
     var I18N = window.LM_I18N;
     var docEl = document.getElementById("doc");
     var tabs = Array.prototype.slice.call(document.querySelectorAll("[data-doc]"));
@@ -151,13 +135,10 @@
     function show(base) {
       current = base;
       tabs.forEach(function (t) {
-        var on = t.getAttribute("data-doc") === base;
-        t.setAttribute("aria-selected", on ? "true" : "false");
-        t.setAttribute("data-type", on ? "solid-fill" : "outline");
+        t.setAttribute("aria-selected", t.getAttribute("data-doc") === base ? "true" : "false");
       });
       var file = fileFor(base);
-      docEl.setAttribute("aria-busy", "true");
-      docEl.innerHTML = '<p class="u-text-support">' + (lang() === "en" ? "Loading…" : "読み込み中…") + "</p>";
+      docEl.innerHTML = '<p class="loading">' + (lang() === "en" ? "Loading…" : "読み込み中…") + "</p>";
       var get = function (f) {
         return fetch(f, { cache: "no-cache" }).then(function (r) {
           if (!r.ok) throw new Error(r.status + "");
@@ -168,8 +149,7 @@
       var job = mode() === "both"
         ? Promise.all([get(base + ".en.md"), get(base + ".md")]).then(function (both) {
           return window.LM_MD.render(both[0]) +
-            '<hr class="dads-divider md-divider" data-color="black" data-style="solid" data-width="2">' +
-            '<p class="u-text-support">日本語版 / Japanese version</p>' +
+            '<hr><p class="loading" style="padding:0">日本語版 / Japanese version</p>' +
             window.LM_MD.render(both[1]);
         })
         : get(file).then(function (md) { return window.LM_MD.render(md); });
@@ -177,27 +157,19 @@
       job
         .then(function (html) {
           docEl.innerHTML = html;
-          docEl.setAttribute("aria-busy", "false");
           window.scrollTo({ top: 0, behavior: "smooth" });
           history.replaceState(null, "", "#" + base);
         })
         .catch(function () {
-          docEl.setAttribute("aria-busy", "false");
           docEl.innerHTML =
-            '<div class="dads-notification-banner" data-style="standard" data-type="error">' +
-            '<h2 class="dads-notification-banner__heading">' +
-            '<svg class="dads-notification-banner__icon" width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="エラー">' +
-            '<circle cx="12" cy="12" r="10" fill="currentcolor"/><path d="M11 6h2v8h-2z" fill="Canvas"/>' +
-            '<circle cx="12" cy="17" r="1.2" fill="Canvas"/></svg>' +
-            '<span class="dads-notification-banner__heading-text">' +
-            (lang() === "en" ? "Could not load the document." : "ドキュメントを読み込めませんでした。") +
-            "</span></h2>" +
-            '<div class="dads-notification-banner__body"><p>' +
+            '<div class="card"><b>' +
+            (lang() === "en" ? "Could not load the document." : "ドキュメントを読み込めませんでした。") + "</b>" +
+            '<p class="small muted" style="margin:8px 0 0">' +
             (lang() === "en"
               ? "Opening the file directly from disk is blocked by the browser. Serve it with <code>python3 -m http.server</code>, or open "
               : "ローカルでファイルを直接開いた場合はブラウザの制約で読み込めません。<code>python3 -m http.server</code> で配信するか、") +
-            '<a class="dads-link" href="' + file + '">' + file + "</a>" +
-            (lang() === "en" ? " directly." : " を直接開いてください。") + "</p></div></div>";
+            '<a href="' + file + '">' + file + "</a>" +
+            (lang() === "en" ? " directly." : " を直接開いてください。") + "</p></div>";
         });
     }
 

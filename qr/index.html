@@ -1,276 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QR Kit — LAST METERS</title>
 <meta name="description" content="イベント用QRコードのプレビュー・印刷・ダウンロード。名刺サイズと卓上ポスター(A6)、日本語版と英語版に対応。">
-<meta name="theme-color" content="#0017c1">
+<meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="../assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap">
-<link rel="stylesheet" href="../assets/css/dads/global.css">
-<link rel="stylesheet" href="../assets/css/dads/components.css">
 <link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/i18n.js"></script>
 <style>
-  .p-qr-hero { display: grid; justify-items: center; gap: calc(16 / 16 * 1rem); text-align: center; }
-  .p-qr-hero__frame {
-    border: 1px solid var(--color-neutral-solid-gray-200);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(16 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
+  .qr-hero { text-align: center; padding: 36px 0 8px; }
+  .qr-big { background:#fff; border-radius:18px; padding:16px; display:inline-block; box-shadow: var(--shadow); }
+  .qr-big img { width: 216px; height: 216px; display:block; }
+  .url-box {
+    font-family: var(--mono); font-size: 12.5px; word-break: break-all;
+    background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; margin: 16px 0 6px;
   }
-  .p-qr-hero__frame img { display: block; width: calc(216 / 16 * 1rem); max-width: 100%; height: auto; }
-  .p-url-box {
-    width: 100%;
-    margin: 0;
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(12 / 16 * 1rem);
-    background-color: var(--color-neutral-solid-gray-50);
-    font-family: var(--font-family-mono);
-    font-size: calc(14 / 16 * 1rem);
-    line-height: 1.5;
-    word-break: break-all;
+  .kit { display:grid; gap:12px; grid-template-columns: 1fr; margin-top: 8px; }
+  @media (min-width:640px){ .kit { grid-template-columns: 1fr 1fr; } }
+  .kit .card { display:flex; flex-direction:column; gap:10px; }
+  .preview {
+    background:#fff; border-radius:10px; padding:8px; display:grid; place-items:center;
+    border:1px solid var(--border-soft); overflow:hidden;
   }
-  .p-kit { display: grid; gap: calc(16 / 16 * 1rem); grid-template-columns: 1fr; margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 48em) { .p-kit { grid-template-columns: 1fr 1fr; } }
-  .p-kit__preview {
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--color-neutral-solid-gray-200);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(8 / 16 * 1rem);
-    background-color: var(--color-neutral-white);
-    overflow: hidden;
+  .preview img { max-width:100%; height:auto; display:block; }
+  ol.steps { padding-left: 1.3em; color: var(--text-dim); font-size: 14px; }
+  ol.steps li { margin-bottom: 6px; }
+  pre.cmd {
+    background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px; overflow-x:auto; font-size: 12.5px; margin: 8px 0 0;
   }
-  .p-kit__preview img { max-width: 100%; height: auto; display: block; }
-  .p-cmd {
-    margin: calc(8 / 16 * 1rem) 0 0;
-    border: 1px solid var(--color-neutral-solid-gray-420);
-    border-radius: calc(8 / 16 * 1rem);
-    padding: calc(12 / 16 * 1rem);
-    background-color: var(--color-neutral-solid-gray-50);
-    overflow-x: auto;
-  }
-  .p-print-area { display: none; }
+  .print-area { display:none; }
 
   @media print {
-    .no-print { display: none !important; }
-    body { background: #fff; color: #000; }
-    .p-print-area { display: block; }
-    body[data-print^="card"] .pa-card { display: block; }
-    body[data-print^="card"] .pa-poster { display: none; }
-    body[data-print^="poster"] .pa-poster { display: block; }
-    body[data-print^="poster"] .pa-card { display: none; }
-    .pa-card img, .pa-poster img { display: none; }
+    @page { margin: 8mm; }
+    .aurora, .grid-lines, .top-controls, .no-print { display:none !important; }
+    body { background:#fff; color:#000; }
+    .print-area { display:block; }
+    body[data-print^="card"] .pa-card { display:block; }
+    body[data-print^="card"] .pa-poster { display:none; }
+    body[data-print^="poster"] .pa-poster { display:block; }
+    body[data-print^="poster"] .pa-card { display:none; }
+    .pa-card img, .pa-poster img { display:none; }
     body[data-print="card-ja"] .pa-card .ja,
     body[data-print="card-en"] .pa-card .en,
     body[data-print="poster-ja"] .pa-poster .ja,
-    body[data-print="poster-en"] .pa-poster .en { display: block; }
+    body[data-print="poster-en"] .pa-poster .en { display:block; }
     .pa-card img { width: 91mm; height: 55mm; }
     .pa-poster img { width: 105mm; height: 148mm; }
     .cut { outline: 0.2mm dashed #999; outline-offset: 2mm; }
-    @page { margin: 8mm; }
   }
 </style>
 </head>
 <body>
-
-<a class="p-skip-link dads-link no-print" href="#main">
-  <span data-l="ja">本文へスキップ</span><span data-l="en">Skip to main content</span>
-</a>
-
-<header class="p-header no-print">
-  <div class="l-container p-header__inner" data-width="wide">
-    <a class="p-header__brand" href="../">
-      <svg class="p-header__mark" width="28" height="28" viewBox="0 0 24 24" fill="currentcolor" aria-hidden="true">
-        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.6 3.3L12 10.8 5.4 7.5 12 4.2ZM5 9.1l6 3v7.4l-6-3V9.1Zm8 10.4v-7.4l6-3v7.4l-6 3Z"/>
-      </svg>
-      <span>LAST METERS<span class="p-header__sub">QR Kit</span></span>
-    </a>
-    <div class="p-header__tools"><span id="langBtn"></span></div>
-  </div>
-</header>
-
-<div class="l-container no-print" data-width="wide" style="padding-block-start: calc(16 / 16 * 1rem);">
-  <nav class="dads-breadcrumb" aria-labelledby="breadcrumb-label">
-    <span id="breadcrumb-label" class="dads-u-visually-hidden">現在位置 / You are here</span>
-    <p class="dads-breadcrumb__list">
-      <span class="dads-breadcrumb__item">
-        <a class="dads-breadcrumb__link" href="../"><span data-l="ja">ホーム</span><span data-l="en">Home</span></a>
-        <span class="dads-breadcrumb__separator">
-          <svg class="dads-breadcrumb__separator-icon" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-            <path d="M4.5 11L4 10.5L8 6.5L4 2.5L4.5 2L9 6.5L4.5 11Z" fill="currentcolor"/>
-          </svg>
-        </span>
-      </span>
-      <span class="dads-breadcrumb__item" aria-current="page">QR Kit</span>
-    </p>
-  </nav>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </div>
 
-<main class="l-main no-print" id="main">
-  <div class="l-container" data-width="wide">
+<main class="wrap no-print">
+  <p style="padding-top:20px"><a href="../" class="small">
+    <span data-l="ja">← プロフィールに戻る</span><span data-l="en">← Back to profile</span>
+  </a></p>
 
-    <div class="dads-heading" data-size="32" data-chip>
-      <p class="dads-heading__shoulder">QR KIT</p>
-      <h1 class="dads-heading__heading">
-        <span data-l="ja">イベント用QRコード</span><span data-l="en">QR codes for the event</span>
-      </h1>
+  <header class="qr-hero">
+    <div class="eyebrow">QR KIT</div>
+    <h1 style="font-size:26px;margin-top:8px">
+      <span data-l="ja">イベント用QRコード</span><span data-l="en">QR codes for the event</span>
+    </h1>
+    <p class="muted small" style="max-width:440px;margin:0 auto 20px">
+      <span data-l="ja">名刺・スライド・卓上ポスターの3用途、日本語版と英語版を用意しています。
+        誤り訂正レベルはH(30%)、余白は規格どおり4モジュール確保しているので、多少汚れても暗い会場でも読み取れます。</span>
+      <span data-l="en">Business card, slide and table poster — in both Japanese and English.
+        Error correction is level H (30%) with a full 4-module quiet zone, so it still scans when smudged or in a dim room.</span>
+    </p>
+    <span class="qr-big"><img src="../assets/qr/profile-qr.svg" alt="QR code for the profile site"></span>
+    <div class="url-box" id="qrUrl">https://eigokono1058-tech.github.io/-/</div>
+    <p class="tiny faint">
+      <span data-l="ja">↑ このURLが埋め込まれています。公開URLを変えたら下の手順で必ず作り直してください。</span>
+      <span data-l="en">↑ This is the URL encoded in the QR. If the site URL changes, regenerate it using the steps below.</span>
+    </p>
+    <div class="row row-wrap" style="justify-content:center;margin-top:10px">
+      <a class="btn btn-sm btn-primary" href="../assets/qr/profile-qr.png" download>PNG (1080px)</a>
+      <a class="btn btn-sm" href="../assets/qr/profile-qr.svg" download>SVG</a>
+    </div>
+  </header>
+
+  <section class="kit">
+    <div class="card">
+      <div class="row spread">
+        <b><span data-l="ja">名刺カード</span><span data-l="en">Business card</span></b>
+        <span class="pill">91 × 55 mm</span>
+      </div>
+      <div class="preview"><img src="../assets/qr/profile-qr-card.svg" alt="Business card sized QR card (Japanese)" id="cardPreview"></div>
+      <p class="tiny faint" style="margin:0">
+        <span data-l="ja">名刺の裏面や当日の名札に貼る想定。厚紙に等倍で印刷してください。</span>
+        <span data-l="en">Meant for the back of a name card or your badge. Print at 100% scale on card stock.</span>
+      </p>
+      <div class="row row-wrap">
+        <button class="btn btn-sm" data-print="card-ja" type="button">
+          <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
+        </button>
+        <button class="btn btn-sm" data-print="card-en" type="button">
+          <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
+        </button>
+      </div>
+      <div class="row row-wrap">
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-card.svg" download>SVG (JA)</a>
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-card-en.svg" download>SVG (EN)</a>
+      </div>
     </div>
 
-    <p class="u-mt-16">
-      <span data-l="ja">名刺・スライド・卓上ポスターの3用途、日本語版と英語版を用意しています。誤り訂正レベルはH（30%）、余白は規格どおり4モジュール確保しているので、多少汚れても暗い会場でも読み取れます。</span>
-      <span data-l="en">Business card, slide and table poster — in both Japanese and English. Error correction is level H (30%) with a full 4-module quiet zone, so it still scans when smudged or in a dim room.</span>
-    </p>
-
-    <section class="l-section" aria-labelledby="qr-main-heading">
-      <h2 id="qr-main-heading" class="dads-u-visually-hidden">
-        <span data-l="ja">公開URLのQRコード</span><span data-l="en">QR code for the site URL</span>
-      </h2>
-      <div class="p-qr-hero">
-        <span class="p-qr-hero__frame">
-          <img src="../assets/qr/profile-qr.svg" alt="QR code for the profile site" width="216" height="216">
-        </span>
-        <p class="p-url-box" id="qrUrl">https://eigokono1058-tech.github.io/-/</p>
-        <p class="u-text-note u-no-margin">
-          <span data-l="ja">↑ このURLが埋め込まれています。公開URLを変えたら下の手順で必ず作り直してください。</span>
-          <span data-l="en">↑ This is the URL encoded in the QR. If the site URL changes, regenerate it using the steps below.</span>
-        </p>
-        <div class="l-cluster" style="justify-content:center">
-          <a class="dads-button" data-type="solid-fill" data-size="md" href="../assets/qr/profile-qr.png" download>PNG (1080px)</a>
-          <a class="dads-button" data-type="outline" data-size="md" href="../assets/qr/profile-qr.svg" download>SVG</a>
-        </div>
+    <div class="card">
+      <div class="row spread">
+        <b><span data-l="ja">卓上ポスター</span><span data-l="en">Table poster</span></b>
+        <span class="pill">A6 / 105 × 148 mm</span>
       </div>
-    </section>
-
-    <section class="l-section" aria-labelledby="kit-heading">
-      <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);">
-        <h2 id="kit-heading" class="dads-heading__heading">
-          <span data-l="ja">印刷キット</span><span data-l="en">Print kit</span>
-        </h2>
+      <div class="preview"><img src="../assets/qr/profile-qr-poster.svg" alt="A6 QR poster (Japanese)" style="max-height:300px" id="posterPreview"></div>
+      <p class="tiny faint" style="margin:0">
+        <span data-l="ja">懇親会のテーブルやブースに立てる用。カードスタンドに入るサイズです。</span>
+        <span data-l="en">Stand it on a table at the mixer or on your booth. Fits a standard card stand.</span>
+      </p>
+      <div class="row row-wrap">
+        <button class="btn btn-sm" data-print="poster-ja" type="button">
+          <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
+        </button>
+        <button class="btn btn-sm" data-print="poster-en" type="button">
+          <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
+        </button>
       </div>
-
-      <ul class="p-kit">
-        <li class="p-card l-stack" data-gap="12">
-          <div class="l-cluster" data-justify="between">
-            <h3 class="dads-u-std-18B-160 u-no-margin">
-              <span data-l="ja">名刺カード</span><span data-l="en">Business card</span>
-            </h3>
-            <span class="dads-chip-label" data-style="outlined" data-color="gray">91 × 55 mm</span>
-          </div>
-          <div class="p-kit__preview">
-            <img src="../assets/qr/profile-qr-card.svg" alt="Business card sized QR card" id="cardPreview" width="364" height="220">
-          </div>
-          <p class="u-text-note u-no-margin">
-            <span data-l="ja">名刺の裏面や当日の名札に貼る想定。厚紙に等倍で印刷してください。</span>
-            <span data-l="en">Meant for the back of a name card or your badge. Print at 100% scale on card stock.</span>
-          </p>
-          <div class="l-cluster">
-            <button class="dads-button" data-type="outline" data-size="sm" data-print="card-ja" type="button">
-              <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
-            </button>
-            <button class="dads-button" data-type="outline" data-size="sm" data-print="card-en" type="button">
-              <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
-            </button>
-            <a class="dads-button" data-type="text" data-size="sm" href="../assets/qr/profile-qr-card.svg" download>SVG (JA)</a>
-            <a class="dads-button" data-type="text" data-size="sm" href="../assets/qr/profile-qr-card-en.svg" download>SVG (EN)</a>
-          </div>
-        </li>
-
-        <li class="p-card l-stack" data-gap="12">
-          <div class="l-cluster" data-justify="between">
-            <h3 class="dads-u-std-18B-160 u-no-margin">
-              <span data-l="ja">卓上ポスター</span><span data-l="en">Table poster</span>
-            </h3>
-            <span class="dads-chip-label" data-style="outlined" data-color="gray">A6 / 105 × 148 mm</span>
-          </div>
-          <div class="p-kit__preview">
-            <img src="../assets/qr/profile-qr-poster.svg" alt="A6 QR poster" id="posterPreview" style="max-height:300px" width="298" height="420">
-          </div>
-          <p class="u-text-note u-no-margin">
-            <span data-l="ja">懇親会のテーブルやブースに立てる用。カードスタンドに入るサイズです。</span>
-            <span data-l="en">Stand it on a table at the mixer or on your booth. Fits a standard card stand.</span>
-          </p>
-          <div class="l-cluster">
-            <button class="dads-button" data-type="outline" data-size="sm" data-print="poster-ja" type="button">
-              <span data-l="ja">日本語版を印刷</span><span data-l="en">Print (JA)</span>
-            </button>
-            <button class="dads-button" data-type="outline" data-size="sm" data-print="poster-en" type="button">
-              <span data-l="ja">英語版を印刷</span><span data-l="en">Print (EN)</span>
-            </button>
-            <a class="dads-button" data-type="text" data-size="sm" href="../assets/qr/profile-qr-poster.svg" download>SVG (JA)</a>
-            <a class="dads-button" data-type="text" data-size="sm" href="../assets/qr/profile-qr-poster-en.svg" download>SVG (EN)</a>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <section class="l-section" aria-labelledby="regen-heading">
-      <div class="dads-heading" data-size="24" data-chip style="margin-block-end: calc(16 / 16 * 1rem);">
-        <h2 id="regen-heading" class="dads-heading__heading">
-          <span data-l="ja">URLを変えたときの作り直し手順</span><span data-l="en">Regenerating after a URL change</span>
-        </h2>
+      <div class="row row-wrap">
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-poster.svg" download>SVG (JA)</a>
+        <a class="btn btn-sm btn-ghost" href="../assets/qr/profile-qr-poster-en.svg" download>SVG (EN)</a>
       </div>
-      <div class="p-card">
-        <ol class="dads-list" data-spacing="8">
-          <li>
-            <span data-l="ja"><code>assets/js/profile-config.js</code> の <code>siteUrl</code> を新しい公開URLに書き換える</span>
-            <span data-l="en">Update <code>siteUrl</code> in <code>assets/js/profile-config.js</code></span>
-          </li>
-          <li>
-            <span data-l="ja">下のコマンドを実行する（6ファイルが同時に更新されます）</span>
-            <span data-l="en">Run the command below (it rewrites all six files)</span>
-          </li>
-          <li>
-            <span data-l="ja">変更をコミットして push する</span>
-            <span data-l="en">Commit and push the result</span>
-          </li>
-        </ol>
-        <pre class="p-cmd"><code>pip install segno
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:20px">
+    <b><span data-l="ja">URLを変えたときの作り直し手順</span><span data-l="en">Regenerating after a URL change</span></b>
+    <ol class="steps" style="margin-top:10px">
+      <li>
+        <span data-l="ja"><code>assets/js/profile-config.js</code> の <code>siteUrl</code> を新しい公開URLに書き換える</span>
+        <span data-l="en">Update <code>siteUrl</code> in <code>assets/js/profile-config.js</code></span>
+      </li>
+      <li>
+        <span data-l="ja">下のコマンドを実行する（6ファイルが同時に更新されます）</span>
+        <span data-l="en">Run the command below (it rewrites all six files)</span>
+      </li>
+      <li>
+        <span data-l="ja">変更をコミットして push する</span>
+        <span data-l="en">Commit and push the result</span>
+      </li>
+    </ol>
+    <pre class="cmd">pip install segno
 python3 tools/gen_qr.py
-python3 tools/gen_qr.py --url https://your-domain.example/</code></pre>
-        <p class="u-text-support u-mt-16 u-no-margin">
-          <span data-l="ja">QRは<b>URLだけ</b>を埋め込んでいます。サイトの中身をいくら更新してもQRは刷り直し不要です。逆にURLが変わるとQRは無効になるので、独自ドメインを使う予定があるならドメインを決めてから印刷してください。</span>
-          <span data-l="en">The QR encodes <b>only the URL</b>, so you can keep editing the site without reprinting. Changing the URL does invalidate it — decide on a custom domain before you print.</span>
-        </p>
-      </div>
-    </section>
+python3 tools/gen_qr.py --url https://your-domain.example/</pre>
+    <p class="tiny faint" style="margin-top:10px;margin-bottom:0">
+      <span data-l="ja">QRは<b>URLだけ</b>を埋め込んでいます。サイトの中身をいくら更新してもQRは刷り直し不要です。
+        逆にURLが変わるとQRは無効になるので、独自ドメインを使う予定があるならドメインを決めてから印刷してください。</span>
+      <span data-l="en">The QR encodes <b>only the URL</b>, so you can keep editing the site without reprinting.
+        Changing the URL does invalidate it — decide on a custom domain before you print.</span>
+    </p>
+  </section>
 
-  </div>
+  <p class="footer">LAST METERS · QR Kit</p>
 </main>
 
-<footer class="p-footer no-print">
-  <div class="l-container" data-width="wide">
-    <h2 class="dads-u-visually-hidden"><span data-l="ja">サイト情報</span><span data-l="en">Site information</span></h2>
-    <ul class="p-footer__links">
-      <li><a class="dads-utility-link" href="../"><span class="dads-utility-link__label"><span data-l="ja">ホーム</span><span data-l="en">Home</span></span></a></li>
-      <li><a class="dads-utility-link" href="../app/"><span class="dads-utility-link__label"><span data-l="ja">デモ</span><span data-l="en">Demo</span></span></a></li>
-      <li><a class="dads-utility-link" href="../pitch/"><span class="dads-utility-link__label"><span data-l="ja">構想</span><span data-l="en">Pitch</span></span></a></li>
-      <li><a class="dads-utility-link" href="../plan/"><span class="dads-utility-link__label"><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></span></a></li>
-    </ul>
-    <p class="p-footer__note">
-      <span data-l="ja">画面はデジタル庁デザインシステム（DADS v2）に準拠しています。デジタル庁とは関係のない個人のサイトです。</span>
-      <span data-l="en">Built with the Digital Agency Design System (DADS v2). A personal site, not affiliated with or endorsed by Japan's Digital Agency.</span>
-    </p>
-  </div>
-</footer>
-
-<div class="p-print-area pa-card">
+<div class="print-area pa-card">
   <img class="ja cut" src="../assets/qr/profile-qr-card.svg" alt="">
   <img class="en cut" src="../assets/qr/profile-qr-card-en.svg" alt="">
 </div>
-<div class="p-print-area pa-poster">
+<div class="print-area pa-poster">
   <img class="ja cut" src="../assets/qr/profile-qr-poster.svg" alt="">
   <img class="en cut" src="../assets/qr/profile-qr-poster-en.svg" alt="">
 </div>
 
+<script src="../assets/js/theme.js"></script>
 <script src="../assets/js/profile-config.js"></script>
 <script>
   (function () {
+    if (window.LMTheme) window.LMTheme.bind("#themeBtn");
     if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
 
     var cfgUrl = (window.PROFILE && window.PROFILE.siteUrl) || "";

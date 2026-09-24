@@ -1,0 +1,32 @@
+# Cloudflare Workers の静的アセットとして「配信しない」ファイル
+# 書き方は .gitignore と同じ。
+# サイト本体（index.html / app / pitch / plan / launchpad / qr / assets）は配信する。
+
+# Worker本体と設定
+worker
+wrangler.jsonc
+wrangler.toml
+package.json
+package-lock.json
+node_modules
+.wrangler
+
+# リポジトリの運用ファイル（公開する必要がない）
+.git
+.github
+.gitignore
+.assetsignore
+.nojekyll
+README.md
+CLAUDE.md
+docs
+tools
+__pycache__
+**/__pycache__
+**/.DS_Store
+
+# Workersが解釈する設定ファイル（それ自体は配信しない）
+_headers
+_redirects
+
+# plan/ の .md は plan/index.html から fetch して表示するので配信する（除外しない）

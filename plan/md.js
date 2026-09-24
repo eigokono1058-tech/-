@@ -3,9 +3,6 @@
    plan/ 配下の自分の書いたドキュメントを表示するためだけのもの。
    対応: 見出し / 表 / リスト（1段ネスト） / コードブロック / 引用 / 水平線 /
          強調 / インラインコード / リンク
-
-   出力するマークアップはデジタル庁デザインシステムのコンポーネント
-   （Heading / Table / List / Blockquote / Link / Divider）に合わせている。
    ========================================================================== */
 window.LM_MD = (function () {
   function esc(s) {
@@ -13,11 +10,6 @@ window.LM_MD = (function () {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
     });
   }
-
-  /* 外部リンクであることを示すDADSのアイコン */
-  var EXTERNAL_ICON =
-    '<svg class="dads-link__icon" width="16" height="16" viewBox="0 0 16 17" fill="currentcolor" aria-hidden="true">' +
-    '<path fill-rule="evenodd" clip-rule="evenodd" d="M3 13.5H13V9.16667H14V14.5H2V2.5H7.33333V3.5H3V13.5ZM9.33333 3.5V2.5H14V7.16667H13V4.23333L7 10.1667L6.33333 9.5L12.2667 3.5H9.33333Z"/></svg>';
 
   function inline(s) {
     var out = esc(s);
@@ -29,9 +21,7 @@ window.LM_MD = (function () {
     });
     out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (m, t, href) {
       var ext = /^https?:/i.test(href);
-      return '<a class="dads-link" href="' + href + '"' +
-        (ext ? ' target="_blank" rel="noopener noreferrer"' : "") + ">" + t +
-        (ext ? EXTERNAL_ICON + '<span class="dads-u-visually-hidden">新規タブで開きます</span>' : "") + "</a>";
+      return '<a href="' + href + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : "") + ">" + t + "</a>";
     });
     out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     out = out.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
@@ -69,24 +59,15 @@ window.LM_MD = (function () {
         continue;
       }
 
-      // 水平線（DADS Divider）
-      if (/^\s*---+\s*$/.test(line)) {
-        html.push('<hr class="dads-divider md-divider" data-color="solid-gray-420" data-style="solid" data-width="1">');
-        i++;
-        continue;
-      }
+      // 水平線
+      if (/^\s*---+\s*$/.test(line)) { html.push("<hr>"); i++; continue; }
 
-      // 見出し（DADS Heading。h2にはチップ、h3以降は素で出す）
+      // 見出し
       var h = line.match(/^(#{1,4})\s+(.*)$/);
       if (h) {
         var lvl = h[1].length;
         var id = "s" + html.length;
-        var size = { 1: "32", 2: "24", 3: "20", 4: "18" }[lvl];
-        html.push(
-          '<div class="dads-heading md-heading" data-size="' + size + '"' + (lvl <= 2 ? " data-chip" : "") + ">" +
-          "<h" + lvl + ' id="' + id + '" class="dads-heading__heading">' + inline(h[2]) + "</h" + lvl + ">" +
-          "</div>"
-        );
+        html.push("<h" + lvl + ' id="' + id + '">' + inline(h[2]) + "</h" + lvl + ">");
         i++;
         continue;
       }
@@ -101,11 +82,8 @@ window.LM_MD = (function () {
           i++;
         }
         html.push(
-          '<div class="dads-table md-table" data-row-hover-highlight tabindex="0" role="region" aria-label="表">' +
-          '<table class="dads-table__table" data-border="hidden" data-cell-border><thead><tr>' +
-          head.map(function (c) {
-            return '<th class="dads-table__col-header" scope="col">' + inline(c) + "</th>";
-          }).join("") +
+          '<div class="md-tblwrap"><table class="md-tbl"><thead><tr>' +
+          head.map(function (c) { return "<th>" + inline(c) + "</th>"; }).join("") +
           "</tr></thead><tbody>" +
           body.map(function (r) {
             return "<tr>" + r.map(function (c) { return "<td>" + inline(c) + "</td>"; }).join("") + "</tr>";
@@ -115,18 +93,18 @@ window.LM_MD = (function () {
         continue;
       }
 
-      // 引用（DADS Blockquote）
+      // 引用
       if (/^\s*>\s?/.test(line)) {
         var q = [];
         while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
           q.push(lines[i].replace(/^\s*>\s?/, ""));
           i++;
         }
-        html.push('<blockquote class="dads-blockquote md-quote"><p>' + inline(q.join(" ")) + "</p></blockquote>");
+        html.push('<blockquote class="md-quote">' + inline(q.join(" ")) + "</blockquote>");
         continue;
       }
 
-      // リスト（1段ネストまで。DADS List）
+      // リスト（1段ネストまで）
       if (/^\s*([-*]|\d+\.)\s+/.test(line)) {
         var ordered = /^\s*\d+\.\s+/.test(line);
         var items = [];
@@ -139,10 +117,9 @@ window.LM_MD = (function () {
         var base = items[0].indent;
         var buf2 = [];
         var open = false;
-        var NESTED = '<ul class="dads-list" data-spacing="4">';
         items.forEach(function (it) {
           if (it.indent > base) {
-            if (!open) { buf2.push(NESTED); open = true; }
+            if (!open) { buf2.push("<ul>"); open = true; }
             buf2.push("<li>" + inline(it.content) + "</li>");
           } else {
             if (open) { buf2.push("</ul>"); open = false; }
@@ -150,10 +127,7 @@ window.LM_MD = (function () {
           }
         });
         if (open) buf2.push("</ul>");
-        var openTag = ordered
-          ? '<ol class="dads-list" data-spacing="8">'
-          : '<ul class="dads-list" data-spacing="8">';
-        html.push(openTag + buf2.join("") + (ordered ? "</ol>" : "</ul>"));
+        html.push((ordered ? "<ol>" : "<ul>") + buf2.join("") + (ordered ? "</ol>" : "</ul>"));
         continue;
       }
 

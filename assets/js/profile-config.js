@@ -99,6 +99,15 @@ window.PROFILE = {
       accent: "#4a9ae0"
     },
     {
+      id: "x",
+      label: { ja: "X", en: "X" },
+      sublabel: { ja: "@otbvnkvqc5ngy17", en: "@otbvnkvqc5ngy17" },
+      // 共有リンクに付く ?s= / ?t= は追跡用パラメータなので落としている
+      url: "https://x.com/otbvnkvqc5ngy17",
+      icon: "x",
+      accent: "#0f1419"
+    },
+    {
       id: "instagram",
       label: { ja: "Instagram", en: "Instagram" },
       sublabel: { ja: "@eigokono", en: "@eigokono" },

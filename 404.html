@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Page not found — LAST METERS</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a0c12">
+<link rel="icon" href="/assets/favicon.svg">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script src="/assets/js/i18n.js"></script>
+<style>
+  .nf { padding: 56px 0 24px; text-align: center; }
+  .nf .code {
+    font-size: 64px; font-weight: 700; line-height: 1;
+    letter-spacing: 0.04em; margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .nf h1 { font-size: 22px; margin-bottom: 8px; }
+  .nf p { max-width: 400px; margin: 0 auto; }
+  .nf-links { margin-top: 26px; text-align: left; }
+  .nf-links a { display: block; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .nf-links a:last-child { border-bottom: 0; }
+  .nf-links .sub { display: block; font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="grid-lines"></div>
+<div class="top-controls">
+  <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
+  <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
+</div>
+
+<main class="wrap">
+
+  <header class="nf">
+    <div class="code" aria-hidden="true">404</div>
+    <h1>
+      <span data-l="ja">ページが見つかりません</span>
+      <span data-l="en">Page not found</span>
+    </h1>
+    <p class="muted small">
+      <span data-l="ja">URLが変わったか、入力に誤りがあるようです。下のリンクから探してみてください。</span>
+      <span data-l="en">The address may have changed, or there is a typo. Try one of the links below.</span>
+    </p>
+  </header>
+
+  <nav class="card nf-links" aria-label="Site map">
+    <a href="/"><b><span data-l="ja">プロフィール</span><span data-l="en">Profile</span></b>
+      <span class="sub"><span data-l="ja">このサイトの入口</span><span data-l="en">Start here</span></span></a>
+    <a href="/app/"><b><span data-l="ja">動くデモ</span><span data-l="en">Live demo</span></b>
+      <span class="sub"><span data-l="ja">地図にピンを差して受取先を変える</span><span data-l="en">Drop a pin to change where a parcel goes</span></span></a>
+    <a href="/pitch/"><b><span data-l="ja">構想</span><span data-l="en">Pitch</span></b>
+      <span class="sub"><span data-l="ja">なにを解こうとしているか</span><span data-l="en">What this is trying to solve</span></span></a>
+    <a href="/plan/"><b><span data-l="ja">事業計画</span><span data-l="en">Business plan</span></b>
+      <span class="sub"><span data-l="ja">計画・未解決の論点・検証計画</span><span data-l="en">Plan, open questions, validation</span></span></a>
+    <a href="/launchpad/"><b>Launchpad</b>
+      <span class="sub"><span data-l="ja">DevDayのセッション用ブリーフ</span><span data-l="en">Brief for the DevDay session</span></span></a>
+    <a href="/qr/"><b><span data-l="ja">QRキット</span><span data-l="en">QR kit</span></b>
+      <span class="sub"><span data-l="ja">名刺・スライド・卓上ポスター</span><span data-l="en">Card, slide and poster</span></span></a>
+  </nav>
+
+  <div class="row" style="justify-content:center;margin-top:22px">
+    <a class="btn btn-primary" href="/">
+      <span data-l="ja">トップへ戻る</span><span data-l="en">Back to home</span>
+    </a>
+  </div>
+
+  <p class="tiny faint" style="text-align:center;margin-top:28px">
+    <span data-l="ja">架空のデータによる概念検証用のサイトです。実在の事業者とは接続していません。</span>
+    <span data-l="en">A concept site on fictional data. Nothing here is connected to a real carrier.</span>
+  </p>
+
+</main>
+
+<script src="/assets/js/theme.js"></script>
+<script>
+  if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
+  if (window.LMTheme) window.LMTheme.bind("#themeBtn");
+</script>
+</body>
+</html>
