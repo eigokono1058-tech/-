@@ -85,7 +85,7 @@ window.LM_UI = (function () {
     policyHead: { ja: "平日の方針", en: "Weekday policy" },
     thinking: { ja: "考えています", en: "Thinking" },
     apply: { ja: "変更する", en: "Switch" },
-    keep: { ja: "今のまま", en: "Keep current" },
+    keep: { ja: "戻る", en: "Back" },
     undo: { ja: "元に戻す", en: "Undo" },
     settled: { ja: "確定", en: "Locked in" },
     again: { ja: "もう一度", en: "Run again" },
@@ -121,9 +121,11 @@ window.LM_UI = (function () {
       ja: "方針の内側です。どちらでいくか選んでください。",
       en: "Both are inside your rules. Pick one."
     },
-    altHead: { ja: "もうひとつの案", en: "The other option" },
-    pickThis: { ja: "こちらにする", en: "Use this one" },
-    goWith: { ja: "これでいく", en: "Go with this" },
+    cand1: { ja: "第1候補", en: "Option 1" },
+    cand2: { ja: "第2候補", en: "Option 2" },
+    altHead: { ja: "第2候補", en: "Option 2" },
+    pickThis: { ja: "第2候補にする", en: "Go with option 2" },
+    goWith: { ja: "第1候補でいく", en: "Go with option 1" },
     kindStreet: { ja: "道の上", en: "On the street" },
     kindPlace: { ja: "建物・駅", en: "A place" },
     ff: { ja: "早送り", en: "Fast-forward" },
@@ -552,6 +554,10 @@ window.LM_UI = (function () {
 
     sheet(
       resCard("ask", "✦", t(S.agentFound), t(S.agentSub)) +
+
+      /* 第1候補。第2候補と同じ見た目の箱に入れて、番号で並べて見せる。 */
+      '<div class="cand cand-1">' +
+      '<div class="cand-n">' + esc(t(S.cand1)) + "</div>" +
       '<div class="swap">' +
       '<div class="swap-side is-from"><span>' + esc(t(d.from.name)) + "</span><b>" + esc(d.from.at) + "</b></div>" +
       '<span class="swap-arrow" aria-hidden="true">→</span>' +
@@ -561,9 +567,9 @@ window.LM_UI = (function () {
       fact(t(d.to.kind === "street" ? S.kindStreet : S.kindPlace)) +
       fact(d.to.extraCost === 0 ? t(S.free) : "+" + yen(d.to.extraCost)) +
       fact(t(S.walk) + " " + d.to.walkMin + (ja() ? "分" : "m")) +
-      (saved ? fact(saved + " " + t(S.earlier)) : "") + "</div>" +
+      (saved ? fact(saved + " " + t(S.earlier)) : "") + "</div></div>" +
 
-      /* もうひとつの案。押すと開く。 */
+      /* 第2候補。押すと開く。 */
       (alt
         ? '<button class="alt2-head' + (altOpen ? " is-open" : "") + '" id="mAlt2" type="button" ' +
           'aria-expanded="' + (altOpen ? "true" : "false") + '">' +
