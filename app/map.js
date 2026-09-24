@@ -670,7 +670,7 @@ window.LM_MAP = (function () {
         d: polyPath(route),
         class: "m-route" + (isFocus ? " is-focus" : ""),
         stroke: color,
-        "stroke-opacity": isFocus ? 0.9 : 0.25
+        "stroke-opacity": isFocus ? 0.5 : 0.16
       }));
 
       var pos = pointAt(route, t.progress);
