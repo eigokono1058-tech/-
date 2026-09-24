@@ -29,9 +29,9 @@ URLに `?lang=en` / `?lang=ja` / `?lang=both` を付ければ指定して開け�
 | ページ | 場所 | 用途 |
 |---|---|---|
 | プロフィール（QRの着地先） | [`/`](./index.html) | 名前・実績・各SNSへワンタップで飛ぶハブ |
-| **Launchpadブリーフ** | [`/launchpad/`](./launchpad/) | **当日の中心資料。提出済みの応募文・いまの到達点・聞く4つの質問・英語の口頭スクリプト** |
+| **メンターに聞くこと** | [`/launchpad/`](./launchpad/) | **当日の質問だけ。メインの問いを大きく、そのあとに3つ。説明はピッチ側に置く** |
 | QRキット | [`/qr/`](./qr/) | QRのプレビュー・印刷（名刺91×55mm / A6ポスター）・ダウンロード |
-| ピッチ（事業構想1ページ） | [`/pitch/`](./pitch/) | 課題・数字・解決策・誰が払うか・足りないもの |
+| ピッチ（事業構想1ページ） | [`/pitch/`](./pitch/) | 課題と、自動化が「到着」までしか進まないこと |
 | デモ（動くプロトタイプ） | [`/app/`](./app/) | 受取先の動的変更・方針にもとづく自動判断・受渡し記録・ツール呼び出しの記録 |
 
 ---
@@ -171,7 +171,7 @@ python3 tools/gen_qr.py --url https://your.domain/  # URLを直接指定する�
 │   ├── video/                  コンセプト動画（1本。mp4 / webm / 字幕 / 表紙）
 │   └── favicon.svg
 ├── qr/index.html               QRキット（プレビュー・印刷・ダウンロード）
-├── launchpad/index.html        Launchpadセッション用ブリーフ（当日の中心資料）
+├── launchpad/index.html        当日メンターに聞く質問だけのページ
 ├── pitch/index.html            事業構想1ページ（DELIVERY OS）
 ├── app/
 │   ├── index.html              デモ本体

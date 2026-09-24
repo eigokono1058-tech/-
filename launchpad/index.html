@@ -3,516 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Packages adapt to people — Eigo (Ayden) Kono</title>
-<meta name="description" content="An AI-powered delivery OS that compares your schedule and preferences with the delivery options available, then arranges the easiest way for you to receive a parcel. Launchpad brief for OpenAI DevDay 2026.">
+<title>What I want to ask — Eigo (Ayden) Kono</title>
+<meta name="description" content="The questions I am bringing to the Launchpad mentor session at OpenAI DevDay 2026. Product design and UXR.">
 <meta name="theme-color" content="#0a0c12">
 <link rel="icon" href="../assets/favicon.svg">
 <link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/i18n.js"></script>
+<!--
+  このページは「当日メンターに聞くこと」だけ。
+  説明はピッチ（../pitch/）に置いてある。ここには足さない。
+-->
 <style>
-  :root { --maxw: 760px; }
+  :root { --maxw: 720px; }
 
-  /* ---------- 共通 ---------- */
-  section.blk { padding: 40px 0; border-top: 1px solid var(--border-soft); }
-  section.blk:first-of-type { border-top: 0; }
-  h2.sec {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--text-faint); margin: 0 0 14px;
-  }
-  h3.big {
-    font-size: clamp(20px, 4.6vw, 26px); letter-spacing: -0.02em;
-    margin: 0 0 14px; text-wrap: balance; line-height: 1.35;
-  }
-  p { font-size: 14.5px; color: var(--text-dim); line-height: 1.75; }
-  p.lede { font-size: 16px; color: var(--text); }
+  /* 左右は .wrap の余白を残す。padding の一括指定で潰さないこと */
+  .page { padding-top: 64px; padding-bottom: 80px; }
 
-  /* ---------- hero ---------- */
-  .hero { padding: 60px 0 14px; }
-  .hero h1 {
-    font-size: clamp(30px, 8vw, 46px); letter-spacing: -0.03em;
-    margin: 14px 0 12px; line-height: 1.12; text-wrap: balance;
-  }
-  .session-chip {
+  .chip {
     display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center;
     font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
     color: var(--brand-2);
   }
-  .hero .sub { font-size: 16.5px; color: var(--text); line-height: 1.6; margin-bottom: 14px; text-wrap: pretty; }
-  .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
 
-  /* ---------- 生活の動線 ---------- */
-  .daylist {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-    margin: 16px 0 0;
+  /* 前置き。2文だけ */
+  .setup {
+    font-size: 15px; color: var(--text-dim); line-height: 1.8;
+    margin: 18px 0 30px; text-wrap: pretty;
   }
-  .daylist span {
-    padding: 5px 11px; border-radius: 999px;
+  .setup b { color: var(--text); font-weight: 700; }
+
+  /* いちばん聞きたいこと */
+  .main-q {
+    border: 1px solid color-mix(in srgb, var(--brand-2) 40%, var(--border));
+    background: color-mix(in srgb, var(--brand-2) 7%, transparent);
+    border-radius: var(--radius); padding: 24px 22px;
+  }
+  .main-q .label {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--brand-2); display: block; margin-bottom: 14px;
+  }
+  .main-q h1 {
+    font-size: clamp(24px, 6.2vw, 36px); letter-spacing: -0.025em;
+    line-height: 1.3; margin: 0; text-wrap: balance; font-weight: 700;
+  }
+
+  /* そのあとに聞きたいこと */
+  .more {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--text-faint); margin: 36px 0 12px;
+  }
+  .qs { display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
+  .qs li {
+    display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: baseline;
+    padding: 16px 18px; border-radius: var(--radius-sm);
     border: 1px solid var(--border); background: var(--surface);
-    font-size: 13px; font-weight: 600;
+    font-size: 15.5px; line-height: 1.6; color: var(--text);
   }
-  .daylist i { color: var(--text-faint); font-style: normal; }
-
-  /* ---------- 数字 ---------- */
-  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 18px; }
-  .kpi {
-    padding: 13px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 82%, transparent);
-  }
-  .kpi .kv { font-size: 24px; font-weight: 650; line-height: 1.05; letter-spacing: -0.02em; }
-  .kpi .kv small { font-size: 0.5em; font-weight: 600; color: var(--text-dim); margin-left: 2px; }
-  .kpi .kl { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; line-height: 1.45; }
-
-  /* ---------- BEFORE / AFTER（このページの主役） ---------- */
-  .ba { display: grid; gap: 12px; margin: 18px 0 0; }
-  @media (min-width: 640px) { .ba { grid-template-columns: 1fr 44px 1fr; align-items: center; } }
-  .ba-card {
-    padding: 20px 18px; border-radius: var(--radius);
-    border: 1px solid var(--border); background: var(--surface);
-    text-align: center;
-  }
-  .ba-card .tag {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em;
-    color: var(--text-faint); display: block;
-  }
-  .ba-card .time {
-    font-size: clamp(34px, 9vw, 46px); font-weight: 700; letter-spacing: -0.03em;
-    line-height: 1.05; margin: 8px 0 4px;
-  }
-  .ba-card .where { font-size: 15px; font-weight: 650; }
-  .ba-card .note { font-size: 12.5px; color: var(--text-faint); margin-top: 8px; line-height: 1.5; }
-  .ba-before .time { color: var(--text-faint); }
-  .ba-before { border-style: dashed; }
-  .ba-after {
-    border-color: color-mix(in srgb, var(--brand-2) 45%, var(--border));
-    background:
-      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 12%, transparent), transparent 62%),
-      var(--surface);
-  }
-  .ba-after .time { color: var(--brand-2); }
-  .ba-arrow {
-    display: grid; place-items: center;
-    font-size: 26px; color: var(--brand-2); line-height: 1;
-  }
-  @media (max-width: 639px) { .ba-arrow { transform: rotate(90deg); padding: 2px 0; } }
-
-  .pref {
-    margin-top: 16px; padding: 14px 16px; border-radius: var(--radius-sm);
-    border-left: 3px solid var(--brand-1);
-    background: color-mix(in srgb, var(--brand-1) 9%, transparent);
-    font-size: 14px; color: var(--text); line-height: 1.7;
-  }
-  .pref .tag {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em;
-    color: var(--brand-1); display: block; margin-bottom: 6px;
-  }
-
-  .rule { display: grid; gap: 8px; margin-top: 16px; }
-  .rule div {
-    display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline;
-    padding: 12px 14px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface); font-size: 14px;
-  }
-  .rule b { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; white-space: nowrap; }
-  .rule .auto b { color: var(--ok); }
-  .rule .ask b { color: var(--warn); }
-
-  /* ---------- OS の図 ---------- */
-  .os { margin-top: 18px; }
-  .os-top {
-    padding: 16px; border-radius: var(--radius); text-align: center;
-    border: 1px solid color-mix(in srgb, var(--brand-2) 45%, var(--border));
-    background:
-      radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--brand-2) 14%, transparent), transparent 70%),
-      var(--surface);
-  }
-  .os-top b { font-size: 17px; letter-spacing: -0.01em; }
-  .os-top span { display: block; font-size: 12.5px; color: var(--text-faint); margin-top: 4px; }
-  .os-stem { height: 20px; display: grid; place-items: center; color: var(--brand-2); }
-  .os-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  @media (min-width: 560px) { .os-row { grid-template-columns: repeat(3, 1fr); } }
-  .os-item {
-    padding: 12px 10px; border-radius: var(--radius-sm); text-align: center;
-    border: 1px solid var(--border); background: var(--surface);
-    font-size: 13px; font-weight: 600;
-  }
-  .os-item.is-future {
-    border-style: dashed; color: var(--text-faint); font-weight: 500;
-  }
-  .os-item .ico { display: block; font-size: 18px; margin-bottom: 4px; }
-
-  /* ---------- 個人 × 全体 ---------- */
-  .x-head {
-    text-align: center; margin: 4px 0 16px;
-    font-size: clamp(19px, 4.4vw, 24px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.4;
-  }
-  .x-head em { font-style: normal; color: var(--brand-2); }
-  .x-head .mul { color: var(--text-faint); font-weight: 400; }
-  .x2 { display: grid; gap: 10px; }
-  @media (min-width: 560px) { .x2 { grid-template-columns: 1fr 1fr; } }
-  .x-card {
-    padding: 15px 16px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface);
-  }
-  .x-card b { display: block; font-size: 13.5px; margin-bottom: 6px; }
-  .x-card.bad b { color: var(--danger); }
-  .x-card.good b { color: var(--ok); }
-  .x-card p { font-size: 13px; margin: 0; line-height: 1.65; }
-
-  /* ---------- スケール ---------- */
-  .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
-  .steps span {
-    padding: 8px 14px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface);
-    font-size: 13.5px; font-weight: 600;
-  }
-  .steps span:first-child { border-color: color-mix(in srgb, var(--brand-2) 45%, var(--border)); color: var(--brand-2); }
-  .steps i { color: var(--text-faint); font-style: normal; }
-
-  /* ---------- OpenAIへの質問 ---------- */
-  .ask-main {
-    padding: 22px 20px; border-radius: var(--radius);
-    border: 1px solid color-mix(in srgb, var(--brand-2) 48%, var(--border));
-    background:
-      radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--brand-2) 13%, transparent), transparent 62%),
-      var(--surface);
-  }
-  .ask-main .tag {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em;
-    color: var(--brand-2); display: block; margin-bottom: 10px;
-  }
-  .ask-main p { font-size: clamp(17px, 4vw, 21px); color: var(--text); line-height: 1.5; margin: 0; text-wrap: balance; }
-  .ask-sub { display: grid; gap: 10px; margin-top: 14px; }
-  .ask-sub div {
-    display: grid; grid-template-columns: auto 1fr; gap: 12px;
-    padding: 14px 16px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface);
-    font-size: 14.5px; color: var(--text); line-height: 1.6;
-  }
-  .ask-sub .n { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--brand-2); }
-  .compare { margin-top: 14px; font-size: 13.5px; color: var(--text-faint); line-height: 1.8; }
-  .compare b { color: var(--text-dim); }
-
-  .foot-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .qs .n { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--brand-2); }
 
   @media print {
-    .aurora, .grid-lines, .top-controls, .noprint { display: none !important; }
+    .aurora, .grid-lines, .top-controls { display: none !important; }
     body { background: #fff; }
     :root { --text: #000; --text-dim: #222; --text-faint: #555; --surface: #fff; --border: #ccc; }
-    section.blk { padding: 18px 0; break-inside: avoid; }
+    .page { padding-top: 0; padding-bottom: 0; }
   }
 </style>
 </head>
 <body>
 <div class="aurora"></div>
 <div class="grid-lines"></div>
-<div class="top-controls noprint">
+<div class="top-controls">
   <a class="home-btn" href="../" aria-label="Back to profile" title="Profile">⌂</a>
   <button class="btn btn-sm lang-btn" id="langBtn" type="button">EN</button>
   <button class="theme-toggle" id="themeBtn" type="button" aria-label="Theme">◐</button>
 </div>
 
-<main class="wrap">
+<main class="wrap page">
 
-  <!-- ============ 1. HERO ============ -->
-  <header class="hero">
-    <div class="session-chip">
-      <span>LAUNCHPAD</span><span>·</span><span>PRODUCT DESIGN &amp; UXR</span>
-    </div>
-    <h1>Packages adapt to people.</h1>
-    <p class="sub">
-      <span data-l="en">An AI-powered delivery OS that decides when, where and how a parcel should be received.</span>
-      <span data-l="ja">荷物を「いつ・どこで・どうやって」受け取るかを、AIが状況に合わせて決める配送OS。</span>
-    </p>
-    <p class="lede">
-      <span data-l="en">We are not building another delivery company. We want to connect the delivery options that
-        already exist — home delivery, station lockers, convenience stores, local couriers, and eventually
-        autonomous delivery — and make them work around the user's life.</span>
-      <span data-l="ja">新しい配送会社を作るつもりはありません。すでにある受け取り方——自宅配送、駅のロッカー、コンビニ受取、地域の配送業者、そして将来の自動配送——をつなぎ、人の生活のほうに合わせて動かしたいと考えています。</span>
-    </p>
-    <div class="meta-row">
-      <span class="pill">Eigo “Ayden” Kono</span>
-      <span class="pill">Hitachi, Ltd. · Tokyo</span>
-      <span class="pill pill-info">OpenAI DevDay · Sep 29, 2026</span>
-    </div>
-    <div class="foot-links noprint">
-      <a class="btn btn-sm btn-primary" href="#how">
-        <span data-l="en">See how it works</span><span data-l="ja">仕組みを見る</span>
-      </a>
-      <a class="btn btn-sm" href="../app/">
-        <span data-l="en">Open the prototype</span><span data-l="ja">プロトタイプを開く</span>
-      </a>
-    </div>
-  </header>
+  <div class="chip">
+    <span>LAUNCHPAD</span><span>·</span><span>PRODUCT DESIGN &amp; UXR</span>
+  </div>
 
-  <!-- ============ 2. PROBLEM ============ -->
-  <section class="blk">
-    <h2 class="sec"><span data-l="en">Problem</span><span data-l="ja">課題</span></h2>
-    <h3 class="big">
-      <span data-l="en">People still have to organize their lives around packages.</span>
-      <span data-l="ja">いまは、人のほうが荷物に生活を合わせています。</span>
-    </h3>
-    <p>
-      <span data-l="en">Delivery assumes one fixed address and one fixed time window. But people move all day.</span>
-      <span data-l="ja">配送は「住所ひとつ・時間帯ひとつ」を前提にしています。でも人は一日じゅう動いています。</span>
-    </p>
+  <p class="setup">
+    <!-- 日本語は改行が空白になってしまうので1行で書く -->
+    <span data-l="ja">日本では年間およそ50億個の荷物が運ばれ、その8.3%が一度では受け取られずに運び直されています。新しい配送会社を作るつもりはありません。すでにある受け取り方——自宅、駅のロッカー、店、そして路上——をつなぎ、<b>その人が受け取れる時と場所に合わせて選ぶ層</b>をつくりたいと考えています。</span>
+    <span data-l="en">Japan moves about five billion parcels a year, and 8.3% of them are carried a second time
+      because nobody took the first one. I am not trying to build another carrier. I want to connect the ways of
+      receiving that already exist — home, station lockers, shops, and the street itself — and
+      <b>choose between them around when and where the person can actually take delivery</b>.</span>
+  </p>
 
-    <div class="daylist">
-      <span data-l="en">Home</span><span data-l="ja">自宅</span><i>→</i>
-      <span data-l="en">Office</span><span data-l="ja">職場</span><i>→</i>
-      <span data-l="en">Transit</span><span data-l="ja">駅</span><i>→</i>
-      <span data-l="en">Store</span><span data-l="ja">買い物</span><i>→</i>
-      <span data-l="en">Home</span><span data-l="ja">自宅</span>
-    </div>
-
-    <p style="margin-top:18px">
-      <span data-l="en">So the question is not “how do we deliver later?”. It is: <b>can the delivery itself change,
-        based on when and where the recipient can actually receive it?</b></span>
-      <span data-l="ja">だから問いは「もっと遅い時間に届けるには？」ではありません。<b>受け取れる時間と場所に合わせて、配送のほうを変えられないか</b>——こちらです。</span>
-    </p>
-
-    <div class="kpis">
-      <div class="kpi">
-        <div class="kv">5.0<small>bn</small></div>
-        <div class="kl">
-          <span data-l="en">parcels a year in Japan</span>
-          <span data-l="ja">日本の宅配便取扱個数（年間）</span>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kv">8.3<small>%</small></div>
-        <div class="kl">
-          <span data-l="en">still redelivered — around 400 million parcels</span>
-          <span data-l="ja">再配達率。約4億個にあたる</span>
-        </div>
-      </div>
-    </div>
-    <p class="small faint" style="margin-top:12px">
-      <span data-l="en">Source: Japan's Ministry of Land, Infrastructure, Transport and Tourism (Oct 2025). Lockers and
-        convenience-store pickup already exist across the country — but each carrier has its own app, so the options
-        are split up and the recipient has to work it out every time.</span>
-      <span data-l="ja">出典：国土交通省（2025年10月）。ロッカーもコンビニ受取も全国にすでにあります。ただし配送会社ごとにアプリが分かれていて、選択肢が分断されているため、毎回こちらが考える必要があります。</span>
-    </p>
+  <section class="main-q">
+    <span class="label">MAIN QUESTION</span>
+    <h1>
+      <span data-l="ja">荷物の受け取り方を、AIエージェントが自動で選んで手配する。どう設計すべきでしょうか。</span>
+      <span data-l="en">An agent that picks how a parcel gets received, and arranges it. How should that be designed?</span>
+    </h1>
   </section>
 
-  <!-- ============ 3. HOW IT WORKS ============ -->
-  <section class="blk" id="how">
-    <h2 class="sec"><span data-l="en">How it works</span><span data-l="ja">どう動くか</span></h2>
-    <h3 class="big">
-      <span data-l="en">One evening, one parcel.</span>
-      <span data-l="ja">ある日の夕方、荷物が1つ。</span>
-    </h3>
-    <p>
-      <span data-l="en">I am working in SoMa and will not be home until 22:40. A parcel is on its way to my front
-        door, arriving 23:10.</span>
-      <span data-l="ja">サンフランシスコのSoMaで仕事をしていて、帰宅は22:40の見込み。荷物は自宅へ向かっていて、到着は23:10。</span>
-    </p>
+  <p class="more">
+    <span data-l="ja">そのうえで聞きたいこと</span><span data-l="en">And then</span>
+  </p>
 
-    <div class="ba">
-      <div class="ba-card ba-before">
-        <span class="tag">BEFORE</span>
-        <div class="time">23:10</div>
-        <div class="where">
-          <span data-l="en">Home delivery</span><span data-l="ja">自宅配送</span>
-        </div>
-        <div class="note">
-          <span data-l="en">I get home at 22:40 — but 23:10 is too late to answer the door</span>
-          <span data-l="ja">帰宅は22:40。でも23:10にインターホンを鳴らされるのは困る</span>
-        </div>
-      </div>
-      <div class="ba-arrow" aria-hidden="true">→</div>
-      <div class="ba-card ba-after">
-        <span class="tag">AFTER</span>
-        <div class="time">20:25</div>
-        <div class="where">
-          <span data-l="en">Montgomery St Station locker</span><span data-l="ja">モンゴメリー駅のロッカー</span>
-        </div>
-        <div class="note">
-          <span data-l="en">+7 min on foot · ¥0 extra · already on my way home</span>
-          <span data-l="ja">徒歩+7分 · 追加料金 ¥0 · もともと帰り道</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="pref">
-      <span class="tag">MY PREFERENCE</span>
-      <span data-l="en">“On weekdays, change my delivery automatically if the pickup point is within 10 minutes of
-        my route and it costs less than ¥300 extra.”</span>
-      <span data-l="ja">「平日は、受取地点が帰り道から10分以内で、追加料金が300円以内なら、勝手に変えていい。」</span>
-    </div>
-
-    <p style="margin-top:16px">
-      <span data-l="en">I set that once. I do not pick between option A, B and C every time a parcel ships.</span>
-      <span data-l="ja">これを一度だけ設定します。荷物が出るたびにAとBとCから選ぶ必要はありません。</span>
-    </p>
-
-    <div class="rule">
-      <div class="auto">
-        <b><span data-l="en">WITHIN</span><span data-l="ja">範囲内</span></b>
-        <span>
-          <span data-l="en">The agent changes the delivery and tells me afterwards. No action required.</span>
-          <span data-l="ja">エージェントが変更して、あとから知らせる。こちらの操作はなし。</span>
-        </span>
-      </div>
-      <div class="ask">
-        <b><span data-l="en">OUTSIDE</span><span data-l="ja">範囲外</span></b>
-        <span>
-          <span data-l="en">It asks first — “the best alternative costs ¥450. Change it?”</span>
-          <span data-l="ja">先に聞く。「別の受取先だと追加で¥450かかります。変更しますか？」</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="foot-links noprint">
-      <a class="btn btn-sm" href="../app/">
-        <span data-l="en">Try it in the prototype</span><span data-l="ja">プロトタイプで試す</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- ============ 4. THE DELIVERY OS ============ -->
-  <section class="blk">
-    <h2 class="sec"><span data-l="en">The Delivery OS</span><span data-l="ja">配送OS</span></h2>
-    <h3 class="big">
-      <span data-l="en">We are not building another delivery company.</span>
-      <span data-l="ja">新しい配送会社を作るのではありません。</span>
-    </h3>
-    <p>
-      <span data-l="en">No trucks, no robots, no self-driving vehicles of our own. A layer that connects the
-        delivery options that already exist, and chooses between them.</span>
-      <span data-l="ja">トラックもロボットも自動運転車も、自分では作りません。すでにある受け取り方をつなぎ、その中から選ぶ層をつくります。</span>
-    </p>
-
-    <div class="os">
-      <div class="os-top">
-        <b>Delivery OS</b>
-        <span>
-          <span data-l="en">schedule · preferences · options · cost · network</span>
-          <span data-l="ja">予定 · 希望 · 使える手段 · 料金 · 配送網の状況</span>
-        </span>
-      </div>
-      <div class="os-stem" aria-hidden="true">↓</div>
-      <div class="os-row">
-        <div class="os-item"><span class="ico" aria-hidden="true">🏠</span>
-          <span data-l="en">Home delivery</span><span data-l="ja">自宅配送</span></div>
-        <div class="os-item"><span class="ico" aria-hidden="true">🔐</span>
-          <span data-l="en">Station lockers</span><span data-l="ja">駅のロッカー</span></div>
-        <div class="os-item"><span class="ico" aria-hidden="true">🏪</span>
-          <span data-l="en">Corner store</span><span data-l="ja">街角のストア</span></div>
-        <div class="os-item"><span class="ico" aria-hidden="true">🚚</span>
-          <span data-l="en">Local courier</span><span data-l="ja">地域の配送業者</span></div>
-        <div class="os-item"><span class="ico" aria-hidden="true">🚲</span>
-          <span data-l="en">Bicycle delivery</span><span data-l="ja">自転車便</span></div>
-        <div class="os-item is-future"><span class="ico" aria-hidden="true">🤖</span>
-          <span data-l="en">Autonomous — future</span><span data-l="ja">自動配送（将来）</span></div>
-      </div>
-    </div>
-
-    <p style="margin-top:18px">
-      <span data-l="en"><b>The providers change by country. The orchestration layer stays the same.</b></span>
-      <span data-l="ja"><b>国が変われば、つなぐ相手は変わります。つなぐ層のほうは変わりません。</b></span>
-    </p>
-
-    <div class="steps">
-      <span>Tokyo MVP</span><i>→</i>
-      <span data-l="en">More providers</span><span data-l="ja">接続先を増やす</span><i>→</i>
-      <span>Japan</span><i>→</i>
-      <span>Global</span>
-    </div>
-  </section>
-
-  <!-- ============ 5. INDIVIDUAL × NETWORK ============ -->
-  <section class="blk">
-    <h2 class="sec"><span data-l="en">The constraint</span><span data-l="ja">制約</span></h2>
-    <p class="x-head">
-      <em><span data-l="en">Individual convenience</span><span data-l="ja">一人ひとりの受け取りやすさ</span></em>
-      <span class="mul">×</span>
-      <em><span data-l="en">Network efficiency</span><span data-l="ja">配送網全体の効率</span></em>
-    </p>
-
-    <div class="x2">
-      <div class="x-card bad">
-        <b><span data-l="en">Not this</span><span data-l="ja">これではない</span></b>
-        <p>
-          <span data-l="en">Bring every parcel to wherever the user happens to be. That would pull vans off their
-            routes and make the network worse for everyone.</span>
-          <span data-l="ja">全員の荷物を、その人がいまいる場所まで運ぶ。配送車がルートから外れ続け、結果的に全体が悪くなります。</span>
-        </p>
-      </div>
-      <div class="x-card good">
-        <b><span data-l="en">This</span><span data-l="ja">こちら</span></b>
-        <p>
-          <span data-l="en">Pick the best option <b>inside</b> what the user already said is acceptable — and choose
-            the one that also keeps the network efficient.</span>
-          <span data-l="ja">その人が「ここまでならいい」と決めた<b>範囲の中</b>で、配送網にとっても良い選び方をする。</span>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 6. QUESTIONS FOR OPENAI ============ -->
-  <section class="blk">
-    <h2 class="sec"><span data-l="en">What I want to discuss with OpenAI</span><span data-l="ja">OpenAIに相談したいこと</span></h2>
-
-    <div class="ask-main">
-      <span class="tag">MAIN QUESTION</span>
-      <p>
-        <span data-l="en">How should we build an AI agent that can automatically choose and arrange the best way
-          for someone to receive a package?</span>
-        <span data-l="ja">人が荷物を受け取るのにいちばん良い方法を、AIエージェントが自動で選んで手配する——これをどう設計すべきでしょうか。</span>
-      </p>
-      <p class="compare">
-        <span data-l="en">The agent would compare <b>the user's schedule</b>, <b>their stated preferences</b>,
-          <b>the delivery options available right then</b>, <b>timing</b>, <b>cost</b> and <b>network conditions</b>,
-          then decide whether to keep home delivery, move it to a locker, or switch to another option entirely.</span>
-        <span data-l="ja">見比べるのは、<b>その人の予定</b>・<b>あらかじめ決めた希望</b>・<b>そのとき使える受け取り方</b>・<b>時刻</b>・<b>料金</b>・<b>配送網の状況</b>。その上で、自宅配送のままにするか、ロッカーに移すか、別の手段に切り替えるかを決めます。</span>
-      </p>
-    </div>
-
-    <div class="ask-sub">
-      <div>
-        <span class="n">1</span>
-        <span>
-          <span data-l="en">How much should the agent decide automatically, and when should it ask the user?</span>
-          <span data-l="ja">どこまでをエージェントが自動で決めてよくて、どこからユーザーに聞くべきでしょうか。</span>
-        </span>
-      </div>
-      <div>
-        <span class="n">2</span>
-        <span>
-          <span data-l="en">How can we improve convenience for each user without making the delivery network less
-            efficient?</span>
-          <span data-l="ja">一人ひとりの受け取りやすさを上げながら、配送網全体の効率を落とさずに済む方法はあるでしょうか。</span>
-        </span>
-      </div>
-      <div>
-        <span class="n">3</span>
-        <span>
-          <span data-l="en">What is the smallest MVP that could prove this idea is actually useful?</span>
-          <span data-l="ja">この構想が本当に役に立つと示せる、いちばん小さいMVPは何でしょうか。</span>
-        </span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ links ============ -->
-  <section class="blk noprint">
-    <h2 class="sec"><span data-l="en">If you want to look further</span><span data-l="ja">もう少し見たい場合</span></h2>
-    <div class="foot-links" style="margin-top:0">
-      <a class="btn btn-sm" href="../app/">
-        <span data-l="en">Prototype</span><span data-l="ja">プロトタイプ</span>
-      </a>
-      <a class="btn btn-sm" href="../#film">
-        <span data-l="en">2-minute video</span><span data-l="ja">2分の動画</span>
-      </a>
-      <a class="btn btn-sm btn-ghost" href="../">
-        <span data-l="en">Profile</span><span data-l="ja">プロフィール</span>
-      </a>
-    </div>
-    <p class="tiny faint" style="margin-top:16px">
-      <span data-l="en">The prototype runs on made-up data. Nothing here is connected to a real carrier.</span>
-      <span data-l="ja">プロトタイプは架空のデータで動いています。実在の配送事業者とは接続していません。</span>
-    </p>
-  </section>
+  <ul class="qs">
+    <li>
+      <span class="n">1</span>
+      <span>
+        <span data-l="ja">どこまでをエージェントが自動で決めてよくて、どこから本人に聞くべきでしょうか。</span>
+        <span data-l="en">How much should the agent decide on its own, and where does it have to ask?</span>
+      </span>
+    </li>
+    <li>
+      <span class="n">2</span>
+      <span>
+        <span data-l="ja">一人ひとりの受け取りやすさを上げながら、配送網全体の効率を落とさずに済む方法はあるでしょうか。</span>
+        <span data-l="en">Can one person's convenience go up without the delivery network getting less efficient?</span>
+      </span>
+    </li>
+    <li>
+      <span class="n">3</span>
+      <span>
+        <span data-l="ja">これが本当に役に立つと示せる、いちばん小さいMVPは何でしょうか。</span>
+        <span data-l="en">What is the smallest thing that would show this is actually useful?</span>
+      </span>
+    </li>
+  </ul>
 
 </main>
 
@@ -520,14 +135,6 @@
 <script>
   if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtn");
   if (window.LMTheme) window.LMTheme.bind("#themeBtn");
-  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-    a.addEventListener("click", function (e) {
-      var el = document.querySelector(a.getAttribute("href"));
-      if (!el) return;
-      e.preventDefault();
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  });
 </script>
 </body>
 </html>
