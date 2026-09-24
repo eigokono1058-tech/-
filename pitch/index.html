@@ -316,109 +316,11 @@
     </p>
   </section>
 
-  <!-- ===== SOLUTION ===== -->
-  <section>
-    <h2 class="sec">
-      <span data-l="ja">3. 解くのは「箱」ではなく「権限」</span>
-      <span data-l="en">3. The product is permissions, not boxes</span>
-    </h2>
-    <p class="sec-note">
-      <span data-l="ja">ロッカーやロボットを増やす競争ではなく、その手前の制御層を取る。既存のコンビニ・駅ロッカー・宅配BOXは、新しく作らなくてもそのままノードになる。</span>
-      <span data-l="en">Not a race to install more lockers and robots, but the control layer in front of them. Existing convenience stores, station lockers and building boxes become nodes as they are.</span>
-    </p>
-
-    <div class="comps">
-      <div class="comp">
-        <div class="cn">① RECEIPT GRANT</div>
-        <h3><span data-l="ja">物理世界のアクセストークン</span><span data-l="en">An access token for the physical world</span></h3>
-        <p>
-          <span data-l="ja">誰に・どこで・いつまで・何を許すかを、最小スコープ・時限付き・失効可能な形で発行する。AIエージェントにTool権限を渡すのと同じ発想。<b>渡していない権限を明示できる</b>のが要点。</span>
-          <span data-l="en">Who, where, until when and what — issued with least privilege, a time box and the ability to revoke. The same idea as handing an AI agent a scoped tool. The point is that it can state <b>what was not granted</b>.</span>
-        </p>
-      </div>
-      <div class="comp">
-        <div class="cn">② RECEIVING GRAPH</div>
-        <h3><span data-l="ja">受取地点を能力で抽象化</span><span data-l="en">Pickup points as capabilities</span></h3>
-        <p>
-          <span data-l="ja">温度帯・本人確認・施錠・空き枠・動的（人や車両）という能力でモデル化し、コンビニも駅ロッカーも勤務先も<b>移動中の本人</b>も同じインターフェースで扱う。</span>
-          <span data-l="en">Model every point by what it can actually do — temperature range, identity check, lock, free slots, and whether it moves. A konbini, a station locker, your office and <b>you, in transit</b> all sit behind one interface.</span>
-        </p>
-      </div>
-      <div class="comp">
-        <div class="cn">③ HANDOFF PROTOCOL</div>
-        <h3><span data-l="ja">占有移転の証跡</span><span data-l="en">Evidence of custody transfer</span></h3>
-        <p>
-          <span data-l="ja">「置いた／受け取った」ではなく、機体認証→グラント照合→認証→温度証跡→スコープ内解錠→占有移転を、署名付きイベントとして残す。これが責任分界の土台になる。</span>
-          <span data-l="en">Not "dropped off / picked up" but a signed chain: device auth → grant check → identity → temperature evidence → unlock within scope → custody transfer. That chain is what makes liability decidable.</span>
-        </p>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <div class="eyebrow">
-        <span data-l="ja">受取先を、住所ではなく「地点と人」にする</span>
-        <span data-l="en">Destination as a place and a person, not an address</span>
-      </div>
-      <p class="small muted" style="margin:10px 0 0">
-        <span data-l="ja">タクシーに乗るついでに受け取る。コンビニで受け取る。勤務先で受け取る。暗証番号を一時的に共有して友人に委任する。
-          <b>移動中の自分に届けてもらう。</b>配車アプリで「ここで乗る」とピンを差すのと同じ操作で、「ここで受け取る」を指定する。
-          個別の機能は既にある。足りないのは<b>配送中にこれらを安全に・即時に切り替える層</b>だけだ。</span>
-        <span data-l="en">Pick it up on the way while riding a taxi. At a convenience store. At the office. Delegate it to a friend by sharing a one-time code.
-          <b>Or have it delivered to you while you are moving.</b> Say “receive here” with the same gesture you already use to say “pick me up here” in a ride-hailing app.
-          Each of these exists in isolation. What is missing is <b>the layer that switches between them safely, mid-delivery</b>.</span>
-      </p>
-    </div>
-  </section>
-
-  <!-- ===== GOVERNANCE ===== -->
-  <section>
-    <h2 class="sec">
-      <span data-l="ja">4. 全部自動化しないことを設計する</span>
-      <span data-l="en">4. Designing what stays human</span>
-    </h2>
-    <p class="sec-note">
-      <span data-l="ja">AIエージェントのガードレール設計とまったく同じ構造。リスクに応じて人間の介入点を決める。</span>
-      <span data-l="en">Structurally identical to guardrail design for AI agents: you decide where a human intervenes, based on risk.</span>
-    </p>
-
-    <div class="ladder">
-      <div class="rung"><span class="rl">L0</span><span>
-        <b><span data-l="ja">手動</span><span data-l="en">Manual</span></b>
-        <span class="rd"><span data-l="ja">受取方法の決定も受渡しも人間。いまの宅配</span><span data-l="en">A human decides and receives. Delivery as it is today</span></span>
-      </span></div>
-      <div class="rung"><span class="rl">L1</span><span>
-        <b><span data-l="ja">提案のみ</span><span data-l="en">Suggest only</span></b>
-        <span class="rd"><span data-l="ja">AIが提案し、実行は毎回人間が承認</span><span data-l="en">The AI proposes; a human approves every time</span></span>
-      </span></div>
-      <div class="rung"><span class="rl">L2</span><span>
-        <b><span data-l="ja">低リスク自動</span><span data-l="en">Low risk automated</span></b>
-        <span class="rd"><span data-l="ja">常温・低額のみ自動実行</span><span data-l="en">Ambient, low-value parcels only</span></span>
-      </span></div>
-      <div class="rung on"><span class="rl">L3</span><span>
-        <b><span data-l="ja">例外時のみ人間 ／ 既定値</span><span data-l="en">Humans on exceptions / the default</span></b>
-        <span class="rd"><span data-l="ja">正常系は自律実行。認証失敗・温度逸脱・破損だけ人間へエスカレーション</span><span data-l="en">The happy path is autonomous; failed auth, temperature breach and damage escalate</span></span>
-      </span></div>
-      <div class="rung no"><span class="rl">L4</span><span>
-        <b><span data-l="ja">屋内まで委譲 ／ 採らない</span><span data-l="en">Indoor access delegated / rejected</span></b>
-        <span class="rd"><span data-l="ja">玄関解錠と屋内搬入まで渡すと、乗っ取りリスクを人間が肩代わりできない</span><span data-l="en">Give away door keys and indoor access and no human can absorb the hijacking risk</span></span>
-      </span></div>
-    </div>
-
-    <p class="small muted" style="margin-top:16px">
-      <span data-l="ja">価値が出るのは正常系ではなく<b>例外時の処理速度</b>。設計原則は4つ:
-        ①権限は時間で切れる（通信が切れたら開かないのが正しい） ②認証失敗はリトライで突破させない
-        ③ロボットを制圧しても中身と住居権限は取れない ④例外の大半は「時間切れ」なので期限設計が運用コストを決める。</span>
-      <span data-l="en">The value is not in the happy path but in <b>how fast exceptions are handled</b>. Four principles:
-        (1) permissions expire — when the network dies, not opening is correct; (2) failed authentication is never defeated by retrying;
-        (3) overpowering the robot yields neither the contents nor the keys; (4) most exceptions are deadlines expiring, so deadline design drives operating cost.</span>
-    </p>
-  </section>
-
   <!-- ===== WHO PAYS ===== -->
   <section>
     <h2 class="sec">
-      <span data-l="ja">5. 困っている人と、払う人は違う</span>
-      <span data-l="en">5. Whoever hurts is not whoever pays</span>
+      <span data-l="ja">3. 困っている人と、払う人は違う</span>
+      <span data-l="en">3. Whoever hurts is not whoever pays</span>
     </h2>
     <p class="sec-note">
       <span data-l="ja">「困っている人」「使う人」「設備を入れる人」「金を払う人」は同じではない。ここを間違えると、良い仕組みを作っても売れない。</span>
@@ -483,7 +385,7 @@
 
   <!-- ===== WHY NOW ===== -->
   <section>
-    <h2 class="sec"><span data-l="ja">6. なぜ今か</span><span data-l="en">6. Why now</span></h2>
+    <h2 class="sec"><span data-l="ja">4. なぜ今か</span><span data-l="en">4. Why now</span></h2>
     <div class="tbl-wrap" data-l="ja">
       <table class="tbl">
         <tbody>
@@ -527,20 +429,32 @@
 
   <!-- ===== VIDEOS ===== -->
   <section>
-    <h2 class="sec"><span data-l="ja">7. コンセプト動画</span><span data-l="en">7. Concept film</span></h2>
+    <h2 class="sec"><span data-l="ja">5. コンセプト動画</span><span data-l="en">5. Concept film</span></h2>
     <p class="sec-note">
-      <span data-l="ja">構想を35秒にしたもの。音は入っていません。</span>
-      <span data-l="en">The idea in 35 seconds. No sound.</span>
+      <span data-l="ja">短い方（35秒）と、方針とエージェントの話まで入れた方（50秒）。どちらも英語のナレーションと字幕つき。</span>
+      <span data-l="en">A short cut (35s) and a longer one (50s) that also covers the policy and the agent. Both have English narration and subtitles.</span>
     </p>
     <div class="vids">
       <figure class="vid" style="margin:0">
-        <video controls preload="metadata" playsinline>
+        <video controls preload="metadata" playsinline poster="../assets/video/delivery-os-poster.jpg">
           <source src="../assets/video/delivery-os.mp4" type="video/mp4">
           <source src="../assets/video/delivery-os.webm" type="video/webm">
+          <track kind="captions" srclang="en" label="English" src="../assets/video/delivery-os.en.vtt" default>
         </video>
         <figcaption>
           <span data-l="ja">Packages adapt to people — 35秒</span>
           <span data-l="en">Packages adapt to people — 35 seconds</span>
+        </figcaption>
+      </figure>
+      <figure class="vid" style="margin:0">
+        <video controls preload="metadata" playsinline>
+          <source src="../assets/video/delivery-os-full.mp4" type="video/mp4">
+          <source src="../assets/video/delivery-os-full.webm" type="video/webm">
+          <track kind="captions" srclang="en" label="English" src="../assets/video/delivery-os-full.en.vtt" default>
+        </video>
+        <figcaption>
+          <span data-l="ja">荷物が人についてくる／境界を決めるのは一度だけ — 50秒</span>
+          <span data-l="en">The parcel follows you, and you set the boundaries once — 50 seconds</span>
         </figcaption>
       </figure>
     </div>

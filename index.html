@@ -46,54 +46,50 @@
   .film { margin: 2px 0 22px; }
   .film-frame {
     position: relative;
-    width: min(72vw, 272px);
+    width: min(74vw, 284px);
     aspect-ratio: 9 / 16;
     margin: 0 auto;
     border-radius: var(--radius-lg);
     overflow: hidden;
     background: #05070c;
-    border: 1px solid color-mix(in srgb, var(--brand-2) 34%, var(--border));
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-2) 8%, transparent), var(--shadow);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
   }
   .film-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #05070c; }
 
-  /* 動画の表紙。コーデックの都合でフレームを抜き出せないので自前で描く */
+  /* 動画の表紙。中身のコマをそのまま出す（video の poster 属性）。
+     この上に薄い影と再生ボタンだけを重ねる。 */
   .film-cover {
     position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 18px 16px;
-    border: 0; cursor: pointer; text-align: left; font: inherit; color: var(--text);
-    background:
-      radial-gradient(85% 55% at 22% 8%, color-mix(in srgb, var(--brand-1) 52%, transparent), transparent 70%),
-      radial-gradient(75% 50% at 88% 96%, color-mix(in srgb, var(--brand-2) 46%, transparent), transparent 72%),
-      linear-gradient(160deg, #10162a 0%, #070a12 60%, #05070c 100%);
-    transition: opacity 0.25s ease;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding: 15px 16px;
+    border: 0; cursor: pointer; text-align: left; font: inherit; color: #fff;
+    background: radial-gradient(60% 40% at 50% 50%, rgba(5,7,12,0.34), rgba(5,7,12,0.06) 70%);
+    transition: opacity 0.3s var(--ease, ease);
   }
   .film-cover.is-hidden { opacity: 0; pointer-events: none; }
-  .fc-eyebrow {
-    font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
-    color: var(--brand-2); display: block;
+  .fc-mid {
+    position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
   }
-  .fc-title {
-    display: block; margin-top: 7px;
-    font-size: 21px; font-weight: 700; line-height: 1.18; letter-spacing: -0.015em;
-    color: #fff; text-wrap: balance;
-  }
-  .fc-mid { display: grid; place-items: center; }
   .fc-play {
-    width: 62px; height: 62px; border-radius: 50%;
+    width: 58px; height: 58px; border-radius: 50%;
     display: grid; place-items: center;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 28px -10px rgba(0, 0, 0, 0.75);
+    transition: transform 0.22s var(--ease, ease);
   }
   .fc-play svg { margin-left: 3px; }
-  .film-cover:hover .fc-play { transform: scale(1.06); }
-  .fc-play { transition: transform 0.18s ease; }
-  .fc-bottom { font-size: 11.5px; color: rgba(255, 255, 255, 0.72); font-weight: 600; }
-  .film-cap { font-size: 12.5px; color: var(--text-faint); text-align: center; margin: 12px auto 0; max-width: 340px; }
+  .film-cover:hover .fc-play { transform: scale(1.05); }
+  .film-meta {
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--text-faint); text-align: center; margin: 14px 0 0;
+    text-transform: uppercase;
+  }
+  .film-cap { font-size: 13px; line-height: 1.6; color: var(--text-dim); text-align: center; margin: 10px auto 0; max-width: 350px; }
 
   /* ---------- link list ---------- */
-  .links { display: grid; gap: 10px; }
+  .links { display: grid; gap: 11px; }
   .link-row {
     display: flex; align-items: center; gap: 14px;
     padding: 15px 16px;
@@ -102,10 +98,10 @@
     border-radius: var(--radius);
     color: var(--text); text-decoration: none;
     box-shadow: var(--shadow-soft);
-    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
-    min-height: 66px;
+    transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+    min-height: 68px;
   }
-  .link-row:hover { text-decoration: none; transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border)); }
+  .link-row:hover { text-decoration: none; transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent, var(--brand-1)) 55%, var(--border)); }
   .link-row:active { transform: scale(0.99); }
   .link-ico {
     width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px;
@@ -118,11 +114,10 @@
   .link-txt b { display: block; font-size: 15.5px; font-weight: 650; }
   .link-txt span { display: block; font-size: 12.5px; color: var(--text-faint); }
   .link-row .chev { color: var(--text-faint); flex: 0 0 auto; }
+  /* いちばん上の1件だけ、枠をほんの少し起こす（色は足さない） */
   .link-row.featured {
-    background:
-      linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
-      color-mix(in srgb, var(--surface) 92%, transparent);
-    border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
   }
 
   /* ---------- projects ---------- */
@@ -234,16 +229,14 @@
   <!-- 動画がこのサイトの主役。タップするまで読み込まないので通信量は軽い -->
   <section class="film" aria-label="Concept film">
     <div class="film-frame">
-      <video id="film" playsinline preload="metadata" controlslist="nodownload">
+      <video id="film" playsinline preload="metadata" controlslist="nodownload"
+             poster="assets/video/delivery-os-poster.jpg" crossorigin="anonymous">
         <source src="assets/video/delivery-os.mp4" type="video/mp4">
         <source src="assets/video/delivery-os.webm" type="video/webm">
+        <track kind="captions" srclang="en" label="English" src="assets/video/delivery-os.en.vtt" default>
       </video>
       <button class="film-cover" id="filmPlay" type="button"
-              aria-label="Play the concept film, 35 seconds, no sound">
-        <span>
-          <span class="fc-eyebrow">DELIVERY OS</span>
-          <span class="fc-title">Packages<br>adapt to people.</span>
-        </span>
+              aria-label="Play the concept film, 35 seconds, English narration with subtitles">
         <span class="fc-mid">
           <span class="fc-play">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="#06121f" aria-hidden="true">
@@ -251,12 +244,12 @@
             </svg>
           </span>
         </span>
-        <span class="fc-bottom">
-          <span data-l="en">35 seconds · no sound · tap to play</span>
-          <span data-l="ja">35秒 · 音なし · タップで再生</span>
-        </span>
       </button>
     </div>
+    <p class="film-meta">
+      <span data-l="en">35 seconds · English narration · subtitles</span>
+      <span data-l="ja">35秒 · 英語ナレーション · 字幕つき</span>
+    </p>
     <p class="film-cap">
       <span data-l="en">Two things break delivery today: you have to be home, and a parcel can only go to
         one fixed place. This is what it looks like when the parcel moves instead.</span>
