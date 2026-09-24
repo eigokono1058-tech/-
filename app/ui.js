@@ -177,6 +177,8 @@ window.LM_UI = (function () {
     if (ev.verdict !== "deny") {
       var pt = D.pointById(pointId);
       if (pt && !pt.dynamic && M.resolvePin() !== pointId) M.setPinToPoint(pointId);
+      // 手で決めた場合も、決めた以上はそこへ向かって歩く
+      if (!ev.needsApproval) headTo(parcelId);
     }
     renderAll();
     if (ev.verdict === "deny" || ev.needsApproval) {
@@ -651,6 +653,80 @@ window.LM_UI = (function () {
     failed: "danger", blocked: "danger", escalate: "warn" };
 
   var thinkingTimer = null;
+  var committed = {};   // 受取先を決めた荷物。決めた荷物だけ、自分がそこへ歩く。
+
+  /* 受取先が決まったら、自分はそこへ向かって歩く。
+     決まる前の「行ったり来たり」は移動中を表すためのもので、
+     決めたあとも続けると何が起きているのか読めなくなる。 */
+  function headTo(parcelId) {
+    if (!parcelId) return;
+    committed[parcelId] = true;
+    focus = parcelId;
+    M.setFocus(parcelId);
+    var tr = E.tracking(parcelId);
+    var pt = D.pointById(tr.pointId);
+    if (pt && pt.xy && !pt.dynamic) M.walkTo(pt.xy[0], pt.xy[1], pt.id);
+    else M.stopWalking();   // ピンでの受取なら、もうそこに居る
+  }
+
+  /** 自分と配送車の両方が着いていたら受渡しに入る。 */
+  function tryHandover() {
+    Object.keys(E.state.parcels).forEach(function (id) {
+      if (!committed[id]) return;
+      var tr = E.state.parcels[id];
+      if (tr.status !== "arrived") return;
+      var pt = D.pointById(tr.pointId);
+      if (pt && pt.dynamic) { E.startHandover(id); return; }
+      if (M.hasArrived() && M.headingTo() === tr.pointId) E.startHandover(id);
+    });
+  }
+
+  /* ---- 配送完了 ---- */
+  var DONE = {
+    title: { ja: "配送完了", en: "Delivered" },
+    at: { ja: "で受け取りました", en: "Picked up at" },
+    charged: {
+      ja: "配送料は登録のカードから自動で引き落とされます。受取時に支払う操作はありません。",
+      en: "The delivery fee is charged to your card automatically. There is nothing to pay at pickup."
+    },
+    seeLog: { ja: "受渡し記録を見る", en: "See the handover record" }
+  };
+
+  function renderDelivered() {
+    var box = $("deliveredBox");
+    if (!box) return;
+    var done = [];
+    D.PARCELS.forEach(function (p) {
+      var tr = E.state.parcels[p.id];
+      if (tr && tr.status === "received") done.push({ parcel: p, tr: tr });
+    });
+    if (!done.length) { box.innerHTML = ""; return; }
+
+    var ja = I18N && I18N.lang === "ja";
+    box.innerHTML = done.map(function (x) {
+      var pt = D.pointById(x.tr.pointId);
+      var d = A.decisions().filter(function (k) { return k.parcelId === x.parcel.id; })[0];
+      var extra = d && d.to ? d.to.extraCost : 0;
+      var fee = 480 + extra;
+      return '<article class="dec dec-ok dec-done">' +
+        '<header class="dec-head"><b>✓ ' + esc(t(DONE.title)) + "</b>" +
+        '<span class="pill tiny">' + esc(t(x.parcel.title)) + "</span></header>" +
+        '<p class="dec-reason">' + esc(ja
+          ? t(pt.name) + t(DONE.at) + (d && d.to ? "（" + d.to.at + "）" : "")
+          : t(DONE.at) + " " + t(pt.name) + (d && d.to ? ", " + d.to.at : "")) + "</p>" +
+        '<div class="dec-facts">' +
+        fact({ ja: "配送料", en: "Delivery" }, "¥" + fee) +
+        fact({ ja: "追加料金", en: "Extra" }, extra === 0 ? "¥0" : "¥" + extra) +
+        "</div>" +
+        '<p class="dec-note tiny faint">' + esc(t(DONE.charged)) + "</p>" +
+        '<div class="row dec-actions"><button class="btn btn-sm btn-ghost" data-tolog="1" type="button">' +
+        esc(t(DONE.seeLog)) + "</button></div></article>";
+    }).join("");
+
+    box.querySelectorAll("[data-tolog]").forEach(function (b) {
+      b.addEventListener("click", function () { setTab("log"); });
+    });
+  }
 
   function reducedMotion() {
     return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -664,7 +740,11 @@ window.LM_UI = (function () {
 
     function finish() {
       box.innerHTML = "";
-      A.runAll("user_action");
+      var ds = A.runAll("user_action");
+      /* 自動で変更が通った荷物があれば、その受取先へ自分が歩き出す */
+      var moved = null;
+      ds.forEach(function (d) { if (!moved && d.outcome === "executed") moved = d; });
+      if (moved) headTo(moved.parcelId);
       renderAgentPanel();
       renderAll();
     }
@@ -821,13 +901,15 @@ window.LM_UI = (function () {
 
     box.querySelectorAll("[data-undo]").forEach(function (b) {
       b.addEventListener("click", function () {
-        A.undo(b.getAttribute("data-undo"));
+        var d = A.undo(b.getAttribute("data-undo"));
+        if (d) { committed[d.parcelId] = false; M.stopWalking(); }
         renderAgentPanel(); renderAll();
       });
     });
     box.querySelectorAll("[data-confirm]").forEach(function (b) {
       b.addEventListener("click", function () {
-        A.confirm(b.getAttribute("data-confirm"));
+        var d = A.confirm(b.getAttribute("data-confirm"));
+        if (d && d.outcome === "confirmed") headTo(d.parcelId);
         renderAgentPanel(); renderAll();
       });
     });
@@ -1010,6 +1092,7 @@ window.LM_UI = (function () {
       renderPolicy();
       renderPolicySummary();
       renderAgentPanel();
+      renderDelivered();
       renderToolCalls();
       var lvl = $("lvlPill");
       if (lvl) {
@@ -1034,9 +1117,9 @@ window.LM_UI = (function () {
 
   /* ---------- init ---------- */
   function init() {
-    M.mount($("map"), { onPin: schedulePinCard });
+    M.mount($("map"), { onPin: schedulePinCard, onArrive: tryHandover });
     M.setFocus(focus);
-    E.subscribe(function () { renderAll(); });
+    E.subscribe(function () { tryHandover(); renderAll(); });
     E.init();
 
     ["flow", "policy", "grant", "log", "survey"].forEach(function (x) {
@@ -1083,6 +1166,7 @@ window.LM_UI = (function () {
       PR.reset();
       M.resetWalk();
       M.followMe(true);
+      committed = {};
       lastVerdict = null;
       var sg = $("agentSurge");
       if (sg) { sg.classList.remove("is-on"); sg.textContent = t({ ja: "例外を起こす", en: "Force an exception" }); }
@@ -1104,7 +1188,7 @@ window.LM_UI = (function () {
     if (I18N) {
       I18N.mountToggle("#langBtn");
       I18N.onChange(function () {
-        M.mount($("map"), { onPin: schedulePinCard });
+        M.mount($("map"), { onPin: schedulePinCard, onArrive: tryHandover });
         closeSheet();
         renderAll();
         if (window.LM_SURVEY) window.LM_SURVEY.relang();

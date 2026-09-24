@@ -100,7 +100,32 @@ window.LM_MAP = (function () {
     return { x: x, y: y, d: dist(px, py, x, y) };
   }
 
-  function personPos() { return pointAt(WALK, walkT); }
+  /* 受取先が決まったら、自分はそこへ向かって歩いて、着いたら止まる。
+     決まる前だけ、行ったり来たりの「移動中」を続ける。 */
+  var heading = null;   // { pts, t, dur, pointId, arrived }
+
+  function personPos() {
+    if (heading) return pointAt(heading.pts, heading.t);
+    return pointAt(WALK, walkT);
+  }
+
+  /** いまいる場所から目的地までの徒歩ルートを引いて、歩き始める。 */
+  function walkTo(x, y, pointId) {
+    var p = personPos();
+    if (heading && heading.pointId === pointId) return;   // 同じ行き先なら引き直さない
+    var pts = [[p.x, p.y]];
+    if (Math.abs(x - p.x) > 2) pts.push([x, p.y]);        // 通りに沿って横へ
+    pts.push([x, y]);                                      // それから目的地へ
+    var len = polyLength(pts).total;
+    heading = {
+      pts: pts, t: 0, pointId: pointId, arrived: false,
+      dur: Math.max(5, len / 7)   // 実時間での所要（見やすさ優先）
+    };
+  }
+
+  function stopWalking() { heading = null; }
+  function hasArrived() { return !!(heading && heading.arrived); }
+  function headingTo() { return heading ? heading.pointId : null; }
 
   /* 物流Hubから任意の座標までの走行ルート（大通りを経由して道なりに） */
   function routeToXY(x, y) {
@@ -378,11 +403,21 @@ window.LM_MAP = (function () {
   function update(state, dtSec) {
     if (!svg) return;
 
-    /* 自分は歩き続ける（端まで行ったら少し止まって折り返す） */
     if (dtSec) {
-      if (dwell > 0) {
+      if (heading) {
+        /* 受取先が決まっている：そこへ向かって歩き、着いたら止まる */
+        if (!heading.arrived) {
+          heading.t += dtSec / heading.dur;
+          if (heading.t >= 1) {
+            heading.t = 1;
+            heading.arrived = true;
+            if (hooks.onArrive) hooks.onArrive(heading.pointId);
+          }
+        }
+      } else if (dwell > 0) {
         dwell -= dtSec;
       } else {
+        /* まだ決まっていない：行ったり来たりで「移動中」を表す */
         walkT += (dtSec / WALK_SEC) * walkDir;
         if (walkT >= 1) { walkT = 1; walkDir = -1; dwell = DWELL_SEC; }
         else if (walkT <= 0) { walkT = 0; walkDir = 1; dwell = DWELL_SEC; }
@@ -488,7 +523,7 @@ window.LM_MAP = (function () {
     if (layers.pin) layers.pin.setAttribute("data-verdict", v || "allow");
   }
 
-  function resetWalk() { walkT = 0; walkDir = 1; dwell = 0; }
+  function resetWalk() { walkT = 0; walkDir = 1; dwell = 0; heading = null; }
 
   return {
     mount: mount,
@@ -496,6 +531,10 @@ window.LM_MAP = (function () {
     setFocus: function (id) { focusParcel = id; },
     personProgress: function () { return walkT; },
     resetWalk: resetWalk,
+    walkTo: walkTo,
+    stopWalking: stopWalking,
+    hasArrived: hasArrived,
+    headingTo: headingTo,
     movePinTo: movePinTo,
     setPinToPoint: setPinToPoint,
     followMe: followMe,
