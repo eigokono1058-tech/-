@@ -1,8 +1,8 @@
 /* ==========================================================================
    動画の書き出し。元のページを1コマずつ撮って、mp4とwebmにまとめる。
 
-     python3 tools/video/narrate.py tools/video/film-50s.html /tmp/nar.wav
-     node tools/video/render.cjs film-50s.html assets/video/delivery-os-full /tmp/nar.wav
+     python3 tools/video/narrate.py tools/video/film.html /tmp/nar.wav af_heart 1.35
+     node   tools/video/render.cjs  film.html assets/video/delivery-os /tmp/nar.wav
 
    wav の隣に <wav>.spans.json（narrate.py が書く）があれば、各場面の長さを
    実際に読み上げた長さへ合わせる。無音がほとんど残らない。
@@ -22,8 +22,8 @@ const path = require("path");
 const FPS = 24;
 const W = 720, H = 1280;
 
-const SRC = path.resolve(__dirname, process.argv[2] || "film-50s.html");
-const BASE = path.resolve(process.argv[3] || path.join(__dirname, "../../assets/video/delivery-os-full"));
+const SRC = path.resolve(__dirname, process.argv[2] || "film.html");
+const BASE = path.resolve(process.argv[3] || path.join(__dirname, "../../assets/video/delivery-os"));
 const WAV = process.argv[4] ? path.resolve(process.argv[4]) : null;
 const SPANS = WAV && fs.existsSync(WAV + ".spans.json")
   ? JSON.parse(fs.readFileSync(WAV + ".spans.json", "utf8")) : null;
