@@ -2,10 +2,10 @@
    動画の書き出し。元のページを1コマずつ撮って、mp4とwebmにまとめる。
 
      python3 tools/video/narrate.py tools/video/film-50s.html /tmp/nar.wav
-     node tools/video/render.cjs film-50s.html assets/video/delivery-os-full /tmp/nar.wav 1.2
+     node tools/video/render.cjs film-50s.html assets/video/delivery-os-full /tmp/nar.wav
 
-   5つめは再生の速さ。1.2 にすると、中身はそのままで全体が1.2倍速く進む
-   （82秒 → 68秒）。narrate.py にも同じ数字を渡すこと。
+   wav の隣に <wav>.spans.json（narrate.py が書く）があれば、各場面の長さを
+   実際に読み上げた長さへ合わせる。無音がほとんど残らない。
 
    ページは window.seek(秒) で任意の時刻の絵になるので、実時間で待たずに
    確実に同じコマが撮れる。撮り直しても結果は同じ。
@@ -25,7 +25,8 @@ const W = 720, H = 1280;
 const SRC = path.resolve(__dirname, process.argv[2] || "film-50s.html");
 const BASE = path.resolve(process.argv[3] || path.join(__dirname, "../../assets/video/delivery-os-full"));
 const WAV = process.argv[4] ? path.resolve(process.argv[4]) : null;
-const RATE = process.argv[5] ? Number(process.argv[5]) : 1;
+const SPANS = WAV && fs.existsSync(WAV + ".spans.json")
+  ? JSON.parse(fs.readFileSync(WAV + ".spans.json", "utf8")) : null;
 
 function ffmpeg() {
   return execFileSync("python3", ["-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"])
@@ -45,14 +46,15 @@ function vttTime(s) {
   page.on("pageerror", (e) => errs.push(e.message));
   await page.goto("file://" + SRC, { waitUntil: "networkidle" });
 
-  const raw = await page.evaluate(() => window.DURATION);
+  if (SPANS) await page.evaluate((s) => window.applyTiming(s), SPANS);
+  const duration = await page.evaluate(() => window.DURATION);
   const cues = await page.evaluate(() => window.CUES || null);
-  const duration = raw / RATE;
   const frames = Math.round(duration * FPS);
-  process.stdout.write(`${path.basename(SRC)} → ${duration.toFixed(1)}秒 / ${frames}コマ / 速さ×${RATE}\n`);
+  process.stdout.write(`${path.basename(SRC)} → ${duration.toFixed(1)}秒 / ${frames}コマ` +
+    (SPANS ? " / 無音を詰めた" : "") + "\n");
 
   for (let i = 0; i < frames; i++) {
-    await page.evaluate((t) => window.seek(t), (i / FPS) * RATE);
+    await page.evaluate((t) => window.seek(t), i / FPS);
     await page.screenshot({
       path: path.join(dir, String(i).padStart(5, "0") + ".jpg"), type: "jpeg", quality: 94
     });
@@ -78,12 +80,12 @@ function vttTime(s) {
 
   if (cues && cues.length) {
     const vtt = "WEBVTT\n\n" + cues.map((c, i) =>
-      (i + 1) + "\n" + vttTime(c[0] / RATE) + " --> " + vttTime(c[1] / RATE) + "\n" + c[2]).join("\n\n") + "\n";
+      (i + 1) + "\n" + vttTime(c[0]) + " --> " + vttTime(c[1]) + "\n" + c[2]).join("\n\n") + "\n";
     fs.writeFileSync(BASE + ".en.vtt", vtt);
   }
 
   fs.rmSync(dir, { recursive: true, force: true });
   const kb = (f) => Math.round(fs.statSync(f).size / 1024);
   console.log(`✓ ${BASE}.mp4 ${kb(BASE + ".mp4")}KB / .webm ${kb(BASE + ".webm")}KB` +
-    (cues ? ` / .en.vtt ${cues.length}行` : "") + `  ${duration.toFixed(1)}秒 ×${RATE}`);
+    (cues ? ` / .en.vtt ${cues.length}行` : "") + `  ${duration.toFixed(1)}秒`);
 })();

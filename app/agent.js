@@ -295,10 +295,32 @@ window.LM_AGENT = (function () {
       };
     });
 
+    /* 道の上と、建物や駅。種類のちがう案を2つ並べて出す。
+       1つだけ出すと「なぜそこなのか」が比べられないため。 */
+    function kindOf(o) { return o.point.dynamic ? "street" : "place"; }
+    function pack(r) {
+      var o = r.option;
+      return {
+        optionId: o.id, pointId: o.pointId, kind: kindOf(o),
+        name: o.label, provider: o.providerName,
+        at: hhmm(o.receivableAtMin), atMin: o.receivableAtMin,
+        extraCost: o.extraCost, walkMin: o.walkMin,
+        successP: r.detail.successP
+      };
+    }
+    var second = null;
+    for (var ri = 1; ri < ranked.length; ri++) {
+      if (kindOf(ranked[ri].option) !== kindOf(ranked[0].option)) { second = ranked[ri]; break; }
+    }
+    if (!second && ranked.length > 1) second = ranked[1];
+    d.alt = second ? pack(second) : null;
+    d.altOption = second ? second.option : null;
+
     var chosen = ranked[0].option;
     d.to = {
       optionId: chosen.id,
       pointId: chosen.pointId,
+      kind: kindOf(chosen),
       name: chosen.label,
       provider: chosen.providerName,
       at: hhmm(chosen.receivableAtMin),
@@ -464,6 +486,22 @@ window.LM_AGENT = (function () {
     return d;
   }
 
+  /** 出した2案のどちらかを選んで確定する。押されるまで何も実行しない。 */
+  function choose(decisionId, optionId) {
+    var d = byId(decisionId);
+    if (!d || d.outcome !== "pending") return null;
+    if (d.altOption && optionId === d.altOption.id) {
+      var was = d.to, wasOpt = d.chosen;
+      d.chosen = d.altOption;
+      d.to = d.alt;
+      d.alt = was;
+      d.altOption = wasOpt;
+    }
+    execute(d);
+    if (d.outcome === "executed") d.outcome = "confirmed";
+    return d;
+  }
+
   function reject(decisionId) {
     var d = byId(decisionId);
     if (!d) return null;
@@ -482,7 +520,8 @@ window.LM_AGENT = (function () {
   }
 
   /* ---------- まとめて走らせる ------------------------------------------ */
-  function runAll(trigger) {
+  function runAll(trigger, opts) {
+    opts = opts || {};
     /* 文脈は1回だけ読む。荷物ごとにカレンダーを読み直さない。 */
     PR.call("calendar.busy_windows", { date: "today" });
     PR.call("location.coarse_area", {});
@@ -493,7 +532,7 @@ window.LM_AGENT = (function () {
       var tr = E.tracking(p.id);
       if (tr.status === "received" || tr.status === "returned") return;
       var d = evaluateParcel(p.id, trigger);
-      if (d.action === "auto") execute(d);
+      if (d.action === "auto" && !opts.proposeOnly) execute(d);
       out.push(d);
     });
     return out;
@@ -546,6 +585,7 @@ window.LM_AGENT = (function () {
     execute: execute,
     runAll: runAll,
     confirm: confirm,
+    choose: choose,
     reject: reject,
     undo: undo,
     canUndo: canUndo,
