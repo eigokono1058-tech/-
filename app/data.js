@@ -4,6 +4,8 @@
    表示文字列はすべて {ja, en} で持つ。LM_I18N.t() で取り出す。
    ========================================================================== */
 window.LM_DATA = (function () {
+  var SF = window.LM_SF;   // 受取地点の座標は実在の交差点から引く（sf.js が先に読まれる）
+
   /* ---- 自律レベル / autonomy levels ----------------------------------- */
   var AUTONOMY = [
     {
@@ -80,10 +82,9 @@ window.LM_DATA = (function () {
       kind: { ja: "自宅", en: "Home" },
       icon: "home",
       caps: ["ambient"],
-      xy: [150, 44],
+      xy: SF.PLACES.home_door,
       labelAbove: true,
       label: { ja: "自宅", en: "Home" },
-      route: [[20, 200], [20, 130], [150, 130], [150, 44]],
       note: {
         ja: "いまの標準。不在でも届くが、盗難・破損・プライバシーの露出が残る。",
         en: "Today's default. Works when you are out, but theft, damage and exposure remain."
@@ -97,9 +98,8 @@ window.LM_DATA = (function () {
       kind: { ja: "自宅", en: "Home" },
       icon: "locker",
       caps: ["ambient", "secure"],
-      xy: [188, 72],
+      xy: SF.PLACES.home_locker,
       label: { ja: "ロビー", en: "Lobby" },
-      route: [[20, 200], [20, 130], [150, 130], [150, 72], [188, 72]],
       note: {
         ja: "常温のみ・数が足りない。満杯だと即座に再配達へ戻る。",
         en: "Ambient only, and never enough boxes. Once full, you are back to redelivery."
@@ -113,9 +113,9 @@ window.LM_DATA = (function () {
       kind: { ja: "地域Hub", en: "Local hub" },
       icon: "store",
       caps: ["ambient", "chilled", "identity", "attended", "secure"],
-      xy: [252, 130],
+      xy: SF.PLACES.konbini,
+      labelAbove: true,
       label: { ja: "ストア", en: "Store" },
-      route: [[20, 200], [20, 130], [252, 130]],
       note: {
         ja: "既存インフラをそのまま地域Hubに使える。冷凍は基本不可。",
         en: "Existing infrastructure works as a local hub as-is. Frozen usually not possible."
@@ -128,10 +128,9 @@ window.LM_DATA = (function () {
       kind: { ja: "地域Hub", en: "Local hub" },
       icon: "locker",
       caps: ["ambient", "chilled", "frozen", "secure"],
-      xy: [318, 62],
+      xy: SF.PLACES.station_locker,
       labelAbove: true,
-      label: { ja: "モンゴメリー駅", en: "Montgomery" },
-      route: [[20, 200], [20, 130], [318, 130], [318, 62]],
+      label: { ja: "モンゴメリー駅", en: "Montgomery St" },
       note: {
         ja: "冷凍対応の3温度帯ロッカー。通勤経路上なら受取コストはほぼゼロ。",
         en: "Three temperature zones including frozen. On your commute, pickup costs you nothing."
@@ -145,10 +144,9 @@ window.LM_DATA = (function () {
       kind: { ja: "外部", en: "Third party" },
       icon: "office",
       caps: ["ambient", "attended", "identity", "secure"],
-      xy: [58, 44],
+      xy: SF.PLACES.office,
       labelAbove: true,
       label: { ja: "勤務先", en: "Office" },
-      route: [[20, 200], [20, 130], [58, 130], [58, 44]],
       note: {
         ja: "日中いる場所に届ける。社内規程で私物受取が禁止の場合あり。",
         en: "Deliver where you actually are in the daytime. Some employers forbid personal parcels."
@@ -178,9 +176,8 @@ window.LM_DATA = (function () {
       kind: { ja: "委任", en: "Delegated" },
       icon: "delegate",
       caps: ["ambient", "chilled", "attended"],
-      xy: [250, 200],
+      xy: SF.PLACES.friend,
       label: { ja: "近所", en: "Neighbour" },
-      route: [[20, 200], [250, 200]],
       note: {
         ja: "受取権限を他人に一時委譲する。誰に何を渡したかの記録が必須。",
         en: "Temporarily delegate the right to receive. Requires a record of who got what."
@@ -193,10 +190,8 @@ window.LM_DATA = (function () {
       kind: { ja: "屋内", en: "Indoor" },
       icon: "robot",
       caps: ["ambient", "chilled", "frozen", "indoor", "secure"],
-      xy: [112, 44],
-      labelAbove: true,
+      xy: SF.PLACES.indoor,
       label: { ja: "屋内搬入", en: "Indoors" },
-      route: [[20, 200], [20, 130], [150, 130], [150, 44], [112, 44]],
       note: {
         ja: "冷蔵庫まで自動搬入。実現には玄関の解錠権限が必要で、リスクが跳ね上がる。",
         en: "All the way to the fridge. Needs the right to unlock your door, which changes the risk entirely."
@@ -671,7 +666,7 @@ window.LM_DATA = (function () {
        mode  "follow" = 歩いている自分に追従 / "fixed" = 差した場所で固定
        kind  "me" 自分の現在地 / "street" 路上 / "point" 既存の受取地点     */
   var PIN = {
-    x: 150, y: 96,
+    x: SF.WALK[0][0], y: SF.WALK[0][1],
     mode: "follow",
     kind: "me",
     pointId: null,          // 既存の受取地点にスナップしていればそのid

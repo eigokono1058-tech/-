@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dynamic Delivery Orchestration OS — demo</title>
 <meta name="description" content="Choose where a parcel meets you, or hand it to an agent that decides inside the boundaries you set.">
-<meta name="theme-color" content="#0a0c12">
+<meta name="theme-color" content="#f6f7fb">
 <link rel="icon" href="../assets/favicon.svg">
 <link rel="stylesheet" href="../assets/css/site.css">
 <link rel="stylesheet" href="app.css">
@@ -84,23 +84,6 @@
   </div>
 </section>
 
-<!-- ================= 検証 ================= -->
-<section class="view" id="view-survey">
-  <div class="pad">
-    <h2 class="vh">
-      <span data-l="ja">これ、使いたいですか？</span><span data-l="en">Would you use this?</span>
-    </h2>
-    <p class="vsub">
-      <span data-l="ja"><b>「使わない」が一番価値のある回答です。</b></span>
-      <span data-l="en"><b>“I would not use it” is the most valuable answer.</b></span>
-    </p>
-    <div id="surveyForm"></div>
-    <hr>
-    <h3 class="vh3"><span data-l="ja">集計</span><span data-l="en">Results</span></h3>
-    <div id="surveyStats"></div>
-  </div>
-</section>
-
 <!-- ===== タブ ===== -->
 <nav class="tabbar" role="tablist" aria-label="Sections">
   <button id="tab-map" role="tab" aria-selected="true" type="button"><span class="ti">📍</span>
@@ -109,12 +92,10 @@
   <button id="tab-log" role="tab" aria-selected="false" type="button"><span class="ti">📜</span>
     <span data-l="ja">記録</span><span data-l="en">Log</span>
   </button>
-  <button id="tab-survey" role="tab" aria-selected="false" type="button"><span class="ti">💬</span>
-    <span data-l="ja">検証</span><span data-l="en">Feedback</span>
-  </button>
 </nav>
 
 <script src="../assets/js/theme.js"></script>
+<script src="sf.js"></script>
 <script src="data.js"></script>
 <script src="policy.js"></script>
 <script src="providers.js"></script>
@@ -122,11 +103,9 @@
 <script src="engine.js"></script>
 <script src="agent.js"></script>
 <script src="map.js"></script>
-<script src="survey.js"></script>
 <script src="ui.js"></script>
 <script>
   window.LM_UI.init();
-  window.LM_SURVEY.init();
   if (window.LM_I18N) window.LM_I18N.mountToggle("#langBtnOnboard");
 </script>
 </body>

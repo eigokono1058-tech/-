@@ -4,20 +4,40 @@
    色・間隔・角丸は site.css の変数から。新しい色は作らない。
    ========================================================================== */
 
-/* 地図の色。暗い地図アプリの見え方に寄せる */
+/* 地図の色。地図アプリの見え方に寄せる（既定は明るい面） */
 :root {
-  --map-bg: #0e1118;
-  --map-block: #1c212e;
-  --map-road: #2f3648;
-  --map-road-minor: #242a3a;
-  --sheet: #151926;
-}
-:root[data-theme="light"] {
-  --map-bg: #eef1f6;
-  --map-block: #e2e7ef;
+  --map-bg: #f6f4ef;
+  --map-water: #a9d3ef;
+  --map-park: #cde9c8;
+  --map-pier: #e9e5dc;
   --map-road: #ffffff;
-  --map-road-minor: #f4f6fa;
+  --map-casing: #dcd8d0;
+  --map-hwy: #f9d77e;
+  --map-hwy-casing: #e3bd63;
+  --map-label: #6b6f76;
+  --map-label-strong: #3c4043;
+  --map-district: #9aa0a6;
+  --map-water-label: #6f9dc0;
+  --map-poi: #7c6a4e;
+  --map-halo: #ffffff;
   --sheet: #ffffff;
+}
+:root[data-theme="dark"] {
+  --map-bg: #212936;
+  --map-water: #17263c;
+  --map-park: #25382f;
+  --map-pier: #2a3240;
+  --map-road: #3c4655;
+  --map-casing: #2a3240;
+  --map-hwy: #6f5d31;
+  --map-hwy-casing: #55492a;
+  --map-label: #98a3b2;
+  --map-label-strong: #ccd4de;
+  --map-district: #6f7a89;
+  --map-water-label: #4d7ba5;
+  --map-poi: #a89577;
+  --map-halo: #1b2230;
+  --sheet: #151926;
 }
 
 body.is-app {
@@ -75,11 +95,11 @@ body.is-app .grid-lines { display: none; }
 .view { display: none; }
 .view.is-active { display: block; }
 
-#view-log, #view-survey {
+#view-log {
   position: fixed; inset: 52px 0 66px;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
-#view-log.is-active, #view-survey.is-active { display: block; }
+#view-log.is-active { display: block; }
 .pad { max-width: var(--maxw); margin: 0 auto; padding: 22px 16px 40px; }
 .vh { font-size: 17px; letter-spacing: -0.01em; margin: 0 0 6px; }
 .vh3 { font-size: 15px; margin: 0 0 10px; }
@@ -87,24 +107,20 @@ body.is-app .grid-lines { display: none; }
 
 /* ==========================================================================
    地図
-   地図とシートを縦に積む。シートは残りの高さをすべて使う。
-   固定配置で重ねると画面の高さによって隙間ができるので、積み方で解く。
+   地図アプリと同じく、地図は画面いっぱい。シートはその上に浮かせる。
+   こうしないと、シートが伸びるたびに地図が縮んで読めなくなる。
    ========================================================================== */
 #view-map.is-active {
   position: fixed; inset: 52px 0 66px;
-  display: flex; flex-direction: column;
   background: var(--map-bg);
 }
 .stage {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
+  position: absolute; inset: 0;
   background: var(--map-bg);
   overflow: hidden;
-  display: grid; place-items: center;
 }
-#map { display: block; width: 100%; height: auto; max-height: 100%; }
-@media (min-width: 640px) { #map { max-width: 700px; } }
+/* 地図は舞台いっぱいに広げる。表示範囲は map.js が画面の形に合わせて切り出す */
+#map { display: block; width: 100%; height: 100%; }
 
 /* 上部の状態表示。地図の上に浮かせる */
 .status {
@@ -130,90 +146,109 @@ body.is-app .grid-lines { display: none; }
 .status.is-ok { border-color: color-mix(in srgb, var(--ok) 55%, transparent); }
 .status.is-ok b { color: var(--ok); }
 
-.maphint {
-  position: absolute; left: 50%; bottom: 12px; z-index: 6;
-  transform: translateX(-50%);
-  padding: 7px 14px; border-radius: 999px;
-  background: color-mix(in srgb, var(--brand-1) 92%, black);
-  color: #fff; font-size: 12.5px; font-weight: 650;
-  white-space: nowrap; pointer-events: none;
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.7);
-  animation: hintIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+/* ---- 地図そのもの ----
+   陸 → 海 → 公園 → 道路の縁取り → 道路 → 文字、の順に重なる。 */
+.m-land { fill: var(--map-bg); }
+.m-water { fill: var(--map-water); }
+.m-pier { fill: var(--map-pier); }
+.m-park { fill: var(--map-park); }
+
+.m-casing, .m-road, .m-hwy, .m-hwy-casing {
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
 }
-@keyframes hintIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+.m-casing { stroke: var(--map-casing); }
+.m-road { stroke: var(--map-road); }
+.m-casing.m-market { stroke-width: 9.4; }
+.m-road.m-market { stroke-width: 7.4; }
+.m-casing.m-arterial { stroke-width: 6.6; }
+.m-road.m-arterial { stroke-width: 5; }
+.m-casing.m-minor { stroke-width: 4.6; }
+.m-road.m-minor { stroke-width: 3.2; }
+.m-casing.m-alley { stroke-width: 2.6; }
+.m-road.m-alley { stroke-width: 1.6; }
+.m-hwy-casing { stroke: var(--map-hwy-casing); stroke-width: 8.4; }
+.m-hwy { stroke: var(--map-hwy); stroke-width: 6.2; }
 
-/* ---- 地図の要素 ---- */
-.m-block { fill: var(--map-block); }
-.m-road { stroke: var(--map-road); stroke-width: 9; fill: none; stroke-linecap: round; }
-.m-road-minor { stroke: var(--map-road-minor); stroke-width: 4; fill: none; stroke-linecap: round; }
-/* 徒歩ルートと物流Hubは説明の邪魔になるので出さない */
-.m-walk, .m-depot, .m-routes { display: none; }
-
-.m-label {
-  fill: var(--text-faint); font-size: 6.6px; font-weight: 600;
-  letter-spacing: 0.01em; pointer-events: none;
+/* 地図の文字は、下の線に負けないよう必ず縁を取る */
+.m-street-name, .m-district, .m-landmark-name, .m-point-label {
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: var(--map-halo);
+  stroke-linejoin: round;
 }
-.m-label-accent { fill: var(--brand-2); }
+.m-street-name {
+  fill: var(--map-label); font-size: 6.2px; font-weight: 500;
+  letter-spacing: 0.02em; stroke-width: 2.2px;
+}
+.m-street-name.is-major {
+  fill: var(--map-label-strong); font-size: 7.4px; font-weight: 600;
+}
+.m-district {
+  fill: var(--map-district); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.16em; stroke-width: 2.6px;
+}
+.m-district.is-water { fill: var(--map-water-label); letter-spacing: 0.2em; }
 
+.m-landmark-dot { fill: var(--map-halo); opacity: 0.72; }
+.m-landmark-name {
+  fill: var(--map-poi); font-size: 6.2px; font-weight: 600; stroke-width: 2.2px;
+}
+
+/* ---- 受取地点。地図の上に立つ、このアプリ自身の印 ---- */
 .m-point { cursor: default; }
 .m-point-hit { fill: transparent; }
 .m-point-dot {
-  fill: var(--surface-2);
-  stroke: var(--border);
-  stroke-width: 1;
+  fill: var(--map-halo);
+  stroke: var(--text-faint);
+  stroke-width: 1.8;
   transition: fill 0.25s ease, stroke 0.25s ease, r 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.m-point-ico { font-size: 8.4px; pointer-events: none; }
+.m-point-ico { font-size: 10.5px; pointer-events: none; }
+.m-point-label {
+  fill: var(--map-label-strong); font-size: 8.6px; font-weight: 700;
+  stroke-width: 3px; letter-spacing: 0.01em;
+}
+.m-point-label.is-me { fill: var(--brand-1); }
 
 /* 選べる状態のときだけ、地点が押せるように見える */
 #map.is-pickable .m-point { cursor: pointer; }
 #map.is-pickable .m-point .m-point-dot {
-  fill: color-mix(in srgb, var(--brand-1) 22%, var(--surface-3));
-  stroke: var(--brand-1);
-  stroke-width: 1.6;
-  r: 9.8;
+  stroke: var(--brand-1); stroke-width: 2.6; r: 12;
 }
-#map.is-pickable .m-point:hover .m-point-dot { r: 11; }
-#map.is-pickable .m-point .m-label { fill: var(--text-dim); }
+#map.is-pickable .m-point:hover .m-point-dot { r: 13.5; }
+#map.is-pickable .m-point .m-point-label { fill: var(--brand-1); }
 .m-point.is-picked .m-point-dot {
-  fill: var(--brand-1); stroke: #fff; stroke-width: 1.6; r: 10.5;
+  fill: var(--brand-1); stroke: var(--map-halo); stroke-width: 2.6; r: 13;
 }
-.m-point.is-picked .m-label { fill: var(--brand-1); font-weight: 700; }
-.m-point.is-selected .m-point-dot {
-  fill: var(--brand-2); stroke: #fff; stroke-width: 1.4;
-}
-.m-point.is-selected .m-label { fill: var(--brand-2); font-weight: 700; }
+.m-point.is-picked .m-point-label { fill: var(--brand-1); }
+.m-point.is-selected .m-point-dot { fill: var(--brand-2); stroke: var(--map-halo); stroke-width: 2.4; }
+.m-point.is-selected .m-point-label { fill: var(--brand-2); }
 .m-point:focus { outline: none; }
-.m-point:focus-visible .m-point-dot { stroke: var(--brand-1); stroke-width: 2; }
+.m-point:focus-visible .m-point-dot { stroke: var(--brand-1); stroke-width: 3; }
 
-/* 自分 */
-.m-person-dot { fill: var(--brand-1); stroke: #fff; stroke-width: 1.4; }
-.m-person-acc { fill: var(--brand-1); opacity: 0.14; }
-.m-person .m-label { display: none; }
-.m-person .m-point-ico { font-size: 7.4px; }
+/* 自分。地図アプリの青い点と同じ見え方 */
+.m-person-dot { fill: var(--brand-1); stroke: var(--map-halo); stroke-width: 2.2; }
+.m-person-acc { fill: var(--brand-1); opacity: 0.13; }
 
-/* 配送車 */
-.m-van-body { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.6; }
-.m-van-halo { opacity: 0.16; }
-.m-van-ico { font-size: 7.4px; }
+/* 配送車と走行ルート */
+.m-route { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.m-van-body { stroke: rgba(0, 0, 0, 0.2); stroke-width: 0.8; }
+.m-van-halo { opacity: 0.18; }
+.m-van-ico { font-size: 9px; }
 .m-van.is-focus .m-van-halo { opacity: 0.3; }
-
-/* 差すピンは今回の主役ではないので出さない */
-.m-pin { display: none; }
 
 /* ==========================================================================
    下のシート
    ========================================================================== */
 .sheet2 {
-  flex: 0 0 auto;
-  max-height: 68%;
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
+  max-height: 78%;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
-  margin-top: -20px;                 /* 地図に少しかぶせる */
   padding: 10px 18px calc(22px + env(safe-area-inset-bottom, 0));
   border-radius: 22px 22px 0 0;
   background: var(--sheet);
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  box-shadow: 0 -14px 40px -18px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 -14px 40px -18px rgba(0, 0, 0, 0.3);
 }
 @media (min-width: 640px) {
   .sheet2 {
@@ -277,6 +312,36 @@ body.is-app .grid-lines { display: none; }
 .pick-card.is-no { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); background: color-mix(in srgb, var(--danger) 8%, var(--surface-2)); }
 .pick-name { display: block; font-size: 17px; letter-spacing: -0.01em; }
 .pick-no { margin: 8px 0 0; font-size: 13px; color: var(--danger); line-height: 1.6; }
+
+/* ここでは受け取れないとき、代わりに押せる候補 */
+.alts-h {
+  margin: 16px 0 8px; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint);
+}
+.alts-none { margin: 14px 0 0; font-size: 13px; color: var(--text-faint); line-height: 1.6; }
+.alts { display: grid; gap: 8px; }
+.alt {
+  appearance: none; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: 38px 1fr 14px; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 14px; text-align: left;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); font: inherit;
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), border-color 0.2s ease, background 0.2s ease;
+}
+.alt:hover { border-color: var(--brand-1); background: color-mix(in srgb, var(--brand-1) 7%, var(--surface-2)); }
+.alt:active { transform: scale(0.985); }
+.alt-ico {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: grid; place-items: center; font-size: 18px;
+  background: var(--surface-3); border: 1px solid var(--border);
+}
+.alt-body { display: grid; gap: 3px; min-width: 0; }
+.alt-body b {
+  font-size: 14.5px; font-weight: 650; letter-spacing: -0.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.alt-facts { font-size: 12.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.alt-go { color: var(--text-faint); font-size: 18px; justify-self: end; }
 
 /* 事実の並び。数字は等幅で */
 .facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -383,7 +448,7 @@ body.is-app .grid-lines { display: none; }
    ========================================================================== */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 45;
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(2, 1fr);
   height: calc(66px + env(safe-area-inset-bottom, 0));
   padding-bottom: env(safe-area-inset-bottom, 0);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -457,46 +522,7 @@ body.is-app .grid-lines { display: none; }
 .log-row.warn .lk { color: var(--warn); }
 .log-row.danger .lk { color: var(--danger); }
 
-/* ==========================================================================
-   アンケート（既存の見た目を引き継ぐ）
-   ========================================================================== */
-.q { margin-bottom: 20px; }
-.q > b { display: block; font-size: 14px; margin-bottom: 8px; }
-.opts { display: flex; flex-wrap: wrap; gap: 7px; }
-.opt {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 13px; border-radius: 11px;
-  border: 1px solid var(--border); background: var(--surface-2);
-  font-size: 13.5px; cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-.opt input { accent-color: var(--brand-2); }
-.opt.is-on { border-color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
-.scale { display: flex; gap: 6px; }
-.scale button {
-  flex: 1; min-height: 44px; border-radius: 11px;
-  border: 1px solid var(--border); background: var(--surface-2);
-  color: var(--text); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer;
-}
-.scale button.is-on { border-color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 16%, transparent); color: var(--brand-2); }
-.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
-.stat {
-  padding: 13px; border-radius: 13px;
-  border: 1px solid var(--border); background: var(--surface-2);
-}
-.stat .sv { font-size: 21px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.stat .sk { font-size: 11px; color: var(--text-faint); margin-top: 3px; line-height: 1.4; }
-.bars { display: grid; gap: 5px; }
-.barline { display: grid; grid-template-columns: 110px 1fr 54px; gap: 9px; align-items: center; font-size: 12px; }
-.bt { height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
-.bt i { display: block; height: 100%; background: linear-gradient(90deg, var(--brand-1), var(--brand-2)); }
-.banner {
-  padding: 13px 15px; border-radius: 13px;
-  border: 1px solid var(--border); background: var(--surface-2); font-size: 13.5px;
-}
-.banner.ok { border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); background: color-mix(in srgb, var(--ok) 9%, transparent); }
-
 @media (prefers-reduced-motion: reduce) {
-  .sheet2.is-in > *, .t2row, .res-ico, .done-check, .ob-mark, .maphint { animation: none !important; }
+  .sheet2.is-in > *, .t2row, .res-ico, .done-check, .ob-mark { animation: none !important; }
   .mode, .m-point-dot, .status { transition: none !important; }
 }

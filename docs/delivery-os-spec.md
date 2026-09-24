@@ -32,7 +32,7 @@
 | 既存クラス | `.card` `.card-tight` `.btn` `.btn-sm` `.btn-primary` `.btn-ghost` `.row` `.row-wrap` `.spread` `.pill` `.eyebrow` `.muted` `.small` `.tiny` `.faint` `.banner` `.stat-grid` `.bars` |
 | 多言語 | 独自i18n。`<span data-l="ja">…</span><span data-l="en">…</span>` の兄弟ペアをCSSで出し分け。en / ja / 併記の3モード |
 | 配信 | Cloudflare Workers 静的アセット（`wrangler.jsonc`）＋ GitHub Pages の二重 |
-| API | `worker/index.js`。`/api/survey` 系のみ。D1バックエンド |
+| 配信 | `worker/index.js`。静的アセットのみ（データベースなし） |
 | テスト | 自動テストなし。`npm run lint` / `npm run build` は**存在しない**（実行しようとしないこと） |
 
 ### 0.2 絶対に守ること
@@ -99,7 +99,6 @@ not for deterministic logistics calculations.」** を実際のコード構造�
 | 2 | 方針 | 方針 / Policy | **ユーザー方針の設定** ＋ 自律レベル ＋ 発行済みグラント | 新規＋既存統合 |
 | 3 | 全体最適 | 全体最適 / Network | **3ユーザー×2車両×2ロッカーの割当デモ** | 新規 |
 | 4 | 記録 | 記録 / Log | 責任分界ログ ＋ **エージェントのツール呼び出し** | 既存＋追加 |
-| 5 | 検証 | 検証 / Feedback | アンケート | 既存のまま |
 
 既存の「権限」タブは **2. 方針** に統合する（方針＝入力、グラント＝出力なので同じ面が正しい）。
 
@@ -500,7 +499,6 @@ app/data.js        POINTS に extraCost / walkMin / detourKm / providerId を追
 <script src="engine.js"></script>
 <script src="agent.js"></script>
 <script src="map.js"></script>
-<script src="survey.js"></script>
 <script src="ui.js"></script>
 ```
 
@@ -835,7 +833,7 @@ Different countries. Different providers. Same orchestration layer.
 - [ ] 全体最適タブで、単独最適と全体最適の4指標が異なる値になる
 - [ ] 健全なケースでは `action:"none"` になり、「変更の必要はありませんでした」が出る
 - [ ] 記録タブに、実際のツール呼び出しが引数付きで出る
-- [ ] 既存機能（地図のピン、グラント表示、アンケート、言語切替）が壊れていない
+- [ ] 既存機能（地図の選択、受渡し記録、言語切替）が壊れていない
 
 ### 表示
 
