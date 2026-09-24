@@ -273,7 +273,7 @@ body.is-app .grid-lines { display: none; }
 }
 
 /* 配送車と走行ルート */
-.m-route { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.m-route { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .m-van-body { stroke: rgba(0, 0, 0, 0.2); stroke-width: 0.8; }
 .m-van-halo { opacity: 0.18; }
 .m-van-ico { font-size: 9px; }
