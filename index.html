@@ -306,7 +306,9 @@
 <div class="sheet" id="qrSheet" role="dialog" aria-modal="true" aria-label="このページのQRコード">
   <div class="sheet-card">
     <div class="eyebrow" style="margin-bottom:12px">SCAN ME</div>
-    <span class="qr-frame"><img src="assets/qr/profile-qr.svg" alt="このページへのQRコード" id="qrImg"></span>
+    <!-- QRは端末にもCDNにも残りやすい。古いQRが出ると死んだURLを指すので、
+         作り直したら必ず ?v= の数字を上げること -->
+    <span class="qr-frame"><img src="assets/qr/profile-qr.svg?v=2" alt="このページへのQRコード" id="qrImg"></span>
     <div class="small mono" id="qrUrl" style="word-break:break-all;color:var(--text-faint);margin-bottom:14px"></div>
     <button class="btn btn-sm" id="qrClose" type="button">
       <span data-l="ja">閉じる</span><span data-l="en">Close</span>
