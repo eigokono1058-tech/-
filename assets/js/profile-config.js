@@ -156,5 +156,5 @@ window.PROFILE = {
   ],
 
   /* ---- 公開URL（QR生成のデフォルト値と共有ボタンに使用） -------------- */
-  siteUrl: "https://eigokono1058-tech.github.io/-/"
+  siteUrl: "https://eigokono1058-tech.github.io/DevDay2026/"
 };
