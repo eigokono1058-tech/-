@@ -197,9 +197,13 @@
     toastTimer = setTimeout(function () { toast.removeAttribute("data-show"); }, 1900);
   }
 
-  // 実際のURLを優先する（QRシートの表示と実体をずらさないため）
+  /* 配る住所は siteUrl に揃える。
+     QRは画像ファイルなので、焼き込めるURLは1つだけ。いっぽうこのサイトは
+     GitHub Pages と Cloudflare の2箇所から配信している。その場のURLを使うと、
+     ミラー側で開いたときに「QRの絵」と「下の文字」が食い違う。
+     QR・文字・コピー・共有の4つを同じURLにする。 */
   var liveUrl = location.href.replace(/index\.html$/, "").replace(/[?#].*$/, "");
-  var shareUrl = /^https?:/.test(liveUrl) ? liveUrl : (P.siteUrl || liveUrl);
+  var shareUrl = /^https?:/.test(P.siteUrl || "") ? P.siteUrl : liveUrl;
 
   var sheet = $("qrSheet");
   var qrUrl = $("qrUrl");
