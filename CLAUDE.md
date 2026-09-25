@@ -11,14 +11,14 @@
 3. Pages のビルド（`pages build and deployment`）が success になるのを確認
 4. 変わったページのURLを出す。キャッシュ対策に `?v=N` を添える
 
-公開URL: https://eigokono1058-tech.github.io/-/
+公開URL: https://eigokono1058-tech.github.io/DevDay2026/
 
 | ページ | URL |
 |---|---|
-| プロフィール | `/-/` |
-| デモ | `/-/app/` |
-| 構想（ピッチ） | `/-/pitch/` |
-| 当日メンターにお伺いしたいこと | `/-/launchpad/` |
+| プロフィール | `/DevDay2026/` |
+| デモ | `/DevDay2026/app/` |
+| 構想（ピッチ） | `/DevDay2026/pitch/` |
+| 当日メンターにお伺いしたいこと | `/DevDay2026/launchpad/` |
 
 ## このリポジトリの作り
 

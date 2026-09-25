@@ -1,6 +1,6 @@
 # 実装指示書 — Delivery Orchestration OS
 
-**対象リポジトリ**: `eigokono1058-tech/-`
+**対象リポジトリ**: `eigokono1058-tech/DevDay2026`
 **対象ブランチ**: `claude/ai-logistics-delivery-service-ec1b4t`
 **目的**: OpenAI DevDay 2026 のメンターセッション「Product design and UXR」で、2〜3分触らせて
 「複数の現実世界サービスをまたいで、エージェントがユーザーの代理で意思決定・実行する」を
