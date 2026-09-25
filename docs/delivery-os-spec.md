@@ -2,7 +2,7 @@
 
 **対象リポジトリ**: `eigokono1058-tech/-`
 **対象ブランチ**: `claude/ai-logistics-delivery-service-ec1b4t`
-**目的**: OpenAI DevDay 2026（9/29）Launchpad「Product design and UXR」で、2〜3分触らせて
+**目的**: OpenAI DevDay 2026 のメンターセッション「Product design and UXR」で、2〜3分触らせて
 「複数の現実世界サービスをまたいで、エージェントがユーザーの代理で意思決定・実行する」を
 体験させる。物流の説明ではなく、**エージェント設計の議論に持ち込むための実物**。
 
